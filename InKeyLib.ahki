@@ -73,17 +73,27 @@ SendChar(cp, uFlags=0) {
 }
 
 SendChars(ChList, uFlags=0) {
-; Previously used to send a comma-delimited set of characters (and an optional Flag) like this:
+; Deprecated.  Primarily for backwards compatibility.  Use SendText() instead.
+;
+; Send a comma-delimited set of 16-bit codepoints, optionally remembering on each the same 32-bit flag value.
+; Less efficient than SendChar or SendText.
 ; e.g.   SendChars("0x926,0x94D,0x935", 1)
-; This function has been replaced by SendText().
-	MsgBox 0, "Error", "This keyboard uses the obsolete SendChars function.  Please update keyboard to use 'SendText' function instead."
-	return 0
+	VarSetCapacity(v, 256, 0)
+		; struct:  	UInt uFlags
+		; 		UShort numChars
+		; 		UShort[]  charArray
+	NumPut(uFlags, v, 0, "UInt")  ; 32-bit
+	numCh := 0
+	Loop parse, ChList, CSV
+		NumPut(A_LoopField, v, (2 * numCh++) + 6, "UShort")
+	NumPut(numCh, v, 4, "UShort")
+	return SendData(0x900A, numCh*2 + 6, v)
 }
 
 SendText(ByRef CharString, uFlags=0) {
 ; Send a text string, optionally remembering on each character the same 32-bit flag value.
 ; e.g. SendText("द्व", 1)
-	return Send_WM_COPYDATA(0x900A, CharString, uFlags)
+	return Send_WM_COPYDATA(0x901A, CharString, uFlags)
 }
 
 UndoLast() {
@@ -404,25 +414,36 @@ StrPutVar(string, ByRef var, encoding)
 */
 
 
-Send_WM_COPYDATA(cmdID, ByRef StringToSend, wParam=0)  ; ByRef saves a little memory in this case.
-; This function sends the specified number and string to the InKey window and returns the reply.
+;~ #~ Send_WM_COPYDATA(cmdID, ByRef StringToSend, wParam=0)  ; ByRef saves a little memory in this case.
+Send_WM_COPYDATA(cmdID, ByRef Data, wParam=0, DataSize=-1)  ; ByRef saves a little memory in this case.
+; This function sends the specified number and string (or data block) to the InKey window and returns the reply.
 ; The reply is 1 if the target window processed the message, or 0 if it ignored it.
-; The optional wParam may also be sent as an additional numeric parameter.
+; Parameters:
+;    cmdID:     Identifies request to make
+;    Data:      String or block of data to pass
+;    wParam:    Optional additional numeric parameter. Size is A_PtrSize, but best not to use values above 32 bits.
+;    DataSize:  Omit for string data.  Otherwise, size in bytes of data block.
 {
 	;~ outputdebug Send_WM_COPYDATA(%cmdID%, %StringToSend%)
 	global K_InkeyHwnd
-	VarSetCapacity(CopyDataStruct, A_PtrSize*3, 0)  ; Set up the structure's memory area.
-	; First set the structure's cbData member to the size of the string, including its zero terminator:
-	SizeInBytes := (StrLen(StringToSend) + 1) * 2
-	NumPut(SizeInBytes, CopyDataStruct, A_PtrSize)  ; OS requires that this be done.
-	NumPut(&StringToSend, CopyDataStruct, A_PtrSize*2)  ; Set lpData to point to the string itself.
+	; struct COPYDATASTRUCT    - size: A_PtrSize*2+4
+	;             UPtr   dwData  (4 or 8 bytes)  Offset: 0.           Value to be passed.
+	;             UInt   cbData  (4 bytes)       Offset: A_PtrSize.   The size, in bytes, of the data pointed to by the lpData member.
+	;             UPtr   lpData  (4 or 8 bytes)  Offset: A_PtrSize+4. Ptr to data to be passed.
+	VarSetCapacity(CopyDataStruct, A_PtrSize*2+4, 0)  ; Set up the structure's memory area.
+	NumPut(cmdID, CopyDataStruct, 0, "UPtr")  ;
+	if (DataSize = -1) {
+		; First set the structure's cbData member to the size of the string, including its zero terminator:
+		DataSize := (StrLen(Data) + 1) * 2
+	}
+	NumPut(DataSize, CopyDataStruct, A_PtrSize, "UInt")
+	NumPut(&Data, CopyDataStruct, A_PtrSize+4, "UPtr")  ; Set lpData to point to the string itself.
 	;~ result := SendMessage, 0x4a, dwNum, &CopyDataStruct,, ahk_id %K_InkeyHwnd%  ; 0x4a is WM_COPYDATA. Must use Send not Post.
 	;~ if (result = FAIL) {
 		;~ SoundPlay *16
 		;~ outputdebug ************ CRITICAL ERROR: Send_WM_COPYDATA(%dwNum%, %StringToSend%) failed!
 	;~ }
 
-	NumPut(cmdID, CopyDataStruct, 0)  ;
 	r := DllCall("SendMessage", UInt, GetInkeyHwnd(), UInt, 0x4A, UInt, wParam, UInt, &CopyDataStruct)  ; probably needs UInt -> Ptr to be x64-compatible
 	if (ErrorLevel) {
 		SoundPlay *16
@@ -443,7 +464,7 @@ Send_WM_COPYDATA(cmdID, ByRef StringToSend, wParam=0)  ; ByRef saves a little me
 	return r
 }
 
-/*
+
 SendData(dwNum, dataSize, ByRef lpData )  ; ByRef saves a little memory in this case.
 ; This function sends the specified number and data structure to the InKey window and returns the reply.
 ; The reply is 1 if the target window processed the message, or 0 if it ignored it.
@@ -459,7 +480,7 @@ SendData(dwNum, dataSize, ByRef lpData )  ; ByRef saves a little memory in this 
 	}
 	return r
 }
-*/
+
 
 params() {
 	global

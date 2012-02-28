@@ -8,9 +8,6 @@ If you find AutoHotKey useful for this or other purposes, please
 email a note of thanks to support@autohotkey.com, and consider
 sending a donation of any size to that address via PayPal.
 
-The InKey extensions are released under the GNU General Public License
-as presented here.
-
 This redistribution of AutoHotKey.exe is licensed under the
 GNU GENERAL PUBLIC LICENSE, as presented below.
 

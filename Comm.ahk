@@ -10,7 +10,7 @@ SendChar16(c) {
 		SendInput %a%
 		r := 1
 	} else {
-;		r := SendCh(c)
+		r := SendCh(c)
 	}
 	;~ DllCall("QueryPerformanceCounter", "Int64*", sctCounterAfter)
 	;~ DllCall("QueryPerformanceFrequency", "Int64 *", f)

@@ -62,7 +62,7 @@ Icon_1=%In_Dir%\inkey.ico
 	InkeyLoadedHKLs := ""
 	setupCallbacks()
 ;	SendU_Init()
-	;~ hMSVCRT := DllCall("LoadLibrary", "str", "MSVCRT.dll")
+	hMSVCRT := DllCall("LoadLibrary", "str", "MSVCRT.dll")
 
 	initContext()
 	Menu KbdMenu, UseErrorLevel
@@ -1044,7 +1044,7 @@ DoCleanup:  ; Called onExit
 			}
 		}
 	}
-	;~ DllCall("FreeLibrary", unit, hMSVCRT)
+	DllCall("FreeLibrary", unit, hMSVCRT)
 	ExitApp
 
 DoHelp:
@@ -1928,6 +1928,6 @@ ButtonOK:
 #include Config.ahk	; Configuration GUI (GUI 3) routines
 #include Validate.ahk	; Validation and splash screen (GUI 1) routines
 #include Comm.ahk	; Interprocess communication and stack management
-;#include iSendU.ahk	; InKey's customized version of the SendU module
+#include iSendU.ahk	; InKey's customized version of the SendU module
 #include KeyboardConfigure.ahk ; Keyboard Configuration GUI (GUIs 5-7)
 #include Lang.ahk ; Internationalisation routines
