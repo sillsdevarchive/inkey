@@ -47,7 +47,7 @@ DoConfigure:
 	Gui, 3:Tab, 2
 	IniRead, PortableMode, InKey.ini, InKey, PortableMode   ; Setting might be 0, but variable was temporarily 1, so re-read setting
 	IniRead, RefreshLangBarOnExit, InKey.ini, InKey, RefreshLangBarOnExit
-	;~ IniRead, NoSplash, InKey.ini, InKey, NoSplash	; Read in Validate.ahk, but value sometimes gets lost ; Wasn't global there.
+	IniRead, NoSplash, InKey.ini, InKey, NoSplash	; Read in Validate.ahk, but value sometimes gets lost
 	; store current values, to compare with user's new selections
 	if (not driveIsFixed)
 		StartWithWindows = 0
@@ -263,42 +263,43 @@ DoConfigure:
 FillKbdListAll() {
 	ImageListID := IL_Create(10)  ; Create an ImageList to hold 10 small icons.
 	LV_SetImageList(ImageListID)  ; Assign the above ImageList to the current ListView.
-	tFolderList =
+	KbdFiles =
+	FolderList =
 	idx = 0
 	Loop, *.*, 2
-		tFolderList = %tFolderList%%A_LoopFileName%`n
-	Sort, tFolderList
-	Loop, parse, tFolderList, `n
+		FolderList = %FolderList%%A_LoopFileName%`n
+	Sort, FolderList
+	Loop, parse, FolderList, `n
 	{	if (A_LoopField = "" or InStr(A_LoopField, ".")) ; Ignore the blank item at the end of the list, and ignore any folder containing a dot in the name.
 			continue
 
-		tmpCurrFolder := A_LoopField
+		CurrFolder := A_LoopField
 		; For each keyboard class (i.e. folder), first read the keyboard program name
-		IniRead, tmpCurrKbdCmd, %A_LoopField%\Class.ini, Class, Cmd, %A_Space%
-		if (tmpCurrFolder <> "_Non-InKey" and not tmpCurrKbdCmd)
+		IniRead, CurrKbdCmd, %A_LoopField%\Class.ini, Class, Cmd, %A_Space%
+		if (CurrFolder <> "_Non-InKey" and not CurrKbdCmd)
 			continue
-;	outputdebug processing folder: %A_LoopField%.  tmpCurrKbdCmd=%tmpCurrKbdCmd%
+;	outputdebug processing folder: %A_LoopField%.  CurrKbdCmd=%CurrKbdCmd%
 
 		; Loop for each *.kbd.ini file
-		tKbdList =
+		KbdList =
 		Loop, %A_LoopField%\*.kbd.ini
-			tKbdList = %tKbdList%%A_LoopFileName%`n
-		Sort, tKbdList
-		Loop, parse, tKbdList, `n
+			KbdList = %KbdList%%A_LoopFileName%`n
+		Sort, KbdList
+		Loop, parse, KbdList, `n
 		{	if (A_LoopField = "") ; Ignore the blank item at the end of the list.
 				continue
-			tmpCurrIni = %tmpCurrFolder%\%A_LoopField%
+			CurrIni = %CurrFolder%\%A_LoopField%
 			idx++
-;		outputdebug processing file: %tmpCurrIni%
-			IniRead, enabled, %tmpCurrIni%, Keyboard, Enabled, %A_Space%
+;		outputdebug processing file: %CurrIni%
+			IniRead, enabled, %CurrIni%, Keyboard, Enabled, %A_Space%
 			chk := (enabled) ? "check " : ""
-			IniRead, KbdLayoutName, %tmpCurrIni%, Keyboard, LayoutName, %A_Space%
-			IniRead, KbdIcon, %tmpCurrIni%, Keyboard, Icon, %A_Space%
-			KbdIcon = %tmpCurrFolder%\%KbdIcon%
+			IniRead, KbdLayoutName, %CurrIni%, Keyboard, LayoutName, %A_Space%
+			IniRead, KbdIcon, %CurrIni%, Keyboard, Icon, %A_Space%
+			KbdIcon = %CurrFolder%\%KbdIcon%
 			ii := IL_Add(ImageListID, KbdIcon)  ; Omits the DLL's path so that it works on Windows 9x too.
-outputdebug	kbdicon=%kbdicon%	ii=%ii% iconIdx=%iconIdx%	LV_Add(%chk%%iconIdx%, "", KbdLayoutName, tmpCurrIni)
+outputdebug	kbdicon=%kbdicon%	ii=%ii% iconIdx=%iconIdx%	LV_Add(%chk%%iconIdx%, "", KbdLayoutName, CurrIni)
 			iconIdx := (ii) ? " Icon" . ii : ""
-			LV_Add(chk . iconIdx, "", KbdLayoutName, tmpCurrIni)
+			LV_Add(chk . iconIdx, "", KbdLayoutName, CurrIni)
 		}
 	}
 	LV_ModifyCol()  ; Auto-size each column to fit its contents.
@@ -428,10 +429,10 @@ SaveTab1Changes() {
 		Gui +LastFound
 		SendMessage, 4140, RowNumber - 1, 0xF000, SysListView321  ; 4140 is LVM_GETITEMSTATE.  0xF000 is LVIS_STATEIMAGEMASK.
 		IsChecked := (ErrorLevel >> 12) - 1  ; This sets IsChecked to true if RowNumber is checked or false otherwise.
-		LV_GetText(tmpCurrIni, RowNumber, 3)
-		IniRead, enabled, %tmpCurrIni%, Keyboard, Enabled, 0
+		LV_GetText(CurrIni, RowNumber, 3)
+		IniRead, enabled, %CurrIni%, Keyboard, Enabled, 0
 		if (enabled <> IsChecked) {
-			IniWrite, %IsChecked%, %tmpCurrIni%, Keyboard, Enabled
+			IniWrite, %IsChecked%, %CurrIni%, Keyboard, Enabled
 			needsRestart := 1
 		}
 	}

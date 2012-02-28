@@ -13,8 +13,8 @@ ConfigureKeyboard(kbd)
 
 	if (currentconfigurekbd <> -1)
 	{
-		tmpString:=GetLang(115)
-		MsgBox %tmpString%  ; You can only have one keyboard configuration window open at a time.  Sorry!
+		TempString:=GetLang(115)
+		MsgBox %TempString%  ; You can only have one keyboard configuration window open at a time.  Sorry!
 		return
 	}
 
@@ -24,66 +24,65 @@ ConfigureKeyboard(kbd)
 
 	gosub InitLocales
 
-	tmpString:=GetLang(76)
-	Gui, 5:Add, Text, x10 y5 w80 h40, %tmpString%  ; Layout Name:
+	TempString:=GetLang(76)
+	Gui, 5:Add, Text, x10 y5 w80 h40, %TempString%  ; Layout Name:
 	Gui, 5:Add, Edit, x100 y8 w150 h20 vLayoutNameGUI, % KbdLayoutName%kbd%
-	tmpString:=GetLang(77)
-	Gui, 5:Add, Text, x10 y45 w80 h40, %tmpString%  ; Menu Text:
+	TempString:=GetLang(77)
+	Gui, 5:Add, Text, x10 y45 w80 h40, %TempString%  ; Menu Text:
 	Gui, 5:Add, Edit, x100 y48 w150 h20 vMenuText, % KbdMenuText%kbd%
-	tmpString:="(&& " . GetLang(78) . ")"
-	Gui, 5:Add, Text, x270 y45 w160 h40, %tmpString%  ; (&& precedes shortcut key)
-	tmpString:=GetLang(79)
-	Gui, 5:Add, Text, x10 y85 w80 h40, %tmpString%  ; Hotkey:
+	TempString:="(&& " . GetLang(78) . ")"
+	Gui, 5:Add, Text, x270 y45 w160 h40, %TempString%  ; (&& precedes shortcut key)
+	TempString:=GetLang(79)
+	Gui, 5:Add, Text, x10 y85 w80 h40, %TempString%  ; Hotkey:
 	Gui, 5:Add, Edit, x100 y88 w150 h20 vHotkey, % KbdHotkey%kbd%
 	Gui, 5:Add, Text, x270 y85 w160 h20, ^=CTRL, #=WIN, +=SHIFT
 	Gui, 5:Add, Text, x320 y98 h20, !=ALT
-	tmpString:=GetLang(80)
-	Gui, 5:Add, Text, x10 y125 w80 h40, %tmpString%  ; Locale:
+	TempString:=GetLang(80)
+	Gui, 5:Add, Text, x10 y125 w80 h40, %TempString%  ; Locale:
 
 	; need to read the locale in case it is not supported by the current Windows version
 	IniRead, IniKbdLang, % KbdIniFile%kbd%, Keyboard, Lang, %A_Space%
 
 	; Convert language code to language name
-	tmpLangName:=ConvertCodeToName(IniKbdLang)
+	LangName:=ConvertCodeToName(IniKbdLang)
 	global LangNameGUI
-	Gui, 5:Add, Edit, x100 y128 w150 h20 ReadOnly vLangNameGUI, %tmpLangName%
-	tmpString:=GetLang(81)
-	Gui, 5:Add, Button, x270 y128 w140 h20 g5ChangeLocaleButton, %tmpString%  ; Change...
+	Gui, 5:Add, Edit, x100 y128 w150 h20 ReadOnly vLangNameGUI, %LangName%
+	TempString:=GetLang(81)
+	Gui, 5:Add, Button, x270 y128 w140 h20 g5ChangeLocaleButton, %TempString%  ; Change...
 
 	global AltLangGUI
 	global ChangeAltLocaleButton
-	global AltLangName
 	If KbdAltLang%kbd% <>
 	{
 		AltLangName:=ConvertCodeToName(KbdAltLang%kbd%)
-		tmpString:=GetLang(82)
-		Gui, 5:Add, Text, x10 y165 w80 h40, %tmpString%  ; Alt. Locale:
+		TempString:=GetLang(82)
+		Gui, 5:Add, Text, x10 y165 w80 h40, %TempString%  ; Alt. Locale:
 		Gui, 5:Add, Edit, x100 y168 w150 h20 ReadOnly vAltLangGUI, %AltLangName%
-		tmpString:=GetLang(81)
-		Gui, 5:Add, Button, x270 y168 w140 h20 vChangeAltLocaleButton g5ChangeAltLocaleButton, %tmpString%  ; Change...
+		TempString:=GetLang(81)
+		Gui, 5:Add, Button, x270 y168 w140 h20 vChangeAltLocaleButton g5ChangeAltLocaleButton, %TempString%  ; Change...
 	}
 	else
 	{
-		tmpString:=GetLang(82)
-		Gui, 5:Add, Text, x10 y165 w80 h40, %tmpString%  ; Alt. Locale:
+		TempString:=GetLang(82)
+		Gui, 5:Add, Text, x10 y165 w80 h40, %TempString%  ; Alt. Locale:
 		Gui, 5:Add, Edit, x100 y168 w150 h20 ReadOnly disabled1 vAltLangGUI,
-		tmpString:=GetLang(81)
-		Gui, 5:Add, Button, x270 y168 w140 h20 disabled1 vChangeAltLocaleButton g5ChangeAltLocaleButton, %tmpString%  ; Change...
+		TempString:=GetLang(81)
+		Gui, 5:Add, Button, x270 y168 w140 h20 disabled1 vChangeAltLocaleButton g5ChangeAltLocaleButton, %TempString%  ; Change...
 	}
 
-	tmpString:=GetLang(83)
-	Gui, 5:Add, Text, x10 y205 w80 h40, %tmpString%  ; Icon:
+	TempString:=GetLang(83)
+	Gui, 5:Add, Text, x10 y205 w80 h40, %TempString%  ; Icon:
 
 	global IconPicGUI
 	Gui, 5:Add, Picture, x70 y207 w20 h20 Border vIconPicGUI, % KbdIconFile%kbd%
 
 	Icon := % KbdIconFile%kbd%
-	StringGetPos, tmpPos, Icon, \, R
-	StringRight, Icon, Icon, StrLen(Icon) - tmpPos -1
+	StringGetPos, position, Icon, \, R
+	StringRight, Icon, Icon, StrLen(Icon) - position -1
 	global IconGUI
 	Gui, 5:Add, Edit, x100 y208 w150 h20 ReadOnly vIconGUI, %Icon%
-	tmpString:=GetLang(81)
-	Gui, 5:Add, Button, x270 y208 w140 h20 g5ChangeIconButton, %tmpString%  ; Change...
+	TempString:=GetLang(81)
+	Gui, 5:Add, Button, x270 y208 w140 h20 g5ChangeIconButton, %TempString%  ; Change...
 
 	keybdname :=% KbdLayoutName%kbd%
 	If KbdConfigureGUI%kbd%<>
@@ -97,13 +96,13 @@ ConfigureKeyboard(kbd)
 		;Gui, 5:Add, Edit, x100 yp w150 h20 ReadOnly vConfigGUI, %GUIFile%
 		;Gui, 5:Add, Button, x270 yp w140 h20, Run...
 
-		tmpString:=GetLang(87)
-		StringLeft, TempChar, tmpString, 1
+		TempString:=GetLang(87)
+		StringLeft, TempChar, TempString, 1
 		if (TempChar <> "-")
 		{
-			tmpString:=" " . tmpString
+			TempString:=" " . TempString
 		}
-		buttontext:=GetLang(86) . " " . keybdname . tmpString . "..."  ; Configure %keybdname%-specific settings...
+		buttontext:=GetLang(86) . " " . keybdname . TempString . "..."  ; Configure %keybdname%-specific settings...
 		Gui, 5:Add, Button, x10 y250 w400 h25 g5ButtonRun, %buttontext%
 	}
 
@@ -132,12 +131,12 @@ ConfigureKeyboard(kbd)
 		}
 	}
 
-	tmpString:=GetLang(12)
-	Gui, 5:Add, Button, x130 yp+50 w80 h25 g5ButtonOK, %tmpString%  ; OK
-	tmpString:=GetLang(13)
-	Gui, 5:Add, Button, x240 yp w80 h25 g5ButtonCancel, %tmpString%  ; Cancel
-	tmpString:=keybdname . " " . GetLang(88)
-	Gui, 5:Show, xCenter yCenter w430, %tmpString%  ; Configuration Options
+	TempString:=GetLang(12)
+	Gui, 5:Add, Button, x130 yp+50 w80 h25 g5ButtonOK, %TempString%  ; OK
+	TempString:=GetLang(13)
+	Gui, 5:Add, Button, x240 yp w80 h25 g5ButtonCancel, %TempString%  ; Cancel
+	TempString:=keybdname . " " . GetLang(88)
+	Gui, 5:Show, xCenter yCenter w430, %TempString%  ; Configuration Options
 	return
 }
 
@@ -166,10 +165,10 @@ return
 Gui, 5:-Disabled  ; Re-enable the main window (must be done prior to the next step).
 Gui, 6:Submit
 Gui, 6:Destroy
-tmpLangName:=NewLocale
+LangName:=NewLocale
 GuiControl, 5:, LangNameGUI, %NewLocale%
-tmpPos:=InStr(AltLocaleList, tmpLangName)
-If tmpPos=0
+position:=InStr(AltLocaleList, LangName)
+If position=0
 {
 	GuiControl, 5:Enable, AltLangGUI
 	GuiControl, 5:Enable, ChangeAltLocaleButton
@@ -266,9 +265,9 @@ else
 
 ; need to copy files to keyboard folder, and change path info for filenames
 FileCopy, %IconGUI%, % KbdFolder%currentconfigurekbd%, 1
-StringGetPos, tmpPos, IconGUI, \, R
+StringGetPos, position, IconGUI, \, R
 if Errorlevel=0
-	StringRight, IconGUIshort, IconGUI, StrLen(IconGUI) - tmpPos -1
+	StringRight, IconGUIshort, IconGUI, StrLen(IconGUI) - position -1
 else
 	IconGUIShort:=IconGUI
 IniWrite, %IconGUIShort%, % KbdIniFile%currentconfigurekbd%, Keyboard, Icon

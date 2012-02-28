@@ -9,845 +9,844 @@ return
 ConvertCodeToName(Lang)
 {
 If Lang=0436
-	return "Afrikaans"
+	LangName=Afrikaans
 If Lang=041C
-	return "Albanian"
+	LangName=Albanian
 If Lang=0484
-	return "Alsatian (France)"
+	LangName=Alsatian (France)
 If Lang=045E
-	return "Amharic (Ethiopia)"
+	LangName=Amharic (Ethiopia)
 If Lang=1401
-	return "Arabic (Algeria)"
+	LangName=Arabic (Algeria)
 If Lang=3C01
-	return "Arabic (Bahrain)"
+	LangName=Arabic (Bahrain)
 If Lang=0C01
-	return "Arabic (Egypt)"
+	LangName=Arabic (Egypt)
 If Lang=0801
-	return "Arabic (Iraq)"
+	LangName=Arabic (Iraq)
 If Lang=2C01
-	return "Arabic (Jordan)"
+	LangName=Arabic (Jordan)
 If Lang=3401
-	return "Arabic (Kuwait)"
+	LangName=Arabic (Kuwait)
 If Lang=3001
-	return "Arabic (Lebanon)"
+	LangName=Arabic (Lebanon)
 If Lang=1001
-	return "Arabic (Libya)"
+	LangName=Arabic (Libya)
 If Lang=1801
-	return "Arabic (Morocco)"
+	LangName=Arabic (Morocco)
 If Lang=2001
-	return "Arabic (Oman)"
+	LangName=Arabic (Oman)
 If Lang=4001
-	return "Arabic (Qatar)"
+	LangName=Arabic (Qatar)
 If Lang=0401
-	return "Arabic (Saudi Arabia)"
+	LangName=Arabic (Saudi Arabia)
 If Lang=2801
-	return "Arabic (Syria)"
+	LangName=Arabic (Syria)
 If Lang=1C01
-	return "Arabic (Tunisia)"
+	LangName=Arabic (Tunisia)
 If Lang=3801
-	return "Arabic (U.A.E.)"
+	LangName=Arabic (U.A.E.)
 If Lang=2401
-	return "Arabic (Yemen)"
+	LangName=Arabic (Yemen)
 If Lang=042B
-	return "Armenian"
+	LangName=Armenian
 If Lang=044D
-	return "Assamese (India)"
+	LangName=Assamese (India)
 If Lang=082C
-	return "Azeri (Cyrillic)"
+	LangName=Azeri (Cyrillic)
 If Lang=042C
-	return "Azeri (Latin)"
+	LangName=Azeri (Latin)
 If Lang=046D
-	return "Bashkir (Russia)"
+	LangName=Bashkir (Russia)
 If Lang=042D
-	return "Basque"
+	LangName=Basque
 If Lang=0423
-	return "Belarusian"
+	LangName=Belarusian
 If Lang=0845
-	return "Bengali (Bangladesh)"
+	LangName=Bengali (Bangladesh)
 If Lang=0445
-	return "Bengali (India)"
+	LangName=Bengali (India)
 If Lang=201A
-	return "Bosnian (Cyrillic, Bosnia and Herzegovina)"
+	LangName=Bosnian (Cyrillic, Bosnia and Herzegovina)
 If Lang=141A
-	return "Bosnian (Latin, Bosnia and Herzegovina)"
+	LangName=Bosnian (Latin, Bosnia and Herzegovina)
 If Lang=047E
-	return "Breton (France)"
+	LangName=Breton (France)
 If Lang=0402
-	return "Bulgarian"
+	LangName=Bulgarian
 If Lang=0403
-	return "Catalan"
+	LangName=Catalan
 If Lang=0C04
-	return "Chinese (Hong Kong)"
+	LangName=Chinese (Hong Kong)
 If Lang=1404
-	return "Chinese (Macao)"
+	LangName=Chinese (Macao)
 If Lang=0804
-	return "Chinese (PRC)"
+	LangName=Chinese (PRC)
 If Lang=0004
-	return "Chinese (Simplified)"
+	LangName=Chinese (Simplified)
 If Lang=1004
-	return "Chinese (Singapore)"
+	LangName=Chinese (Singapore)
 If Lang=0404
-	return "Chinese (Taiwan)"
+	LangName=Chinese (Taiwan)
 If Lang=7C04
-	return "Chinese (Traditional)"
+	LangName=Chinese (Traditional)
 If Lang=0483
-	return "Corsican (France)"
+	LangName=Corsican (France)
 If Lang=041A
-	return "Croatian"
+	LangName=Croatian
 If Lang=101A
-	return "Croatian (Latin, Bosnia and Herzegovina)"
+	LangName=Croatian (Latin, Bosnia and Herzegovina)
 If Lang=0405
-	return "Czech"
+	LangName=Czech
 If Lang=0406
-	return "Danish"
+	LangName=Danish
 If Lang=048C
-	return "Dari (Afghanistan)"
+	LangName=Dari (Afghanistan)
 If Lang=0465
-	return "Divehi"
+	LangName=Divehi
 If Lang=0813
-	return "Dutch (Belgium)"
+	LangName=Dutch (Belgium)
 If Lang=0413
-	return "Dutch (Standard)"
+	LangName=Dutch (Standard)
 If Lang=0C09
-	return "English (Australia)"
+	LangName=English (Australia)
 If Lang=2809
-	return "English (Belize)"
+	LangName=English (Belize)
 If Lang=1009
-	return "English (Canada)"
+	LangName=English (Canada)
 If Lang=2409
-	return "English (Caribbean)"
+	LangName=English (Caribbean)
 If Lang=4009
-	return "English (India)"
+	LangName=English (India)
 If Lang=1809
-	return "English (Ireland)"
+	LangName=English (Ireland)
 If Lang=2009
-	return "English (Jamaica)"
+	LangName=English (Jamaica)
 If Lang=4409
-	return "English (Malaysia)"
+	LangName=English (Malaysia)
 If Lang=1409
-	return "English (New Zealand)"
+	LangName=English (New Zealand)
 If Lang=3409
-	return "English (Philippines)"
+	LangName=English (Philippines)
 If Lang=4809
-	return "English (Singapore)"
+	LangName=English (Singapore)
 If Lang=1C09
-	return "English (South Africa)"
+	LangName=English (South Africa)
 If Lang=2C09
-	return "English (Trinidad and Tobago)"
+	LangName=English (Trinidad and Tobago)
 If Lang=0809
-	return "English (United Kingdom)"
+	LangName=English (United Kingdom)
 If Lang=0409
-	return "English (United States)"
+	LangName=English (United States)
 If Lang=3009
-	return "English (Zimbabwe)"
+	LangName=English (Zimbabwe)
 If Lang=0425
-	return "Estonian"
+	LangName=Estonian
 If Lang=0438
-	return "Faroese"
+	LangName=Faroese
 If Lang=0429
-	return "Farsi"
+	LangName=Farsi
 If Lang=0464
-	return "Filipino (Philippines)"
+	LangName=Filipino (Philippines)
 If Lang=040B
-	return "Finnish"
+	LangName=Finnish
 If Lang=080C
-	return "French (Belgian)"
+	LangName=French (Belgian)
 If Lang=0C0C
-	return "French (Canadia)"
+	LangName=French (Canadia)
 If Lang=040C
-	return "French (Standard)"
+	LangName=French (Standard)
 If Lang=140C
-	return "French (Luxembourg)"
+	LangName=French (Luxembourg)
 If Lang=180C
-	return "French (Monaco)"
+	LangName=French (Monaco)
 If Lang=100C
-	return "French (Swiss)"
+	LangName=French (Swiss)
 If Lang=0462
-	return "Frisian (Netherlands)"
+	LangName=Frisian (Netherlands)
 If Lang=0456
-	return "Galician"
+	LangName=Galician
 If Lang=0437
-	return "Georgian"
+	LangName=Georgian
 If Lang=0C07
-	return "German (Austrian)"
+	LangName=German (Austrian)
 If Lang=0407
-	return "German (Standard)"
+	LangName=German (Standard)
 If Lang=1407
-	return "German (Liechtenstein)"
+	LangName=German (Liechtenstein)
 If Lang=1007
-	return "German (Luxembourg)"
+	LangName=German (Luxembourg)
 If Lang=0807
-	return "German (Swiss)"
+	LangName=German (Swiss)
 If Lang=0408
-	return "Greek"
+	LangName=Greek
 If Lang=046F
-	return "Greenlandic (Greenland)"
+	LangName=Greenlandic (Greenland)
 If Lang=0447
-	return "Gujarati"
+	LangName=Gujarati
 If Lang=0468
-	return "Hausa (Latin, Nigeria)"
+	LangName=Hausa (Latin, Nigeria)
 If Lang=040D
-	return "Hebrew"
+	LangName=Hebrew
 If Lang=0439
-	return "Hindi"
+	LangName=Hindi
 If Lang=040E
-	return "Hungarian"
+	LangName=Hungarian
 If Lang=040F
-	return "Icelandic"
+	LangName=Icelandic
 If Lang=0470
-	return "Igbo (Nigeria)"
+	LangName=Igbo (Nigeria)
 If Lang=0421
-	return "Indonesian"
+	LangName=Indonesian
 If Lang=085D
-	return "Inuktitut (Latin, Canada)"
+	LangName=Inuktitut (Latin, Canada)
 If Lang=045D
-	return "Inuktitut (Syllabics, Canada)"
+	LangName=Inuktitut (Syllabics, Canada)
 If Lang=083C
-	return "Irish (Ireland)"
+	LangName=Irish (Ireland)
 If Lang=0434
-	return "isiXhosa (South Africa)"
+	LangName=isiXhosa (South Africa)
 If Lang=0435
-	return "isiZulu (South Africa)"
+	LangName=isiZulu (South Africa)
 If Lang=0410
-	return "Italian (Standard)"
+	LangName=Italian (Standard)
 If Lang=0810
-	return "Italian (Swiss)"
+	LangName=Italian (Swiss)
 If Lang=0411
-	return "Japanese"
+	LangName=Japanese
 If Lang=044B
-	return "Kannada"
+	LangName=Kannada
 If Lang=043F
-	return "Kazakh"
+	LangName=Kazakh
 If Lang=0453
-	return "Khmer (Cambodia)"
+	LangName=Khmer (Cambodia)
 If Lang=0486
-	return "K'iche (Guatemala)"
+	LangName=K'iche (Guatemala)
 If Lang=0487
-	return "Kinyarwanda (Rwanda)"
+	LangName=Kinyarwanda (Rwanda)
 If Lang=0457
-	return "Konkani"
+	LangName=Konkani
 If Lang=0412
-	return "Korean"
+	LangName=Korean
 If Lang=0440
-	return "Kyrgyz"
+	LangName=Kyrgyz
 If Lang=0454
-	return "Lao (Lao P.D.R.)"
+	LangName=Lao (Lao P.D.R.)
 If Lang=0426
-	return "Latvian"
+	LangName=Latvian
 If Lang=0427
-	return "Lithuanian"
+	LangName=Lithuanian
 If Lang=082E
-	return "Lower Sorbian (Germany)"
+	LangName=Lower Sorbian (Germany)
 If Lang=046E
-	return "Luxembourgish (Luxembourg)"
+	LangName=Luxembourgish (Luxembourg)
 If Lang=042F
-	return "Macedonian"
+	LangName=Macedonian
 If Lang=083E
-	return "Malay (Brunei Darussalam)"
+	LangName=Malay (Brunei Darussalam)
 If Lang=043E
-	return "Malay (Malaysia)"
+	LangName=Malay (Malaysia)
 If Lang=044C
-	return "Malayalam (India)"
+	LangName=Malayalam (India)
 If Lang=043A
-	return "Maltese (Malta)"
+	LangName=Maltese (Malta)
 If Lang=0481
-	return "Maori (New Zealand)"
+	LangName=Maori (New Zealand)
 If Lang=047A
-	return "Mapudungun (Chile)"
+	LangName=Mapudungun (Chile)
 If Lang=044E
-	return "Marathi"
+	LangName=Marathi
 If Lang=047C
-	return "Mohawk (Mohawk)"
+	LangName=Mohawk (Mohawk)
 If Lang=0450
-	return "Mongolian (Cyrillic, Mongolia)"
+	LangName=Mongolian (Cyrillic, Mongolia)
 If Lang=0850
-	return "Mongolian (Traditional Mongolian, PRC)"
+	LangName=Mongolian (Traditional Mongolian, PRC)
 If Lang=0461
-	return "Nepali (Nepal)"
+	LangName=Nepali (Nepal)
 If Lang=0414
-	return "Norwegian (Bokmal)"
+	LangName=Norwegian (Bokmal)
 If Lang=0814
-	return "Norwegian (Nynorsk)"
+	LangName=Norwegian (Nynorsk)
 If Lang=0482
-	return "Occitan (France)"
+	LangName=Occitan (France)
 If Lang=0448
-	return "Oriya (India)"
+	LangName=Oriya (India)
 If Lang=0463
-	return "Pashto (Afghanistan)"
+	LangName=Pashto (Afghanistan)
 If Lang=0429
-	return "Persian"
+	LangName=Persian
 If Lang=0415
-	return "Polish"
+	LangName=Polish
 If Lang=0416
-	return "Portuguese (Brazilian)"
+	LangName=Portuguese (Brazilian)
 If Lang=0816
-	return "Portuguese (Standard)"
+	LangName=Portuguese (Standard)
 If Lang=0446
-	return "Punjabi"
+	LangName=Punjabi
 If Lang=046B
-	return "Quechua (Bolivia)"
+	LangName=Quechua (Bolivia)
 If Lang=086B
-	return "Quechua (Ecuador)"
+	LangName=Quechua (Ecuador)
 If Lang=0C6B
-	return "Quechua (Peru)"
+	LangName=Quechua (Peru)
 If Lang=0418
-	return "Romanian"
+	LangName=Romanian
 If Lang=0417
-	return "Romansh (Switzerland)"
+	LangName=Romansh (Switzerland)
 If Lang=0419
-	return "Russian"
+	LangName=Russian
 If Lang=243B
-	return "Sami, Inari (Finland)"
+	LangName=Sami, Inari (Finland)
 If Lang=103B
-	return "Sami, Lule (Norway)"
+	LangName=Sami, Lule (Norway)
 If Lang=143B
-	return "Sami, Lule (Sweden)"
+	LangName=Sami, Lule (Sweden)
 If Lang=0C3B
-	return "Sami, Northern (Finland)"
+	LangName=Sami, Northern (Finland)
 If Lang=043B
-	return "Sami, Northern (Norway)"
+	LangName=Sami, Northern (Norway)
 If Lang=083B
-	return "Sami, Northern (Sweden)"
+	LangName=Sami, Northern (Sweden)
 If Lang=203B
-	return "Sami, Skolt (Finland)"
+	LangName=Sami, Skolt (Finland)
 If Lang=183B
-	return "Sami, Southern (Norway)"
+	LangName=Sami, Southern (Norway)
 If Lang=1C3B
-	return "Sami, Southern (Sweden)"
+	LangName=Sami, Southern (Sweden)
 If Lang=044F
-	return "Sanskrit"
+	LangName=Sanskrit
 If Lang=1C1A
-	return "Serbian (Cyrillic, Bosnia and Herzegovina)"
+	LangName=Serbian (Cyrillic, Bosnia and Herzegovina)
 If Lang=0C1A
-	return "Serbian (Cyrillic)"
+	LangName=Serbian (Cyrillic)
 If Lang=181A
-	return "Serbian (Latin, Bosnia and Herzegovina)"
+	LangName=Serbian (Latin, Bosnia and Herzegovina)
 If Lang=081A
-	return "Serbian (Latin)"
+	LangName=Serbian (Latin)
 If Lang=046C
-	return "Sesotho sa Leboa (South Africa)"
+	LangName=Sesotho sa Leboa (South Africa)
 If Lang=0432
-	return "Setswana (South Africa)"
+	LangName=Setswana (South Africa)
 If Lang=045B
-	return "Sinhala (Sri Lanka)"
+	LangName=Sinhala (Sri Lanka)
 If Lang=041B
-	return "Slovak"
+	LangName=Slovak
 If Lang=0424
-	return "Slovenian"
+	LangName=Slovenian
 If Lang=2C0A
-	return "Spanish (Argentina)"
+	LangName=Spanish (Argentina)
 If Lang=400A
-	return "Spanish (Bolivia)"
+	LangName=Spanish (Bolivia)
 If Lang=340A
-	return "Spanish (Chile)"
+	LangName=Spanish (Chile)
 If Lang=240A
-	return "Spanish (Colombia)"
+	LangName=Spanish (Colombia)
 If Lang=140A
-	return "Spanish (Costa Rica)"
+	LangName=Spanish (Costa Rica)
 If Lang=1C0A
-	return "Spanish (Dominican Republic)"
+	LangName=Spanish (Dominican Republic)
 If Lang=300A
-	return "Spanish (Ecuador)"
+	LangName=Spanish (Ecuador)
 If Lang=440A
-	return "Spanish (El Salvador)"
+	LangName=Spanish (El Salvador)
 If Lang=100A
-	return "Spanish (Guatemala)"
+	LangName=Spanish (Guatemala)
 If Lang=480A
-	return "Spanish (Honduras)"
+	LangName=Spanish (Honduras)
 If Lang=080A
-	return "Spanish (Mexican)"
+	LangName=Spanish (Mexican)
 If Lang=4C0A
-	return "Spanish (Nicaragua)"
+	LangName=Spanish (Nicaragua)
 If Lang=180A
-	return "Spanish (Panama)"
+	LangName=Spanish (Panama)
 If Lang=3C0A
-	return "Spanish (Paraguay)"
+	LangName=Spanish (Paraguay)
 If Lang=280A
-	return "Spanish (Peru)"
+	LangName=Spanish (Peru)
 If Lang=500A
-	return "Spanish (Puerto Rico)"
+	LangName=Spanish (Puerto Rico)
 If Lang=0C0A
-	return "Spanish (Spain)"
+	LangName=Spanish (Spain)
 If Lang=540A
-	return "Spanish (United States)"
+	LangName=Spanish (United States)
 If Lang=380A
-	return "Spanish (Uruguay)"
+	LangName=Spanish (Uruguay)
 If Lang=200A
-	return "Spanish (Venezuela)"
+	LangName=Spanish (Venezuela)
 If Lang=0441
-	return "Swahili"
+	LangName=Swahili
 If Lang=081D
-	return "Swedish (Finland)"
+	LangName=Swedish (Finland)
 If Lang=041D
-	return "Swedish"
+	LangName=Swedish
 If Lang=045A
-	return "Syriac"
+	LangName=Syriac
 If Lang=0428
-	return "Tajik (Cyrillic, Tajikistan)"
+	LangName=Tajik (Cyrillic, Tajikistan)
 If Lang=085F
-	return "Tamazight (Latin, Algeria)"
+	LangName=Tamazight (Latin, Algeria)
 If Lang=0449
-	return "Tamil"
+	LangName=Tamil
 If Lang=0444
-	return "Tatar"
+	LangName=Tatar
 If Lang=044A
-	return "Telugu"
+	LangName=Telugu
 If Lang=041E
-	return "Thai"
+	LangName=Thai
 If Lang=0451
-	return "Tibetan (PRC)"
+	LangName=Tibetan (PRC)
 If Lang=041F
-	return "Turkish"
+	LangName=Turkish
 If Lang=0442
-	return "Turkmen (Turkmenistan)"
+	LangName=Turkmen (Turkmenistan)
 If Lang=0480
-	return "Uighur (PRC)"
+	LangName=Uighur (PRC)
 If Lang=0422
-	return "Ukrainian"
+	LangName=Ukrainian
 If Lang=042E
-	return "Upper Sorbian (Germany)"
+	LangName=Upper Sorbian (Germany)
 If Lang=0420
-	return "Urdu"
+	LangName=Urdu
 If Lang=0843
-	return "Uzbek (Cyrillic)"
+	LangName=Uzbek (Cyrillic)
 If Lang=0443
-	return "Uzbek (Latin)"
+	LangName=Uzbek (Latin)
 If Lang=042A
-	return "Vietnamese"
+	LangName=Vietnamese
 If Lang=0452
-	return "Welsh (United Kingdom)"
+	LangName=Welsh (United Kingdom)
 If Lang=0488
-	return "Wolof (Senegal)"
+	LangName=Wolof (Senegal)
 If Lang=0485
-	return "Yakut (Russia)"
+	LangName=Yakut (Russia)
 If Lang=0478
-	return "Yi (PRC)"
+	LangName=Yi (PRC)
 If Lang=046A
-	return "Yoruba (Nigeria)"
-return "Unknown Language"
+	LangName=Yoruba (Nigeria)
+return LangName
 }
 
 ConvertNameToCode(LangName) {
 If LangName=Afrikaans
-	return "0436"
+	Lang=0436
 If LangName=Albanian
-	return "041C"
+	Lang=041C
 If LangName=Alsatian (France)
-	return "0484"
+	Lang=0484
 If LangName=Amharic (Ethiopia)
-	return "045E"
+	Lang=045E
 If LangName=Arabic (Algeria)
-	return "1401"
+	Lang=1401
 If LangName=Arabic (Bahrain)
-	return "3C01"
+	Lang=3C01
 If LangName=Arabic (Egypt)
-	return "0C01"
+	Lang=0C01
 If LangName=Arabic (Iraq)
-	return "0801"
+	Lang=0801
 If LangName=Arabic (Jordan)
-	return "2C01"
+	Lang=2C01
 If LangName=Arabic (Kuwait)
-	return "3401"
+	Lang=3401
 If LangName=Arabic (Lebanon)
-	return "3001"
+	Lang=3001
 If LangName=Arabic (Libya)
-	return "1001"
+	Lang=1001
 If LangName=Arabic (Morocco)
-	return "1801"
+	Lang=1801
 If LangName=Arabic (Oman)
-	return "2001"
+	Lang=2001
 If LangName=Arabic (Qatar)
-	return "4001"
+	Lang=4001
 If LangName=Arabic (Saudi Arabia)
-	return "0401"
+	Lang=0401
 If LangName=Arabic (Syria)
-	return "2801"
+	Lang=2801
 If LangName=Arabic (Tunisia)
-	return "1C01"
+	Lang=1C01
 If LangName=Arabic (U.A.E.)
-	return "3801"
+	Lang=3801
 If LangName=Arabic (Yemen)
-	return "2401"
+	Lang=2401
 If LangName=Armenian
-	return "042B"
+	Lang=042B
 If LangName=Assamese (India)
-	return "044D"
+	Lang=044D
 If LangName=Azeri (Cyrillic)
-	return "082C"
+	Lang=082C
 If LangName=Azeri (Latin)
-	return "042C"
+	Lang=042C
 If LangName=Bashkir (Russia)
-	return "046D"
+	Lang=046D
 If LangName=Basque
-	return "042D"
+	Lang=042D
 If LangName=Belarusian
-	return "0423"
+	Lang=0423
 If LangName=Bengali (Bangladesh)
-	return "0845"
+	Lang=0845
 If LangName=Bengali (India)
-	return "0445"
+	Lang=0445
 If LangName=Bosnian (Cyrillic, Bosnia and Herzegovina)
-	return "201A"
+	Lang=201A
 If LangName=Bosnian (Latin, Bosnia and Herzegovina)
-	return "141A"
+	Lang=141A
 If LangName=Breton (France)
-	return "047E"
+	Lang=047E
 If LangName=Bulgarian
-	return "0402"
+	Lang=0402
 If LangName=Catalan
-	return "0403"
+	Lang=0403
 If LangName=Chinese (Hong Kong)
-	return "0C04"
+	Lang=0C04
 If LangName=Chinese (Macao)
-	return "1404"
+	Lang=1404
 If LangName=Chinese (PRC)
-	return "0804"
+	Lang=0804
 If LangName=Chinese (Simplified)
-	return "0004"
+	Lang=0004
 If LangName=Chinese (Singapore)
-	return "1004"
+	Lang=1004
 If LangName=Chinese (Taiwan)
-	return "0404"
+	Lang=0404
 If LangName=Chinese (Traditional)
-	return "7C04"
+	Lang=7C04
 If LangName=Corsican (France)
-	return "0483"
+	Lang=0483
 If LangName=Croatian
-	return "041A"
+	Lang=041A
 If LangName=Croatian (Latin, Bosnia and Herzegovina)
-	return "101A"
+	Lang=101A
 If LangName=Czech
-	return "0405"
+	Lang=0405
 If LangName=Danish
-	return "0406"
+	Lang=0406
 If LangName=Dari (Afghanistan)
-	return "048C"
+	Lang=048C
 If LangName=Divehi
-	return "0465"
+	Lang=0465
 If LangName=Dutch (Belgium)
-	return "0813"
+	Lang=0813
 If LangName=Dutch (Standard)
-	return "0413"
+	Lang=0413
 If LangName=English (Australia)
-	return "0C09"
+	Lang=0C09
 If LangName=English (Belize)
-	return "2809"
+	Lang=2809
 If LangName=English (Canada)
-	return "1009"
+	Lang=1009
 If LangName=English (Caribbean)
-	return "2409"
+	Lang=2409
 If LangName=English (India)
-	return "4009"
+	Lang=4009
 If LangName=English (Ireland)
-	return "1809"
+	Lang=1809
 If LangName=English (Jamaica)
-	return "2009"
+	Lang=2009
 If LangName=English (Malaysia)
-	return "4409"
+	Lang=4409
 If LangName=English (New Zealand)
-	return "1409"
+	Lang=1409
 If LangName=English (Philippines)
-	return "3409"
+	Lang=3409
 If LangName=English (Singapore)
-	return "4809"
+	Lang=4809
 If LangName=English (South Africa)
-	return "1C09"
+	Lang=1C09
 If LangName=English (Trinidad and Tobago)
-	return "2C09"
+	Lang=2C09
 If LangName=English (United Kingdom)
-	return "0809"
+	Lang=0809
 If LangName=English (United States)
-	return "0409"
+	Lang=0409
 If LangName=English (Zimbabwe)
-	return "3009"
+	Lang=3009
 If LangName=Estonian
-	return "0425"
+	Lang=0425
 If LangName=Faroese
-	return "0438"
+	Lang=0438
 If LangName=Farsi
-	return "0429"
+	Lang=0429
 If LangName=Filipino (Philippines)
-	return "0464"
+	Lang=0464
 If LangName=Finnish
-	return "040B"
+	Lang=040B
 If LangName=French (Belgian)
-	return "080C"
+	Lang=080C
 If LangName=French (Canadia)
-	return "0C0C"
+	Lang=0C0C
 If LangName=French (Standard)
-	return "040C"
+	Lang=040C
 If LangName=French (Luxembourg)
-	return "140C"
+	Lang=140C
 If LangName=French (Monaco)
-	return "180C"
+	Lang=180C
 If LangName=French (Swiss)
-	return "100C"
+	Lang=100C
 If LangName=Frisian (Netherlands)
-	return "0462"
+	Lang=0462
 If LangName=Galician
-	return "0456"
+	Lang=0456
 If LangName=Georgian
-	return "0437"
+	Lang=0437
 If LangName=German (Austrian)
-	return "0C07"
+	Lang=0C07
 If LangName=German (Standard)
-	return "0407"
+	Lang=0407
 If LangName=German (Liechtenstein)
-	return "1407"
+	Lang=1407
 If LangName=German (Luxembourg)
-	return "1007"
+	Lang=1007
 If LangName=German (Swiss)
-	return "0807"
+	Lang=0807
 If LangName=Greek
-	return "0408"
+	Lang=0408
 If LangName=Greenlandic (Greenland)
-	return "046F"
+	Lang=046F
 If LangName=Gujarati
-	return "0447"
+	Lang=0447
 If LangName=Hausa (Latin, Nigeria)
-	return "0468"
+	Lang=0468
 If LangName=Hebrew
-	return "040D"
+	Lang=040D
 If LangName=Hindi
-	return "0439"
+	Lang=0439
 If LangName=Hungarian
-	return "040E"
+	Lang=040E
 If LangName=Icelandic
-	return "040F"
+	Lang=040F
 If LangName=Igbo (Nigeria)
-	return "0470"
+	Lang=0470
 If LangName=Indonesian
-	return "0421"
+	Lang=0421
 If LangName=Inuktitut (Latin, Canada)
-	return "085D"
+	Lang=085D
 If LangName=Inuktitut (Syllabics, Canada)
-	return "045D"
+	Lang=045D
 If LangName=Irish (Ireland)
-	return "083C"
+	Lang=083C
 If LangName=isiXhosa (South Africa)
-	return "0434"
+	Lang=0434
 If LangName=isiZulu (South Africa)
-	return "0435"
+	Lang=0435
 If LangName=Italian (Standard)
-	return "0410"
+	Lang=0410
 If LangName=Italian (Swiss)
-	return "0810"
+	Lang=0810
 If LangName=Japanese
-	return "0411"
+	Lang=0411
 If LangName=Kannada
-	return "044B"
+	Lang=044B
 If LangName=Kazakh
-	return "043F"
+	Lang=043F
 If LangName=Khmer (Cambodia)
-	return "0453"
+	Lang=0453
 If LangName=K'iche (Guatemala)
-	return "0486"
+	Lang=0486
 If LangName=Kinyarwanda (Rwanda)
-	return "0487"
+	Lang=0487
 If LangName=Konkani
-	return "0457"
+	Lang=0457
 If LangName=Korean
-	return "0412"
+	Lang=0412
 If LangName=Kyrgyz
-	return "0440"
+	Lang=0440
 If LangName=Lao (Lao P.D.R.)
-	return "0454"
+	Lang=0454
 If LangName=Latvian
-	return "0426"
+	Lang=0426
 If LangName=Lithuanian
-	return "0427"
+	Lang=0427
 If LangName=Lower Sorbian (Germany)
-	return "082E"
+	Lang=082E
 If LangName=Luxembourgish (Luxembourg)
-	return "046E"
+	Lang=046E
 If LangName=Macedonian
-	return "042F"
+	Lang=042F
 If LangName=Malay (Brunei Darussalam)
-	return "083E"
+	Lang=083E
 If LangName=Malay (Malaysia)
-	return "043E"
+	Lang=043E
 If LangName=Malayalam (India)
-	return "044C"
+	Lang=044C
 If LangName=Maltese (Malta)
-	return "043A"
+	Lang=043A
 If LangName=Maori (New Zealand)
-	return "0481"
+	Lang=0481
 If LangName=Mapudungun (Chile)
-	return "047A"
+	Lang=047A
 If LangName=Marathi
-	return "044E"
+	Lang=044E
 If LangName=Mohawk (Mohawk)
-	return "047C"
+	Lang=047C
 If LangName=Mongolian (Cyrillic, Mongolia)
-	return "0450"
+	Lang=0450
 If LangName=Mongolian (Traditional Mongolian, PRC)
-	return "0850"
+	Lang=0850
 If LangName=Nepali (Nepal)
-	return "0461"
+	Lang=0461
 If LangName=Norwegian (Bokmal)
-	return "0414"
+	Lang=0414
 If LangName=Norwegian (Nynorsk)
-	return "0814"
+	Lang=0814
 If LangName=Occitan (France)
-	return "0482"
+	Lang=0482
 If LangName=Oriya (India)
-	return "0448"
+	Lang=0448
 If LangName=Pashto (Afghanistan)
-	return "0463"
+	Lang=0463
 If LangName=Persian
-	return "0429"
+	Lang=0429
 If LangName=Polish
-	return "0415"
+	Lang=0415
 If LangName=Portuguese (Brazilian)
-	return "0416"
+	Lang=0416
 If LangName=Portuguese (Standard)
-	return "0816"
+	Lang=0816
 If LangName=Punjabi
-	return "0446"
+	Lang=0446
 If LangName=Quechua (Bolivia)
-	return "046B"
+	Lang=046B
 If LangName=Quechua (Ecuador)
-	return "086B"
+	Lang=086B
 If LangName=Quechua (Peru)
-	return "0C6B"
+	Lang=0C6B
 If LangName=Romanian
-	return "0418"
+	Lang=0418
 If LangName=Romansh (Switzerland)
-	return "0417"
+	Lang=0417
 If LangName=Russian
-	return "0419"
+	Lang=0419
 If LangName=Sami, Inari (Finland)
-	return "243B"
+	Lang=243B
 If LangName=Sami, Lule (Norway)
-	return "103B"
+	Lang=103B
 If LangName=Sami, Lule (Sweden)
-	return "143B"
+	Lang=143B
 If LangName=Sami, Northern (Finland)
-	return "0C3B"
+	Lang=0C3B
 If LangName=Sami, Northern (Norway)
-	return "043B"
+	Lang=043B
 If LangName=Sami, Northern (Sweden)
-	return "083B"
+	Lang=083B
 If LangName=Sami, Skolt (Finland)
-	return "203B"
+	Lang=203B
 If LangName=Sami, Southern (Norway)
-	return "183B"
+	Lang=183B
 If LangName=Sami, Southern (Sweden)
-	return "1C3B"
+	Lang=1C3B
 If LangName=Sanskrit
-	return "044F"
+	Lang=044F
 If LangName=Serbian (Cyrillic)
-	return "0C1A"
+	Lang=0C1A
 If LangName=Serbian (Latin)
-	return "081A"
+	Lang=081A
 If LangName=Serbian (Cyrillic, Bosnia and Herzegovina)
-	return "1C1A"
+	Lang=1C1A
 If LangName=Serbian (Cyrillic, Serbia)
-	return "0C1A"
+	Lang=0C1A
 If LangName=Serbian (Latin, Bosnia and Herzegovina)
-	return "181A"
+	Lang=181A
 If LangName=Serbian (Latin, Serbia)
-	return "081A"
+	Lang=081A
 If LangName=Sesotho sa Leboa (South Africa)
-	return "046C"
+	Lang=046C
 If LangName=Setswana (South Africa)
-	return "0432"
+	Lang=0432
 If LangName=Sinhala (Sri Lanka)
-	return "045B"
+	Lang=045B
 If LangName=Slovak
-	return "041B"
+	Lang=041B
 If LangName=Slovenian
-	return "0424"
+	Lang=0424
 If LangName=Spanish (Argentina)
-	return "2C0A"
+	Lang=2C0A
 If LangName=Spanish (Bolivia)
-	return "400A"
+	Lang=400A
 If LangName=Spanish (Chile)
-	return "340A"
+	Lang=340A
 If LangName=Spanish (Colombia)
-	return "240A"
+	Lang=240A
 If LangName=Spanish (Costa Rica)
-	return "140A"
+	Lang=140A
 If LangName=Spanish (Dominican Republic)
-	return "1C0A"
+	Lang=1C0A
 If LangName=Spanish (Ecuador)
-	return "300A"
+	Lang=300A
 If LangName=Spanish (El Salvador)
-	return "440A"
+	Lang=440A
 If LangName=Spanish (Guatemala)
-	return "100A"
+	Lang=100A
 If LangName=Spanish (Honduras)
-	return "480A"
+	Lang=480A
 If LangName=Spanish (Mexican)
-	return "080A"
+	Lang=080A
 If LangName=Spanish (Nicaragua)
-	return "4C0A"
+	Lang=4C0A
 If LangName=Spanish (Panama)
-	return "180A"
+	Lang=180A
 If LangName=Spanish (Paraguay)
-	return "3C0A"
+	Lang=3C0A
 If LangName=Spanish (Peru)
-	return "280A"
+	Lang=280A
 If LangName=Spanish (Puerto Rico)
-	return "500A"
+	Lang=500A
 If LangName=Spanish (Spain)
-	return "0C0A"
+	Lang=0C0A
 If LangName=Spanish (United States)
-	return "540A"
+	Lang=540A
 If LangName=Spanish (Uruguay)
-	return "380A"
+	Lang=380A
 If LangName=Spanish (Venezuela)
-	return "200A"
+	Lang=200A
 If LangName=Swahili
-	return "0441"
+	Lang=0441
 If LangName=Swedish (Finland)
-	return "081D"
+	Lang=081D
 If LangName=Swedish
-	return "041D"
+	Lang=041D
 If LangName=Syriac
-	return "045A"
+	Lang=045A
 If LangName=Tajik (Cyrillic, Tajikistan)
-	return "0428"
+	Lang=0428
 If LangName=Tamazight (Latin, Algeria)
-	return "085F"
+	Lang=085F
 If LangName=Tamil
-	return "0449"
+	Lang=0449
 If LangName=Tatar
-	return "0444"
+	Lang=0444
 If LangName=Telugu
-	return "044A"
+	Lang=044A
 If LangName=Thai
-	return "041E"
+	Lang=041E
 If LangName=Tibetan (PRC)
-	return "0451"
+	Lang=0451
 If LangName=Turkish
-	return "041F"
+	Lang=041F
 If LangName=Turkmen (Turkmenistan)
-	return "0442"
+	Lang=0442
 If LangName=Uighur (PRC)
-	return "0480"
+	Lang=0480
 If LangName=Ukrainian
-	return "0422"
+	Lang=0422
 If LangName=Upper Sorbian (Germany)
-	return "042E"
+	Lang=042E
 If LangName=Urdu
-	return "0420"
+	Lang=0420
 If LangName=Uzbek (Cyrillic)
-	return "0843"
+	Lang=0843
 If LangName=Uzbek (Latin)
-	return "0443"
+	Lang=0443
 If LangName=Vietnamese
-	return "042A"
+	Lang=042A
 If LangName=Welsh (United Kingdom)
-	return "0452"
+	Lang=0452
 If LangName=Wolof (Senegal)
-	return "0488"
+	Lang=0488
 If LangName=Yakut (Russia)
-	return "0485"
+	Lang=0485
 If LangName=Yi (PRC)
-	return "0478"
+	Lang=0478
 If LangName=Yoruba (Nigeria)
-	return "046A"
-
+	Lang=046A
 return Lang
 }

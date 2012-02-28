@@ -12,7 +12,7 @@ File_Description=InKey Keyboard Manager
 File_Version=0.105.0.0
 Inc_File_Version=0
 Internal_Name=inkey
-Legal_Copyright=(c) 2008-2012 InKeySoftware
+Legal_Copyright=(c) 2008-2011 InKeySoftware
 Original_Filename=InKey.ahk
 Product_Name=InKey Keyboard Manager
 Product_Version=1.0.96.0
@@ -23,20 +23,17 @@ Icon_1=%In_Dir%\inkey.ico
 */
 
 #SingleInstance force
-#Warn All, OutputDebug
 
 ; Main initialization
-	Outputdebug ___________________________ INKEY.AHK ___________________
-	ver = 0.300 ;
-	K_ProtocolNum = 3 ; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number should be incremented in both files.
+	Outputdebug ___________________________ INKEYU.AHK ___________________
+	ver = 0.105 ;
+	K_ProtocolNum = 2 ; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number should be incremented in both files.
 	SetWorkingDir %A_ScriptDir%
 	onExit DoCleanup
-	;~ SetTitleMatchMode 3
-	SetTitleMatchMode 2
+	SetTitleMatchMode 3
 	DetectHiddenWindows On
-	;~ selfHwnd := WinExist(A_ScriptFullPath . " ahk_class AutoHotkey")
 	selfHwnd := WinExist(A_ScriptFullPath . " ahk_class AutoHotkey")
-	outputdebug selfHwnd = %selfHwnd%
+	;outputdebug selfHwnd = %selfHwnd%
 	currentconfigurekbd = -1
 	currentconfigure = 0
 	ActiveKbd = -1
@@ -61,8 +58,8 @@ Icon_1=%In_Dir%\inkey.ico
 	Outputdebug Kbd# 0 (Default) HKL=%KbdHKL0%
 	InkeyLoadedHKLs := ""
 	setupCallbacks()
-;	SendU_Init()
-	;~ hMSVCRT := DllCall("LoadLibrary", "str", "MSVCRT.dll")
+	SendU_Init()
+	hMSVCRT := DllCall("LoadLibrary", "str", "MSVCRT.dll")
 
 	initContext()
 	Menu KbdMenu, UseErrorLevel
@@ -79,7 +76,6 @@ Icon_1=%In_Dir%\inkey.ico
 	;IniRead AutoGrabContext, InKey.ini, InKey, AutoGrabContext, 0
 	AutoGrabContext = 0
 	IniRead PortableMode, InKey.ini, InKey, PortableMode, 1
-	IniRead IsBeta, InKey.ini, InKey, Beta, 1
 
 	IniRead ShowKeyboardNameBalloon, InKey.ini, InKey, ShowKeyboardNameBalloon, 0
 	IniRead UseAltLangWithoutPrompting, InKey.ini, InKey, UseAltLangWithoutPrompting, 0
@@ -610,8 +606,8 @@ RegisterAndLoadKeyboard(kk) {
 	RegWrite REG_SZ, HKLM, SYSTEM\CurrentControlSet\Control\Keyboard Layouts\%KLID%, layout file, %UnderlyingLayoutFile%
 	RegWrite REG_SZ, HKLM, SYSTEM\CurrentControlSet\Control\Keyboard Layouts\%KLID%, layout id, %ID%
 	RegWrite REG_SZ, HKLM, SYSTEM\CurrentControlSet\Control\Keyboard Layouts\%KLID%, layout text, %layoutName%
-	if errorlevel {
-		Outputdebug RegWrite failed
+	if errorlevel
+	{	Outputdebug RegWrite failed
 		return 0
 	}
 	if (Preload)
@@ -621,9 +617,8 @@ RegisterAndLoadKeyboard(kk) {
 	if (jj <> hkl) {
 		Outputdebug % "Error loading new kbd# " . A_Index . ". Expected HKL: " . hkl . ". Got HKL: " . jj ; %
 		return 0
-	} else {
+	} else
 		Outputdebug % "Kbd# " . A_Index . " succesfully registered. LN=" . layoutName . ", KLID=" . klid . ", HKL=" . hkl    ;%
-	}
 	return hkl
 }
 
@@ -723,9 +718,9 @@ ShowKbdMenu:
 	ActiveKbdHwnd := GetKbdHwnd(ActiveKbd)
 	if (ActiveKbdHwnd)
 		DllCall("PostMessage", UInt, ActiveKbdHwnd, UInt, 0x8001)
-	else {
+	else
 		outputdebug Error, could not suspend %ActiveKbdFile%
-	}
+
 	; if (PutMenuAtCursor)
 		Menu KbdMenu, show
 	; else
@@ -737,9 +732,9 @@ ShowKbdMenu:
 		ActiveKbdHwnd := GetKbdHwnd(ActiveKbd)
 		if (ActiveKbdHwnd)
 			DllCall("PostMessage", UInt, ActiveKbdHwnd, UInt, 0x8002)
-		else {
+		else
 			outputdebug Error, could not resume %ActiveKbdFile%
-		}
+
 		; SetTitleMatchMode Regex
 		; DetectHiddenWindows On
 		; if WinExist("i)" . ActiveKbdFile . " ahk_class AutoHotkey")
@@ -828,7 +823,7 @@ GrabContext:
 
 	TrayTipQ("Grabbed Context: " . si)
 ;	setformat integer, h
-	;~ TrayTipQ("non-joined conjunct", "", 20000)
+	TrayTipQ("non-joined conjunct", "", 20000)
 
 	return
 
@@ -932,9 +927,8 @@ RefreshLangBar() {
 	if not errorlevel {
 		WinHide %titleTSIL%
 		Send {Enter}
-	} else {
+	} else
 		Outputdebug Did not find input.dll dialog
-	}
 	DetectHiddenWindows off
 }
 
@@ -1020,9 +1014,8 @@ DoCleanup:  ; Called onExit
 			if (hkl and InStr(InkeyLoadedHKLs, hkl)) {
 				; Outputdebug Unloading hkl %hkl%
 				DllCall("UnloadKeyboardLayout","uint",hkl)
-			} else {
+			} else
 				outputdebug HKL %hkl% was not unloaded (kbd = %A_Index%)
-			}
 		}
 
 		if (not InStr("Shutdown Logoff Reload Single", A_ExitReason)) {  ; No need to refresh Lang Bar if we're restarting InKey or shutting down the workstation.
@@ -1044,7 +1037,7 @@ DoCleanup:  ; Called onExit
 			}
 		}
 	}
-	;~ DllCall("FreeLibrary", unit, hMSVCRT)
+	DllCall("FreeLibrary", unit, hMSVCRT)
 	ExitApp
 
 DoHelp:
@@ -1218,9 +1211,9 @@ ActivateKbd(kbd, hkl) {
 		DetectHiddenWindows On
 		if (OutputVarPID) {
 			WinWait ahk_pid %OutputVarPID%, , 5
-			if errorlevel {
+			if errorlevel
 				outputdebug winwait timed out
-			} else {
+			else {
 				WinGetClass cl
 				if (cl = "#32770") {
 					sleep 500
@@ -1681,7 +1674,7 @@ REMOVE_TRAYTIP:
 	SetTimer REMOVE_TRAYTIP,off
 	traytip
 	return
-/*
+
 U8Tip(utf8, period=2000) {
 	global tipHwnd
 	global PreviewAtCursor
@@ -1698,7 +1691,7 @@ U8Tip(utf8, period=2000) {
 	p := period * -1
 	setTimer HIDE_U_TIP, %p%
 }
-*/
+
 UTip(byref wideTxt, period=2000) {
 	global tipHwnd
 	global PreviewAtCursor
@@ -1717,7 +1710,6 @@ UTip(byref wideTxt, period=2000) {
 }
 
 CreateUTip() {
-	local x
 	CoordMode mouse
 	SysGet mon, MonitorWorkArea
 	tipWidth := 35	; maybe these should be user prefs??
@@ -1728,9 +1720,9 @@ CreateUTip() {
 	Gui 2:margin, 5, 5
 	Gui, 2:Color, FFFF99
 	Gui 2:Font, s16
-	Gui, 2:Add, Text, x0 y0 hwndtipHwnd1 center w%tipWidth% h%tipHeight% BackgroundTrans
+	Gui, 2:Add, Text, x0 y0 hwndtipHwnd center w%tipWidth% h%tipHeight% BackgroundTrans
 	Gui, 2:Show, Hide x%x% y%y%  ; NoActivate avoids deactivating the currently active window.
-	return tipHwnd1
+	return tipHwnd
 }
 
 HIDE_U_TIP:
@@ -1738,6 +1730,54 @@ Gui 2:Hide
 return
 
 ;=========================================================
+
+
+
+; TO DO: LAST CHARACTER OF INPUT STRING GETS LOST!!!
+; PROBABLY SHOULD REWRITE ANYWAY TO USE: DllCall("MultiByteToWideChar", UInt,65001, UInt,0, Str,utf8, Int,-1, UInt,&U, Int,256)
+
+; Decode a UTF8 string, copying the resultant character values into an array of
+; 16-bit values.  This array is null-terminated.
+UTF8ToWide(ByRef buf, ByRef u8) {
+	sl := strlen(u8)
+	if sl = 0
+		return 0
+	ct = 0
+	varSetCapacity(buf, sl * 2 + 2, 0)
+	i = 1
+	Loop
+	{
+		b1 := asc(substr(u8,i,1))
+		if b1 < 128
+		{	; Lower ANSI character "encoded" in a single byte
+			v := b1
+			i += 1
+		} else {
+			b2 := asc(substr(u8,i+1,1))
+			if b1 & 0xE0 = 0xC0
+			{ ; two byte encoding
+				v := ((b1 & 0x1f) << 6) | (b2 & 0x3f)
+				i += 2
+			} else {
+				b3 := asc(substr(u8,i+2,1))
+				if b1 & 0xf0 = 0xe0
+				{ ; three-byte encoding
+					v := ((b1 & 0x0f) << 12) + ((b2 & 0x3f) << 6) + (b3 & 0x3f)
+					i += 3
+				} else {
+				 ; four-byte encoding
+					b4 := asc(substr(u8,i+3,1))
+					v := ((b1 & 0x7) << 18) | ((b2 & 0x3f) << 6) | ((b3 & 0x3f) << 6) | (b4 & 0x3f)
+					i += 4
+				}
+			}
+		}
+		numPut(v, buf, 2*ct++)
+		if (i >= sl)
+			break
+	}
+	return ct
+}
 
 
 
@@ -1752,8 +1792,8 @@ refreshContext:
 		outputdebug No clipboard text found for refreshContext.
 	} else {
 		Send {Right}  ; To unselect text to the left
-		x := clipboard
-		refreshStack(x)
+		Transform x, Unicode	; Get clipboard text as Unicode
+		stackIdx := DecodeUTF8String(ctxStack,x)
 	}
 	Clipboard := ClipSaved   ; Restore the original clipboard. Note the use of Clipboard (not ClipboardAll).
 	ClipSaved =   ; Free the memory in case the clipboard was very large.
@@ -1928,6 +1968,6 @@ ButtonOK:
 #include Config.ahk	; Configuration GUI (GUI 3) routines
 #include Validate.ahk	; Validation and splash screen (GUI 1) routines
 #include Comm.ahk	; Interprocess communication and stack management
-;#include iSendU.ahk	; InKey's customized version of the SendU module
+#include iSendU.ahk	; InKey's customized version of the SendU module
 #include KeyboardConfigure.ahk ; Keyboard Configuration GUI (GUIs 5-7)
 #include Lang.ahk ; Internationalisation routines

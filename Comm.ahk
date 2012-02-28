@@ -1,24 +1,3 @@
-; Send a character (up to character 0xFFFF only)
-; To send an SMP character, call SendChar16 once for each character in the surrogate pair. i.e. UTF-16
-SendChar16(c) {
-	global IsBeta
-	;~ DllCall("QueryPerformanceCounter", "Int64*", sctCounterBefore)
-	if (IsBeta) {
-		setformat integerfast, H
-		c += 0
-		a := "{U+" . substr(c,3,4) . "}"
-		SendInput %a%
-		r := 1
-	} else {
-;		r := SendCh(c)
-	}
-	;~ DllCall("QueryPerformanceCounter", "Int64*", sctCounterAfter)
-	;~ DllCall("QueryPerformanceFrequency", "Int64 *", f)
-	;~ x := (sctCounterAfter - sctCounterBefore) * 1000 / f
-	;~ outputdebug SendCh(%c%) took %x% ms
-	return r
-}
-
 Send_WM_COPYDATA(Kbd, dwNum, ByRef StringToSend)  ; ByRef saves a little memory in this case.
 ; This function sends the specified number and string to the window of the specified keyboard, and returns the reply.
 {
@@ -75,47 +54,30 @@ initContext()
 	LastRotBack =
 
 	stackIdx = 0
-	varSetCapacity(ctxStack, maxstack * 2, 0)
+	varSetCapacity(ctxStack, maxstack * 4, 0)
 	varSetCapacity(flagStack, maxstack * 4, 0)
 		;setformat integer, d
 }
 
-/*
-Receive_WM_COPYDATA(wParam, lParam)
-{
-	StringAddress := NumGet(lParam + 8)  ; lParam+8 is the address of CopyDataStruct's lpData member.
-	CopyOfData := StrGet(StringAddress)  ; Copy the string out of the structure.
-	; Show it with ToolTip vs. MsgBox so we can return in a timely fashion:
-	ToolTip %A_ScriptName%`nReceived the following string:`n%CopyOfData%`nct=%wParam%
-	return true  ; Returning 1 (true) is the traditional way to acknowledge this message.
-}
-*/
-
 Receive_WM_COPYDATA(wParam, lParam)
 {	; This function can receive string data from a keyboard.
 	; Any processing done in response must return quickly. If necessary, set a timer to kick off a longer process.
-	dwSize := NumGet(lParam+0, A_PtrSize)  ;  address of CopyDataStruct's cbData member.
-	if (dwSize = 0)
+	dwNum := NumGet(lParam + 0)  ; specifying MyVar+0 forces the number in MyVar to be used instead of the address of MyVar itself
+	SetFormat integer, H
+	dwNum += 0
+	SetFormat integer, d
+	dwSize := NumGet(lParam + 4)  ; lParam+4 is the address of CopyDataStruct's cbData member.
+	StringAddress := NumGet(lParam + 8)  ; lParam+8 is the address of CopyDataStruct's lpData member.
+	; StringLength := DllCall("lstrlen", UInt, StringAddress)
+   ;outputdebug Receiving: dwNum=%dwNum%, dwSize=%dwSize%
+   if (dwSize <= 0)
 		StringData := ""
 	else
 	{
-		StringData := StrGet(NumGet(lParam+0, A_PtrSize*2))  ; Copy the string out of the structure.  ; lParam+8 is the address of CopyDataStruct's lpData member. ; Assumed null-terminated.
-
-		dwNum := NumGet(lParam+0)  ; specifying MyVar+0 forces the number in MyVar to be used instead of the address of MyVar itself
-		SetFormat Integer, H
-		dwNum += 0
-		SetFormat IntegerFast, d
-
-		; ToolTip %A_ScriptName%`nReceived the following string:`n%StringData%`ndwNum=%dwNum%`ndwSize=%dwSize%'`wParam=%wParam%	; //DEBUG
-		;~ OutputDebug %A_ScriptName%`nReceived the following string:`n%StringData%`nwParam=%wParam%`ndwNum=%dwNum%`ndwSize=%dwSize%
-
-		;~ outputdebug %A_ScriptName% received string message: %StringData%
-
-		; Handle string passed as a SendChars command (0x900A)
-		if (dwNum = 0x900A) {
-			;~ outputdebug received SendChars message
-			return SendChars(StringData, wParam)
-		}
+		VarSetCapacity(StringData, dwSize, 0)
+		;DllCall("lstrcpy", "str", StringData, "uint", StringAddress)  ; Copy the string out of the structure.
+		DllCall("MSVCRT\memcpy", "str", StringData, "uint", StringAddress, "uint", dwSize)  ; Copy the string out of the structure.
+		outputdebug %A_ScriptName% received string message: %StringData%
 
 		; Handle string passed as a TrayTipQ command (0x9001)
 		if (dwNum = 0x9001 and RegExMatch(StringData,"^(?P<text>.*)\|(?P<title>.*)\|(?P<ms>.+)", ov_)) {
@@ -163,7 +125,7 @@ Receive_WM_COPYDATA(wParam, lParam)
 		; Handle string passed as a ToolTipU command (0x9007)
 		if (dwNum = 0x9007 and RegExMatch(StringData,"^(?P<text>.*)\|(?P<ms>.+)", ov_)) {
 			outputdebug received tip message: %ov_text%, %ov_ms%
-			UTip(ov_text, ov_ms ? ov_ms : rotaPeriod)
+			U8Tip(ov_text, ov_ms ? ov_ms : rotaPeriod)
 			return 3
 		}
 
@@ -184,34 +146,41 @@ Receive_WM_COPYDATA(wParam, lParam)
 			return 3
 		}
 
+		; Handle string passed as a SendChars command (0x900A)
+		if (dwNum = 0x900A) {
+			outputdebug received SendChars message
+			return SendChars(StringData)
+		}
+
 		; Handle string passed as a InsertChars command (0x900B)
 		if (dwNum = 0x900B) {
 			outputdebug received InsertChars message
-			return InsertChars(StringData, wParam)
+			return InsertChars(StringData)
 		}
 
 	}
-	setformat integer, H
+	setformat integer, h
 	dwNum += 0
 	Outputdebug ** ERROR: %A_ScriptName% has no handler for received string: %dwNum%, "%StringData%"
-	setformat integerfast, d
+	setformat integer, d
 	return 2  ; Tell sender that we didn't process this string
 }
 
-SendChars(ByRef data, uFlags) {
-	;~ uFlags := NumGet(data, 0) ; "UInt"
-	numCh := StrLen(data)
+SendChars(ByRef data) {
+	uFlags := NumGet(data, 0) ; "UInt"
+	numCh := NumGet(data, 4, "UShort")
 	;outputdebug SendChars: uFlags=%uFlags%, numCh=%numCh%
 	if (numCh > 32)
 		return 2  ; guard against bad parameters
 	Loop % numCh
-		SendChar(NumGet(data, (A_Index-1)*2, "UShort"), uFlags)
+		SendChar(NumGet(data, A_Index * 2 + 4, "UShort"), uFlags)
 	return 3 ; OK
 }
 
-InsertChars(ByRef data, pos) {
-	uFlags := 0 ; "UInt"  ; TODO: Get this from keyboard
-	numCh := StrLen(data)
+InsertChars(ByRef data) {
+	uFlags := NumGet(data, 0) ; "UInt"
+	pos := NumGet(data, 4, "UShort")
+	numCh := NumGet(data, 6, "UShort")
 	if (numCh > 32 or pos > 32)
 		return 2 ; guard against bad parameters
 	Loop % pos	; Remember these characters   TODO:  directly manipulate the stacks
@@ -221,7 +190,7 @@ InsertChars(ByRef data, pos) {
 	}
 	Back(pos)
 	Loop % numCh
-		SendChar(NumGet(data, (A_Index-1)*2, "UShort"), uFlags)
+		SendChar(NumGet(data, A_Index * 2 + 6, "UShort"), uFlags)
 	ii := pos
 	Loop % pos
 	{
@@ -245,7 +214,6 @@ RegisterRota(id, def, flags, back, style, list) {
 	rotStyle%id% := style
 	RotSetStart%id% = 0
 	outputdebug RegisterRota(%id%, %def%, %flags%, %back%, %style%, ...)
-	;~ ToolTip RegisterRota(%id%; %def%; %flags%; %back%; %style%; %list%)
 	list .= Chr(10)
 	if (style & 1)  ; Single-line list.  Sets were delimited with tabs.
 		StringReplace list, list, %A_Tab%, `n, All
@@ -306,7 +274,7 @@ DoRota(id) {
 		local priorRT := rotTime
 		rotTime := A_TickCount
 		if ((rotTime - priorRT > rotaPeriod) or (flags() <> rotFlags%id%)) {
-			;showflags()
+			showflags()
 			local ms := rotTime - priorRT
 			outputdebug % "rota expired or not match flags: " . priorRT . "|" . rotTime . " [" . ms . "] " . rotaPeriod . ", " . flags() . ", " . rotFlags%id%
 			if (rotDef%id%)
@@ -512,7 +480,7 @@ ctx(pos = 1)
 	global
 	local x := stackIdx - pos
 	if x >= 0
-		return numGet(ctxStack, x * 2)
+		return numGet(ctxStack, x * 4)
 	return 0
 }
 
@@ -561,7 +529,7 @@ Back(ct=1) {
 	stackIdx -= ct
 	if stackIdx < 0
 		stackIdx = 0
-	;showstack()	; //DEBUG
+	showstack()	; //DEBUG
 }
 
 OnEnter() {
@@ -590,17 +558,17 @@ OnSendChar(wParam, lParam) {
 }
 
 SendChar(ch, uFlags=0) {
+	global
 	;SetFormat integer, d
-	;~ v := ch + 0
-	;outputdebug SendChar: %ch% (%v%), %uFlags%
+	v := ch + 0
+	outputdebug SendChar: %ch% (%v%), %uFlags%
 	if (ch>1) {
-		SendChar16(ch)
-		;outputdebug sendch(%ch%)
+		SendCh(ch)
+		outputdebug sendch(%ch%)
 	}
 	push(ch, uFlags)
-	global LastRotBack =
+	LastRotBack =
 	showstack()	; //DEBUG
-
 }
 
 OnDeleteChar(numCharsToDel, endingPos) {
@@ -626,15 +594,15 @@ DeleteChar(numCharsToDel=1, endingPos=1) {
 		local cc := endingPos - A_Index
 		local v := ctx(cc)
 		local f := flags(cc)
-		SendChar16(v)
+		SendCh(v)
 		local p := stackIdx - cc - numCharsToDel  ; BUG: Check we're not going back too far
-		numPut(v, ctxStack, 2*p)
+		numPut(v, ctxStack, 4*p)
 		numPut(f, flagStack, 4*p)
 	}
 	stackIdx -= numCharsToDel
 	if stackIdx < 0
 		stackIdx = 0
-	;showstack()	; //DEBUG
+	showstack()	; //DEBUG
 	return 0
 }
 
@@ -653,8 +621,8 @@ ReplaceChar(u, numCharsToRep=1, endingPos=1, uFlags=0) {
 		return 1
 	}
 	SendBkSpc(toBack)
-	SendChar16(u)
-	NumPut(u, ctxStack, 2*(stackIdx - (numCharsToRep + endingPos - 1)))
+	SendCh(u)
+	NumPut(u, ctxStack, 4*(stackIdx - (numCharsToRep + endingPos - 1)))
 	NumPut(uFlags, flagStack, 4*(stackIdx - (numCharsToRep + endingPos - 1)))
 	; Add back chars that were to the right of endingPos
 	Loop % endingPos - 1  ; %
@@ -662,15 +630,15 @@ ReplaceChar(u, numCharsToRep=1, endingPos=1, uFlags=0) {
 		local cc := endingPos - A_Index
 		local v := ctx(cc)
 		local f := flags(cc)
-		SendChar16(v)
+		SendCh(v)
 		local p := stackIdx - cc - (numCharsToRep - 1)  ; BUG: Check we're not going back too far
-		numPut(v, ctxStack, 2*p)
+		numPut(v, ctxStack, 4*p)
 		numPut(f, flagStack, 4*p)
 	}
 	stackIdx -= (numCharsToRep - 1)
 	if stackIdx < 0
 		stackIdx = 0
-	;showstack()	; //DEBUG
+	showstack()	; //DEBUG
 	return 0
 }
 
@@ -686,7 +654,7 @@ InsertChar(u, uFlags=0) {
 	f := flags()
 	ReplaceChar(u, 1, 1, uFlags)
 	SendChar(v, f)
-	;showstack()	; //DEBUG
+	showstack()	; //DEBUG
 }
 
 ; Temporary way to toggle our Back() behavior.
@@ -712,37 +680,37 @@ SendBkSpc(ct=1) {
 	}
 	local toBack := ct
 	if (thisAppDoesGreedyBackspace) {
-		Clipsaved := ClipboardAll  		; Preserve clipboard state while we do this
+				; TO DO: Preserve clipboard state while we do this
 		Loop {
 			clipboard =
 			Send +{Left}^x			; Send Shift+Left to select, and then Ctrl+X to cut
 			ClipWait 10				; Wait for clipboard
-			;~ Transform x, Unicode	; Get clipboard text as Unicode
-			;~ numDeleted := DecodeUTF8String(buf,x)  ; See how many chars were deleted
-			buf := Clipboard
-			numDeleted := StrLen(buf)  ; See how many chars were deleted
+			Transform x, Unicode	; Get clipboard text as Unicode
+			numDeleted := DecodeUTF8String(buf,x)  ; See how many chars were deleted
 			toBack -= numDeleted 	; See how many we still need to back up over (or need to add back, if negative)
+			;>>DEBUG
 			Outputdebug toBack = %toBack%, numDeleted = %numDeleted%
+			showbuf()
+			;<<DEBUG
 			if toBack <= 0
 				break
 		}
 		toback *= -1
 		Loop %toBack% 					; Add them back
 		{
-			local qq := numGet(buf, (A_Index-1)*2, "UShort")
-			SendChar16(qq)
+			SendCh(numGet(buf, (A_Index-1)*4))
+			;>>DEBUG
+			local qq := numGet(buf, (A_Index-1)*4)
 			outputdebug Added back %qq%
+			;<<DEBUG
 		}
-		Clipboard := Clipsaved	; Restore the original clipboard.
-		Clipsaved =		; Free the memory in case the clipboard was very large.
-	} else {  	; TODO: If we're about to delete the trail surrogate (range DCC0-DFFF), delete the leading surrogate too (range D800-DBFF), as the app will.
+	} else {
 		Send {BS %ct%}  ; Assumes that each BS will eat only one character
 	}
 	buf =
 	return 0
 }
 
-/*
 ; Decode a UTF8 string, copying the resultant character values into an array of
 ; 32-bit values.  This array is NOT null-terminated.
 ; The return value indicates the number of valid elements in the array.
@@ -786,7 +754,6 @@ DecodeUTF8String(ByRef buf, ByRef u8) {
 	}
 	return ct
 }
-*/
 
 ; ================================
 
@@ -798,7 +765,7 @@ DecodeUTF8String(ByRef buf, ByRef u8) {
 ; the beginning, pushing the startIdx up.  When startIdx is higher than endIdx, it means we have previously
 ; wrapped around.
 
-; Numbers on the context stack are 16 bits. Numbers on the flag stack are 32 bits.
+; Numbers on the stack are of type UINT. (32 bits)
 
 ; --------------------------------
 ; Push an item onto the stack
@@ -810,22 +777,17 @@ push(n, uFlags=0)
 		local so := maxstack - stackshift
 		Loop %so%
 		{
-			numput(numGet(ctxStack,2*(A_Index - 1 + stackshift), "UShort"), ctxStack, 2*(A_Index - 1), "UShort")
-			numput(numGet(flagStack,4*(A_Index - 1 + stackshift), "UInt"), flagStack, 4*(A_Index - 1), "UInt")
+			numput(numGet(ctxStack,4*(A_Index - 1 + stackshift)), ctxStack, 4*(A_Index - 1))
+			numput(numGet(flagStack,4*(A_Index - 1 + stackshift)), flagStack, 4*(A_Index - 1))
 		}
 		stackIdx -= stackshift
 	}
-	numPut(n, ctxStack, 2*stackIdx)
+	numPut(n, ctxStack, 4*stackIdx)
 	numPut(uFlags, flagStack, 4*stackIdx)
 	stackIdx++
 }
 
-refreshStack(ByRef s) ; Reset the context stack to the provided string
-{
-	ctxStack := s
-	stackIdx := strlen(ctxStack)
-	; TODO: zero out the contents of the flagStack!!!
-}
+
 
 ; DEBUG>>
 
@@ -837,7 +799,7 @@ showstack()
 	local s =
 	Loop %stackIdx%
 	{
-		v := numGet(ctxStack,2*(A_Index - 1), "UShort")
+		v := numGet(ctxStack,4*(A_Index - 1))
 		s = %s%|%v%
 	}
 	outputdebug ctxStack: %s%   [idx = %stackIdx%]
@@ -851,13 +813,28 @@ showflags()
 	local s =
 	Loop %stackIdx%
 	{
-		v := numGet(flagStack,4*(A_Index - 1), "UInt")
+		v := numGet(flagStack,4*(A_Index - 1))
 		s = %s%|%v%
 	}
 	outputdebug flagStack: %s%   [idx = %stackIdx%]
 }
 
 
+; A debug routine to show the values cut to the clipboard by the Back() function.
+showbuf()
+{
+	global
+	local v
+	local s =
+	setformat integer, HEX
+	Loop %numCopied%
+	{
+		v := numGet(buf,4*(A_Index - 1))
+		s = %s%|%v%
+	}
+	setformat integer, d
+	outputdebug buf contains [%s%]
+}
 ; <<DEBUG
 
 ; Pop an item off the stack
@@ -867,7 +844,7 @@ pop()
 	global
 	if stackIdx = 0
 		return ""
-	return numGet(ctxStack,--stackIdx * 2)
+	return numGet(ctxStack,--stackIdx * 4)
 }
 */
 
