@@ -27,7 +27,7 @@ Icon_1=%In_Dir%\inkey.ico
 
 ; Main initialization
 	Outputdebug ___________________________ INKEY.AHK ___________________
-	ver = 0.300 ;
+	ver = 0.301 ;
 	K_ProtocolNum = 3 ; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number should be incremented in both files.
 	SetWorkingDir %A_ScriptDir%
 	onExit DoCleanup
@@ -221,7 +221,7 @@ Icon_1=%In_Dir%\inkey.ico
 			; There are keyboards needing registered or unregistered, but user does not have Admin privileges.
 			Gui Hide
 			TitleString:=GetLang(116)  ; Install/update Keyboard registration?
-			TempString:=GetLang(117) . " " . %UnusedRKCt% . "`n" . GetLang(118) . " " . %Kbd2RegCt% . "`n`n" . GetLang(119) . "`n" . GetLang(120) . "`n" . GetLang(121) . "`n`n" . GetLang(122)
+			TempString:=GetLang(117) . " " . UnusedRKCt . "`n" . GetLang(118) . " " . Kbd2RegCt . "`n`n" . GetLang(119) . "`n" . GetLang(120) . "`n" . GetLang(121) . "`n`n" . GetLang(122)
 			MsgBox 36, %TitleString%, %TempString%  ; # Keyboards to unregister: %UnusedRKCt%`n# Keyboards to register: %Kbd2RegCt%`n`nFor InKey to run in its "Installed" mode, it must first update the keyboard registry to match your settings.`nDoing so requires full administrator permissions.`nIf you do not have administrator permissions on this computer, InKey can still run in "Portable" mode.`n`nWould you like to restart InKey with full administrator permissions?
 			ifMsgBox Yes
 			{	DllCall("shell32\ShellExecuteW", uint, 0, str, "RunAs", str, A_ScriptFullPath, str, "ReloadAsAdmin", str, A_ScriptDir, int, 1)
@@ -476,8 +476,8 @@ ProcessKbdErrors:
 					} else {
 						Gui Hide
 						TitleString:=GetLang(126) ; Use %sLangName% language for '%ln%' layout?
-						LangCode:=% KbdLang%kk%
-						TempString:= GetLang(127) . " " . %LangCode% . " " . GetLang(128) . "`n`n" . GetLang(129) . "`n`n" . GetLang(130) . " " . %sLangName% . " " . GetLang(131) . " " . %ln% . " " . GetLang(132) ; "The language code " . %LangCode% . " is unknown on this version or service-pack of Windows.`n`nSome applications may not function properly with an unknown language.`n`nWould you like to instead use " . sLangName . " for the '" . ln "' keyboard?"
+						LangCode:= KbdLang%kk%
+						TempString:= GetLang(127) . " " . LangCode . " " . GetLang(128) . "`n`n" . GetLang(129) . "`n`n" . GetLang(130) . " " . sLangName . " " . GetLang(131) . " " . ln . " " . GetLang(132) ; "The language code " . %LangCode% . " is unknown on this version or service-pack of Windows.`n`nSome applications may not function properly with an unknown language.`n`nWould you like to instead use " . sLangName . " for the '" . ln "' keyboard?"
 						MsgBox 4, %TitleString%, %TempString%
 						Gui Show
 						ifmsgbox Yes
@@ -488,9 +488,9 @@ ProcessKbdErrors:
 			}
 
 			Gui Hide
-			TitleString:=GetLang(133) . " " . %ln% ; Unknown language code for layout: %ln%
-			LangCode:=% KbdLang%kk%
-			TempString:= GetLang(127) . " " . %LangCode% . " " . GetLang(134) . "`n" . GetLang(135) . "`n`n" . GetLang(136) ; "The language code " . %LangCode% . " is unknown on this computer, and you have not configured an alternative for this keyboard.`nSome applications may not function properly with this language.`n`nLoad it anyway?"
+			TitleString:=GetLang(133) . " " . ln ; Unknown language code for layout: %ln%
+			LangCode:= KbdLang%kk%
+			TempString:= GetLang(127) . " " . LangCode . " " . GetLang(134) . "`n" . GetLang(135) . "`n`n" . GetLang(136) ; "The language code " . %LangCode% . " is unknown on this computer, and you have not configured an alternative for this keyboard.`nSome applications may not function properly with this language.`n`nLoad it anyway?"
 			MsgBox 4, %TitleString%, %TempString%
 			Gui Show
 			ifmsgbox Yes
@@ -704,7 +704,7 @@ GetAHK() {
 
 	gui hide
 	TitleString:=GetLang(137) ; InKey Installation Error
-	TempString:=GetLang(138) . " " . %ahkexe% . " " . GetLang(139) . "`n" . %A_ScriptDir% . " " . GetLang(140)  . "`n" . GetLang(141) . "`n" . GetLang(142) . "`n`n" . GetLang(143) ; The required file '%ahkexe%' was not found in the`n'%A_ScriptDir%' folder,`nnor is AutoHotKey installed on this system.`nTo install AutoHotKey, please visit autohotkey.com.`n`nInKey will close.
+	TempString:=GetLang(138) . " " . ahkexe . " " . GetLang(139) . "`n" . A_ScriptDir . " " . GetLang(140)  . "`n" . GetLang(141) . "`n" . GetLang(142) . "`n`n" . GetLang(143) ; The required file '%ahkexe%' was not found in the`n'%A_ScriptDir%' folder,`nnor is AutoHotKey installed on this system.`nTo install AutoHotKey, please visit autohotkey.com.`n`nInKey will close.
 	MsgBox 16, %TitleString%, %TempString%
 	ExitApp
 }
@@ -959,7 +959,7 @@ DoResync:
 		tries++
 		if (tries > 100) {
 			TempString:=GetLang(144) ; Error while attempting to reset keyboards.
-			TrayTipQ(%TempString%)
+			TrayTipQ(TempString)
 			return
 		}
 		kf := 0
@@ -1208,7 +1208,7 @@ ActivateKbd(kbd, hkl) {
 		Run %RunCmd%,  ,  UseErrorLevel, OutputVarPID
 		if (ErrorLevel) {
 			TitleString:=GetLang(145) ; Error
-			TempString:= GetLang(146) . %kbd% . "`n" . GetLang(147) . "`n" . %RunCmd% ; Unable to launch keyboard #%kbd%,`nbecause the following command failed:`n%RunCmd%
+			TempString:= GetLang(146) . kbd . "`n" . GetLang(147) . "`n" . RunCmd ; Unable to launch keyboard #%kbd%,`nbecause the following command failed:`n%RunCmd%
 			MsgBox 16, %TitleString%, %TempString%
 			requestkbd(0)
 			return
@@ -1225,7 +1225,7 @@ ActivateKbd(kbd, hkl) {
 				if (cl = "#32770") {
 					sleep 500
 					TitleString:=GetLang(145) ; Error
-					TempString:= GetLang(148) . " " . %NewKbdFile% . ".`n`n" . GetLang(149) ; There seems to be a problem with launching "%NewKbdFile%".`n`nWould you like switch to the default keyboard?
+					TempString:= GetLang(148) . " " . NewKbdFil . ".`n`n" . GetLang(149) ; There seems to be a problem with launching "%NewKbdFile%".`n`nWould you like switch to the default keyboard?
 					MsgBox 52, %TitleString%, %TempString%
 					IfMsgBox Yes
 					{	DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KbdHKL0)  ; Change all windows to default lang.

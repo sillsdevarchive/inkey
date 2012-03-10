@@ -6,7 +6,7 @@
 #LTrim			; This command causes leading whitespace in continuation sections (e.g. multi-line rota strings) to be trimmed.
 				; If you prefer otherwise, use #LTrim Off
 
-K_InKeyLibVersion = 0.103	; At the top of your script, the very first line of code
+K_InKeyLibVersion = 0.300	; At the top of your script, the very first line of code
 	; should set K_MinimumInKeyLibVersion to this number.
 	; This will ensure that if a user has an older version of InKeyLib.ahki that
 	; does not support the functionality that your script requires, he will be
@@ -20,7 +20,7 @@ K_InKeyLibVersion = 0.103	; At the top of your script, the very first line of co
 	; 0.100 Adds support for AutoHotKey_L, which includes better Unicode support.
 	; 0.101 Adds support for compiling InKey with AutoHotKey_L, which includes better Unicode support.
 	; 0.102 Improves support for CAPSLOCK functionality in default handlers. Adds UseUpperCase() function.
-	; 0.103 SendText() and InsertText() functions, etc.
+	; 0.300 SendText() and InsertText() functions
 
 K_ProtocolNum = 3	; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number is incremented in both.
 			; This ensures that communication conventions between InKey and a keyboard will match.
@@ -87,13 +87,13 @@ SendChars(ChList, uFlags=0) {
 	Loop parse, ChList, CSV
 		NumPut(A_LoopField, v, (2 * numCh++) + 6, "UShort")
 	NumPut(numCh, v, 4, "UShort")
-	return SendData(0x900A, numCh*2 + 6, v)
+	return SendData(0x900A, v, 0, numCh*2 + 6)
 }
 
 SendText(ByRef CharString, uFlags=0) {
 ; Send a text string, optionally remembering on each character the same 32-bit flag value.
 ; e.g. SendText("द्व", 1)
-	return Send_WM_COPYDATA(0x901A, CharString, uFlags)
+	return SendData(0x901A, CharString, uFlags)
 }
 
 UndoLast() {
@@ -127,12 +127,24 @@ DeleteChar(numCharsToDel=1, endingPos=1) {
 	return SendToInKey(0x8014, numCharsToDel, endingPos)
 }
 
-ReplaceChar(u, numCharsToRep=1, endingPos=1, uFlags=0) {
-; Replace one or more characters with a specified character.
+ReplaceChar(cp, numCharsToRep=1, endingPos=1, uFlags=0) {
+; Replace one or more characters with the character of the specified codepoint (up to 0xFFFF)
 ; The characters to replace are identified by their count and their ending position.
 ; e.g. If the context is "abXXde", then ReplaceChar(42, 2, 3) will make it "ab*de".
-	s := u . "," . numCharsToRep . "," . endingPos . "," . uFlags
-	return Send_WM_COPYDATA(0x9002, s)
+	s := cp . "," . numCharsToRep . "," . endingPos . "," . uFlags
+	return SendData(0x9002, s)
+}
+
+
+ReplaceText(newText, numCharsToRep=1, endingPos=1, uFlags=0) {
+;  TODO:  Implement on InKey engine side.
+; Replace one or more characters with specified text.
+; The characters to replace are identified by their count and their ending position.
+; e.g. If the context is "abXXde", then ReplaceText("LM", 2, 3) will make it "abLMde".
+	;~ s := u . "," . numCharsToRep . "," . endingPos . "," . uFlags
+	;~ return SendData(0x9012, s)
+	MsgBox Sorry.  ReplaceText() function is not yet implemented.
+	return
 }
 
 
@@ -142,56 +154,65 @@ InsertChar(u, uFlags=0) {
 		; insert a character (whose code is u) at pos number of characters back in the context.
 		; e.g. InsertChar(42, uFlags, 1) would insert character 42 immediately prior to the most recent character.
 	s := u . "," . uFlags
-	return Send_WM_COPYDATA(0x9003, s)
+	return SendData(0x9003, s)
 }
 
 InsertChars(ChList, uFlags=0, pos=1) {
+; Consider using InsertText() instead.
 ; Insert characters (whose codes are specified in a tab-delimited string ChList) at pos number of characters back in the context.
 	; e.g. InsertChars("42,43", uFlags, 1) would insert characters 42 and 43 immediately prior to the most recent character.
-	;~ VarSetCapacity(v, 256, 0)
-		;~ ; struct:  	UInt uFlags
-		;~ ;		UShort pos
-		;~ ; 		UShort numChars
-		;~ ; 		UShort[]  charArray
-	;~ NumPut(uFlags, v, 0)  ; "UInt" - 32 bits
-	;~ NumPut(pos, v, 4)  ; "UShort" - 16 bits
-	;~ numCh := 0
-	;~ Loop parse, ChList, CSV
-		;~ NumPut(A_LoopField, v, (2 * numCh++) + 8, "UShort")
-	;~ NumPut(numCh, v, 6, "UShort")
-	;~ return SendData(0x900B, numCh*2 + 8, v)
-
-	MsgBox 0, "Error", "This keyboard uses the obsolete InsertChars function.  Please update keyboard to use 'InsertText' function instead."
-	return 0
+	VarSetCapacity(v, 256, 0)
+		; struct:  	UInt uFlags
+		;		UShort pos
+		; 		UShort numChars
+		; 		UShort[]  charArray
+	NumPut(uFlags, v, 0, "UInt")  ; "UInt" - 32 bits
+	NumPut(pos, v, 4, "UShort")  ; "UShort" - 16 bits
+	numCh := 0
+	Loop parse, ChList, CSV
+		NumPut(A_LoopField, v, (2 * numCh++) + 8, "UShort")
+	NumPut(numCh, v, 6, "UShort")
+	return SendData(0x900B, v, 0, numCh*2 + 8)
 }
 
 InsertText(ByRef CharString, uFlags=0, pos=1) {
 ; Insert a text string at pos number of characters back in the context.
 	; e.g. InsertChars("Ba", uFlags, 1) would insert "Ba" immediately prior to the most recent character.
 ; Optionally remembers on each character the same 32-bit flag value.
-	return Send_WM_COPYDATA(0x900B, CharString, pos)  ; TODO:  uFlags not yet implemented!!  Will need to pack it into the string, or get pos to share bits with CmdID
+	len := StrLen(CharString)
+	size := len*2+10
+	VarSetCapacity(v, size, 0)
+		; struct:  	UInt uFlags
+		;		UShort pos
+		; 		UShort numChars
+		; 		UShort[]  charArray
+	NumPut(uFlags, v, 0, "UInt")  ; "UInt" - 32 bits
+	NumPut(pos, v, 4, "UShort")  ; "UShort" - 16 bits
+	NumPut(len, v, 6, "UShort")
+	StrPut(CharString, &v+8, size, "UTF-16")
+	return SendData(0x900B, v, pos, size)
 }
 
 TrayTipQ(txt, title="", ms=2000) {
 ; Show a tip at the tray icon
 	s := txt . "|" . title . "|" . ms
-	Send_WM_COPYDATA(0x9001, s)
+	SendData(0x9001, s)
 	return
 }
 
 ToolTipU(txt, ms=0) {
-; Show a UTF-8 tip in the preview tip window
+; Show text in the preview tip window
 ; If time is not specified, it will use InKey's SpeedRotaPeriod setting.
 	s := txt . "|" . ms
-	Send_WM_COPYDATA(0x9007, s)
+	SendData(0x9007, s)
 	return
 }
 
-PreviewChar(u, ms=0) {
-; Show a unicode character in the preview tip window
+PreviewChar(cp, ms=0) {
+; Show a character specified by the given codepoint (up to U+FFFF) in the preview tip window.
 ; If time is not specified, it will use InKey's SpeedRotaPeriod setting.
-	s := u . "|" . ms
-	Send_WM_COPYDATA(0x9008, s)
+	s := cp . "|" . ms
+	SendData(0x9008, s)
 	return
 }
 
@@ -243,7 +264,7 @@ RegisterRota(id, list, def=0, uFlags=0, back=0, style=0) {
 		FatalError("Error: Double whitespace in rota string " . id)
 	}
 	s := K_FileID . "_" . id . "|" . def . "|" . uFlags . "|" . back . "|" . style . "|" . list
-	Send_WM_COPYDATA(0x9004, s)
+	SendData(0x9004, s)
 }
 
 DoRota(id) {
@@ -253,7 +274,7 @@ DoRota(id) {
 ; Return Value:  Currently, 1 if a match was found.  0 otherwise.  (This may change.)
 	global K_FileID
 	s := K_FileID . "_" . id
-	x := Send_WM_COPYDATA(0x9005, s)
+	x := SendData(0x9005, s)
 	outputdebug DoRota(%id%) [%s%] => %x%
 	if (x = 4)
 		MsgBox 16, , DoRota(%id%)`nNo such rota exists
@@ -273,13 +294,13 @@ SendRotaChar(id, u, uFlags) {
 	}
 	s := K_FileID . "_" . id . "|" . u . "|" . uFlags
 	outputdebug Sending SendRotaChar message: %s%
-	x := Send_WM_COPYDATA(0x9009, s)
+	x := SendData(0x9009, s)
 }
 
 FatalError(str) {
 ; Terminate this keyboard due to an error condition.  (If you merely do ExitApp, InKey may keep trying to run this script.)
 	s = %str%`nTerminating %A_ScriptName%
-	Send_WM_COPYDATA(0x9006, s)
+	SendData(0x9006, s)
 	ExitApp
 }
 
@@ -313,23 +334,14 @@ Receive_WM_COPYDATA(wParam, lParam)
 	; Any processing done in response must return quickly. If necessary, set a timer to kick off a longer process.
 	;GLOBAL ; Vital!!  Otherwise,our GoSubs will be in local context
 	SetFormat integer, H
-	K_dwNum := NumGet(lParam + 0)+0  ; For some reason, the "+ 0" has to be there.
-	K_StringAddress := NumGet(lParam + 8)  ; lParam+8 is the address of CopyDataStruct's lpData member.
+	K_dwNum := NumGet(lParam + 0)+0
+	K_StringAddress := NumGet(lParam + A_PtrSize+4)  ; address of CopyDataStruct's lpData member.
 
-	if (A_IsUnicode) {
-		; InKey currently passes strings as UTF-8, but this script is being run with UTF-16 strings.
-		; We need to convert the UTF8 string to what is native to this script.
-		K_StringLength := DllCall("lstrlenA", UInt, K_StringAddress)
-		if (K_StringLength > 0) {
-			K_StringData := StrGet(K_StringAddress, K_StringLength, "utf-8")
-		}
-	} else {
-		; Native string is 8-bit.  No need to convert.
-		K_StringLength := DllCall("lstrlen", UInt, K_StringAddress)
-		if (K_StringLength > 0) {
-			VarSetCapacity(K_StringData, K_StringLength)
-			DllCall("lstrcpy", "str", K_StringData, "uint", K_StringAddress)  ; Copy the string out of the structure.
-		}
+	; InKey currently passes strings to InkeyLib as UTF-8, but this script is being run with UTF-16 strings.  TODO!!!!!!!!!!!!!!!!!  update!!!
+	; We need to convert the UTF8 string to what is native to this script.
+	K_StringLength := DllCall("lstrlenA", UInt, K_StringAddress)
+	if (K_StringLength > 0) {
+		K_StringData := StrGet(K_StringAddress, K_StringLength, "utf-8")
 	}
 	outputdebug %A_ScriptName% received command %K_dwNum% with string of length: %K_StringLength%
 
@@ -414,8 +426,7 @@ StrPutVar(string, ByRef var, encoding)
 */
 
 
-;~ #~ Send_WM_COPYDATA(cmdID, ByRef StringToSend, wParam=0)  ; ByRef saves a little memory in this case.
-Send_WM_COPYDATA(cmdID, ByRef Data, wParam=0, DataSize=-1)  ; ByRef saves a little memory in this case.
+SendData(cmdID, ByRef Data, wParam=0, DataSize=-1)  ; ByRef saves a little memory in this case.
 ; This function sends the specified number and string (or data block) to the InKey window and returns the reply.
 ; The reply is 1 if the target window processed the message, or 0 if it ignored it.
 ; Parameters:
@@ -424,7 +435,6 @@ Send_WM_COPYDATA(cmdID, ByRef Data, wParam=0, DataSize=-1)  ; ByRef saves a litt
 ;    wParam:    Optional additional numeric parameter. Size is A_PtrSize, but best not to use values above 32 bits.
 ;    DataSize:  Omit for string data.  Otherwise, size in bytes of data block.
 {
-	;~ outputdebug Send_WM_COPYDATA(%cmdID%, %StringToSend%)
 	global K_InkeyHwnd
 	; struct COPYDATASTRUCT    - size: A_PtrSize*2+4
 	;             UPtr   dwData  (4 or 8 bytes)  Offset: 0.           Value to be passed.
@@ -444,10 +454,10 @@ Send_WM_COPYDATA(cmdID, ByRef Data, wParam=0, DataSize=-1)  ; ByRef saves a litt
 		;~ outputdebug ************ CRITICAL ERROR: Send_WM_COPYDATA(%dwNum%, %StringToSend%) failed!
 	;~ }
 
-	r := DllCall("SendMessage", UInt, GetInkeyHwnd(), UInt, 0x4A, UInt, wParam, UInt, &CopyDataStruct)  ; probably needs UInt -> Ptr to be x64-compatible
+	r := DllCall("SendMessage", UPtr, GetInkeyHwnd(), UInt, 0x4A, UPtr, wParam, UPtr, &CopyDataStruct)
 	if (ErrorLevel) {
 		SoundPlay *16
-		outputdebug ************ CRITICAL ERROR: Send_WM_COPYDATA(%cmdID%, %StringToSend%) failed!
+		outputdebug ************ CRITICAL ERROR: SendData(%cmdID%, %StringToSend%) failed!
 	}
 	;~ VarSetCapacity(CopyDataStruct, 12, 0)  ; Set up the structure's memory area.
 	;~ NumPut(dwNum, CopyDataStruct, 0)  ;
@@ -464,7 +474,7 @@ Send_WM_COPYDATA(cmdID, ByRef Data, wParam=0, DataSize=-1)  ; ByRef saves a litt
 	return r
 }
 
-
+/*
 SendData(dwNum, dataSize, ByRef lpData )  ; ByRef saves a little memory in this case.
 ; This function sends the specified number and data structure to the InKey window and returns the reply.
 ; The reply is 1 if the target window processed the message, or 0 if it ignored it.
@@ -480,7 +490,7 @@ SendData(dwNum, dataSize, ByRef lpData )  ; ByRef saves a little memory in this 
 	}
 	return r
 }
-
+*/
 
 params() {
 	global
@@ -509,7 +519,7 @@ params() {
 
 SendToInKey(msg, wParam=0, lParam=0)
 {
-	r := DllCall("SendMessage", UInt, GetInkeyHwnd(), UInt, msg, UInt, wParam, UInt, lParam)
+	r := DllCall("SendMessage", UPtr, GetInkeyHwnd(), UInt, msg, UPtr, wParam, UPtr, lParam)
 	;outputdebug SendToInKey => %r%, e=%ErrorLevel%
 	return r
 }

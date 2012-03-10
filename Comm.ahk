@@ -23,7 +23,7 @@ Send_WM_COPYDATA(Kbd, dwNum, ByRef StringToSend)  ; ByRef saves a little memory 
 ; This function sends the specified number and string to the window of the specified keyboard, and returns the reply.
 {
 	VarSetCapacity(CopyDataStruct, 12, 0)  ; Set up the structure's memory area.
-	NumPut(dwNum, CopyDataStruct, 0)  ;
+	NumPut(dwNum, CopyDataStruct, 0)  ;    REDO!!
 	NumPut(StrLen(StringToSend) + 1, CopyDataStruct, 4)  ;     ; Set the structure's cbData member to the size of the string, including its zero terminator: OS requires that this be done.
 	NumPut(&StringToSend, CopyDataStruct, 8)  ; Set lpData to point to the string itself.
 	r := DllCall("SendMessage", UInt, GetKbdHwnd(Kbd), UInt, 0x4A, UInt, 0, UInt, &CopyDataStruct)
@@ -94,28 +94,26 @@ Receive_WM_COPYDATA(wParam, lParam)
 Receive_WM_COPYDATA(wParam, lParam)
 {	; This function can receive string data from a keyboard.
 	; Any processing done in response must return quickly. If necessary, set a timer to kick off a longer process.
-	dwSize := NumGet(lParam+0, A_PtrSize)  ;  address of CopyDataStruct's cbData member.
+	dwSize := NumGet(lParam+0, A_PtrSize, "UInt")  ;  address of CopyDataStruct's cbData member.
+	StringAddress := NumGet(lParam + A_PtrSize+4, "UPtr")  ; address of CopyDataStruct's lpData member.
 	if (dwSize = 0)
 		StringData := ""
 	else
 	{
-		StringData := StrGet(NumGet(lParam+0, A_PtrSize*2))  ; Copy the string out of the structure.  ; lParam+8 is the address of CopyDataStruct's lpData member. ; Assumed null-terminated.
+		VarSetCapacity(StringData, dwSize, 0)
+		DllCall("MSVCRT\memcpy", "str", StringData, "UPtr", StringAddress, "uint", dwSize)  ; Copy the string out of the structure.
 
-		dwNum := NumGet(lParam+0)  ; specifying MyVar+0 forces the number in MyVar to be used instead of the address of MyVar itself
-		SetFormat Integer, H
-		dwNum += 0
-		SetFormat IntegerFast, d
+		;~ StringData := StrGet(NumGet(lParam+0, A_PtrSize*2))  ; Copy the string out of the structure.  ; lParam+8 is the address of CopyDataStruct's lpData member. ; Assumed null-terminated.
+
+		SetFormat IntegerFast, H
+		dwNum := NumGet(lParam+0, 0, "UPtr")  ; specifying MyVar+0 forces the number in MyVar to be used instead of the address of MyVar itself
+		;~ dwNum += 0
+		;~ SetFormat IntegerFast, d
 
 		; ToolTip %A_ScriptName%`nReceived the following string:`n%StringData%`ndwNum=%dwNum%`ndwSize=%dwSize%'`wParam=%wParam%	; //DEBUG
 		;~ OutputDebug %A_ScriptName%`nReceived the following string:`n%StringData%`nwParam=%wParam%`ndwNum=%dwNum%`ndwSize=%dwSize%
 
 		;~ outputdebug %A_ScriptName% received string message: %StringData%
-
-		; Handle string passed as a SendChars command (0x900A)
-		if (dwNum = 0x900A) {
-			;~ outputdebug received SendChars message
-			return SendChars(StringData, wParam)
-		}
 
 		; Handle string passed as a TrayTipQ command (0x9001)
 		if (dwNum = 0x9001 and RegExMatch(StringData,"^(?P<text>.*)\|(?P<title>.*)\|(?P<ms>.+)", ov_)) {
@@ -184,11 +182,29 @@ Receive_WM_COPYDATA(wParam, lParam)
 			return 3
 		}
 
+		; Handle string passed as a SendChars command (0x900A)
+		if (dwNum = 0x900A) {
+			outputdebug received SendChars message
+			return SendChars(StringData)
+		}
+
+		; Handle string passed as a SendText command (0x901A)
+		if (dwNum = 0x901A) {
+			outputdebug received SendText message
+			return SendText(StringData, wParam)
+		}
+
 		; Handle string passed as a InsertChars command (0x900B)
 		if (dwNum = 0x900B) {
 			outputdebug received InsertChars message
-			return InsertChars(StringData, wParam)
+			return InsertChars(StringData)
 		}
+
+		; Handle string passed as a InsertChars command (0x900B)
+		;~ if (dwNum = 0x900B) {
+			;~ outputdebug received InsertChars message
+			;~ return InsertChars(StringData, wParam)
+		;~ }
 
 	}
 	setformat integer, H
@@ -198,8 +214,18 @@ Receive_WM_COPYDATA(wParam, lParam)
 	return 2  ; Tell sender that we didn't process this string
 }
 
-SendChars(ByRef data, uFlags) {
-	;~ uFlags := NumGet(data, 0) ; "UInt"
+SendChars(ByRef data) {
+	uFlags := NumGet(data, 0, "UInt")
+	numCh := NumGet(data, 4, "UShort")
+	;outputdebug SendChars: uFlags=%uFlags%, numCh=%numCh%
+	if (numCh > 32)
+		return 2  ; guard against bad parameters
+	Loop % numCh
+		SendChar(NumGet(data, A_Index * 2 + 4, "UShort"), uFlags)
+	return 3 ; OK
+}
+
+SendText(ByRef data, uFlags) {
 	numCh := StrLen(data)
 	;outputdebug SendChars: uFlags=%uFlags%, numCh=%numCh%
 	if (numCh > 32)
@@ -209,6 +235,31 @@ SendChars(ByRef data, uFlags) {
 	return 3 ; OK
 }
 
+InsertChars(ByRef data) {
+	uFlags := NumGet(data, 0, "UInt")
+	pos := NumGet(data, 4, "UShort")
+	numCh := NumGet(data, 6, "UShort")
+	OutputDebug insertchars: %uFlags%, %pos%, %numCh%
+	if (numCh > 32 or pos > 32)
+		return 2 ; guard against bad parameters
+	Loop % pos	; Remember these characters   TODO:  directly manipulate the stacks
+	{
+		ctx%A_Index% := ctx(A_Index)
+		flg%A_Index% := flags(A_Index)
+	}
+	Back(pos)
+	Loop % numCh
+		SendChar(NumGet(data, A_Index * 2 + 6, "UShort"), uFlags)
+	ii := pos
+	Loop % pos
+	{
+		SendChar(ctx%ii%, flg%ii%)
+		ii--
+	}
+	return 3 ; OK
+}
+
+/*
 InsertChars(ByRef data, pos) {
 	uFlags := 0 ; "UInt"  ; TODO: Get this from keyboard
 	numCh := StrLen(data)
@@ -230,6 +281,7 @@ InsertChars(ByRef data, pos) {
 	}
 	return 3 ; OK
 }
+*/
 
 SendRotaChar(id, u, uFlags) {
 	SendChar(u, uFlags)
@@ -512,7 +564,7 @@ ctx(pos = 1)
 	global
 	local x := stackIdx - pos
 	if x >= 0
-		return numGet(ctxStack, x * 2)
+		return numGet(ctxStack, x * 2, "UShort")
 	return 0
 }
 
@@ -527,7 +579,7 @@ flags(pos = 1)
 	global
 	local x := stackIdx - pos
 	if x >= 0
-		return numGet(flagStack, x * 4)
+		return numGet(flagStack, x * 4, "UInt")
 	return 0
 }
 
@@ -628,8 +680,8 @@ DeleteChar(numCharsToDel=1, endingPos=1) {
 		local f := flags(cc)
 		SendChar16(v)
 		local p := stackIdx - cc - numCharsToDel  ; BUG: Check we're not going back too far
-		numPut(v, ctxStack, 2*p)
-		numPut(f, flagStack, 4*p)
+		numPut(v, ctxStack, 2*p, "UShort")
+		numPut(f, flagStack, 4*p, "UInt")
 	}
 	stackIdx -= numCharsToDel
 	if stackIdx < 0
@@ -654,8 +706,8 @@ ReplaceChar(u, numCharsToRep=1, endingPos=1, uFlags=0) {
 	}
 	SendBkSpc(toBack)
 	SendChar16(u)
-	NumPut(u, ctxStack, 2*(stackIdx - (numCharsToRep + endingPos - 1)))
-	NumPut(uFlags, flagStack, 4*(stackIdx - (numCharsToRep + endingPos - 1)))
+	NumPut(u, ctxStack, 2*(stackIdx - (numCharsToRep + endingPos - 1)), "UShort")
+	NumPut(uFlags, flagStack, 4*(stackIdx - (numCharsToRep + endingPos - 1)), "UInt")
 	; Add back chars that were to the right of endingPos
 	Loop % endingPos - 1  ; %
 	{
@@ -664,8 +716,8 @@ ReplaceChar(u, numCharsToRep=1, endingPos=1, uFlags=0) {
 		local f := flags(cc)
 		SendChar16(v)
 		local p := stackIdx - cc - (numCharsToRep - 1)  ; BUG: Check we're not going back too far
-		numPut(v, ctxStack, 2*p)
-		numPut(f, flagStack, 4*p)
+		numPut(v, ctxStack, 2*p, "UShort")
+		numPut(f, flagStack, 4*p, "UInt")
 	}
 	stackIdx -= (numCharsToRep - 1)
 	if stackIdx < 0
@@ -694,9 +746,9 @@ InsertChar(u, uFlags=0) {
 ; when you press Backspace.
 $^+Backspace::
 thisAppDoesGreedyBackspace := NOT thisAppDoesGreedyBackspace
-gb := thisAppDoesGreedyBackspace ? %OnString% : %OffString%
+gb := thisAppDoesGreedyBackspace ? OnString : OffString
 TempString:=GetLang(61) ; Handling of greedy backspace is
-TrayTipQ(%TempString% . " " . %gb%)
+TrayTipQ(TempString . " " . gb)
 return
 
 ; The equivalent of sending ct number of Backspace characters, except that a mode is supported
@@ -711,7 +763,10 @@ SendBkSpc(ct=1) {
 		return
 	}
 	local toBack := ct
-	if (thisAppDoesGreedyBackspace) {
+	local cc := ctx()
+	outputdebug cc = %cc%
+	if (thisAppDoesGreedyBackspace or ((cc >= 0xDC00) and (cc <= 0xDFFF))) {
+		OutputDebug avoiding greedy backspace
 		Clipsaved := ClipboardAll  		; Preserve clipboard state while we do this
 		Loop {
 			clipboard =
@@ -815,8 +870,8 @@ push(n, uFlags=0)
 		}
 		stackIdx -= stackshift
 	}
-	numPut(n, ctxStack, 2*stackIdx)
-	numPut(uFlags, flagStack, 4*stackIdx)
+	numPut(n, ctxStack, 2*stackIdx, "UShort")
+	numPut(uFlags, flagStack, 4*stackIdx, "UInt")
 	stackIdx++
 }
 

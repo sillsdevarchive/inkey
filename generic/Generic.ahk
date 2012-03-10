@@ -27,11 +27,14 @@ K_MinimumInKeyLibVersion = 0.103
 
 K_UseContext = 1	; Causes uncaptured character keys to be included in the context too.
 rep := 1
+uFlags := 1
 
 #include InKeyLib.ahki
 
 OnLoadScript:	; This section is executed when this InKey script is first loaded.
 	RegisterRota(33, "Ñ~ 𓀱 N Ñ N~	ñ~ n ñ n~	̃~ ̃ ~", 0x303, 0, 0, 1)
+	RegisterRota(1, "d ð ɗ ɖ ȡ ᶑᶑ ᶁ 𓀱 ᵭ", 42, 0, 0, 1)
+	RegisterRota(2, "e ee ɛ ɛɛ é ê è ə", 0x65, 0, 0, 8) ;| e ee ɛ ɛɛ é ê è ə
 	return
 
 $~::DoRota(33)
@@ -97,3 +100,26 @@ DllCall("QueryPerformanceFrequency", "Int64 *", f)
 x := (CounterAfter - CounterBefore) * 1000 / (f * rep)
 OutputDebug % "SendText time is " . x
 return
+
+$1::SendChar(0x916, uFlags++)
+$2::SendChars("0x926,0x94D,0x935", uFlags++)
+$3::SendText("द्व", uFlags++)
+$4::InsertChars("42,43", uFlags++, 1)
+$5::InsertText("insवrted", uFlags++, 1) ; DOESN'T WORK
+$6::ReplaceChar(42, 2, 3) ; If the context is "abXXde", then ReplaceChar(42, 2, 3) will make it "ab*de".
+$7::InsertChar(42, uFlags++)
+$8::DeleteChar(2, 3)  ; DeleteChar(2, 3) when context is "abXXcd" will delete the 2 X'es that end 3 characters back.
+
+$9::
+v := ctx()+0
+t := "मेरो ctx = " . v
+v := flags() + 0
+t2 := "flags: " . v
+TrayTipQ(t, t2, 2000)
+return
+
+$0::ToolTipU("tद्व tip text", 2000)
+$q::Back(2)
+$w::PreviewChar(0x915, 2000)
+$e::DoRota(1)
+$r::DoRota(2)
