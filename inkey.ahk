@@ -9,7 +9,7 @@ Execution_Level=2
 Set_Version_Info=1
 Company_Name=InKeySoftware
 File_Description=InKey Keyboard Manager
-File_Version=0.105.0.0
+File_Version=0.3.0.1
 Inc_File_Version=0
 Internal_Name=inkey
 Legal_Copyright=(c) 2008-2012 InKeySoftware
@@ -379,8 +379,8 @@ Icon_1=%In_Dir%\inkey.ico
 	IniRead PreviewAtCursor, InKey.ini, InKey, PreviewAtCursor, 1
 	IniRead rotaPeriod, InKey.ini, InKey, SpeedRotaPeriod, 1000
 
-	if (numKeyboards <> 0)
-		Sleep, 2000
+	;~ if (numKeyboards <> 0)
+		;~ Sleep, 2000
 	gui hide
 
 ;	ChangeLanguage(KbdHKL0) ; Just to be sure
