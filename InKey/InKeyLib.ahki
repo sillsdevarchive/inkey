@@ -1,0 +1,693 @@
+; ***** InKeyLib.ahki  *****
+; Provides the programming interface to the InKey System
+
+#NoTrayIcon 		; Comment this line out during keyboard development to see when keyboards are loaded.
+#SingleInstance force	; InKey keyboard scripts must be single-instance.
+#LTrim			; This command causes leading whitespace in continuation sections (e.g. multi-line rota strings) to be trimmed.
+				; If you prefer otherwise, use #LTrim Off
+
+K_InKeyLibVersion = 0.300	; At the top of your script, the very first line of code
+	; should set K_MinimumInKeyLibVersion to this number.
+	; This will ensure that if a user has an older version of InKeyLib.ahki that
+	; does not support the functionality that your script requires, he will be
+	; required to update his InKeyLib.ahki file to at least this version.
+	; If your script does not need the functionality that newer versions of
+	; InKeyLib.ahki provide, you can use an older version of InKeyLib.ahki as you
+	; develop your script, so that users who do not have the latest version can still
+	; use your script. Older versions (going back to version 0.089) can be found
+	; at www.inkeysoftware.com
+
+	; 0.100 Adds support for AutoHotKey_L, which includes better Unicode support.
+	; 0.101 Adds support for compiling InKey with AutoHotKey_L, which includes better Unicode support.
+	; 0.102 Improves support for CAPSLOCK functionality in default handlers. Adds UseUpperCase() function.
+	; 0.300 SendText() and InsertText() functions
+
+K_ProtocolNum = 3	; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number is incremented in both.
+			; This ensures that communication conventions between InKey and a keyboard will match.
+
+goto K_DO_INITIALIZE
+
+;=========================================
+; These are the functions that may be called by a keyboard script:
+
+; Retrieves the value of a named parameter (as parsed from the K_Params global variable).
+; This assumes that K_Params string is comprised of one or more paramName=paramValue elements,
+; and that the values are single words not containing whitespace characters.
+; If you use parameters differently, parse K_Params directly as appropriate.
+GetParam(paramName, defaultVal = 0) {
+	global K_Params
+	if RegExMatch(K_Params, "i)(?<=\b" . paramName . "=)\S+", v)
+		return v
+	return defaultVal
+}
+
+ctx(pos = 1)
+; Get the value of a character at a specified position back in the context.
+; e.g.  ctx(2) returns the value of the 2nd-most-recent character of the context.
+{
+	x := SendToInkey(0x8011, pos)
+	if (x = 0)
+		return ""
+	return x
+}
+
+flags(pos = 1)
+; Get the flags at a specified position back in the context.
+; e.g.  flags(2) returns the flags for the the 2nd-most-recent character of the context.
+{
+	x := SendToInkey(0x8012, pos)
+	if x = 0
+		return ""
+	return x
+}
+
+SendChar(cp, uFlags=0) {
+; Send a character of the given codepoint (up to 0xFFFF), optionally remembering a 32-bit flags value associated with it.
+; While this is theoretically more efficient than using SendText, the savings only amounts to about 0.2 milliseconds,
+; so use whichever makes the keyboard easier to manage.
+	ok := SendToInKey(0x8010, cp, uFlags)
+	if (ok)
+		return
+	MsgBox Communication with InKey has been lost.`nPlease restart it.
+	ExitApp
+}
+
+SendChars(ChList, uFlags=0) {
+; Deprecated.  Primarily for backwards compatibility.  Use SendText() instead.
+;
+; Send a comma-delimited set of 16-bit codepoints, optionally remembering on each the same 32-bit flag value.
+; Less efficient than SendChar or SendText.
+; e.g.   SendChars("0x926,0x94D,0x935", 1)
+	VarSetCapacity(v, 256, 0)
+		; struct:  	UInt uFlags
+		; 		UShort numChars
+		; 		UShort[]  charArray
+	NumPut(uFlags, v, 0, "UInt")  ; 32-bit
+	numCh := 0
+	Loop parse, ChList, CSV
+		NumPut(A_LoopField, v, (2 * numCh++) + 6, "UShort")
+	NumPut(numCh, v, 4, "UShort")
+	return SendData(0x900A, v, 0, numCh*2 + 6)
+}
+
+SendText(ByRef CharString, uFlags=0) {
+; Send a text string, optionally remembering on each character the same 32-bit flag value.
+; e.g. SendText("द्व", 1)
+	return SendData(0x901A, CharString, uFlags)
+}
+
+UndoLast() {
+; Call this when BackSpace is pressed.
+	return SendToInKey(0x8015)
+}
+
+DoSpace() {
+; Call this when the spacebar is pressed.
+	SendToInKey(0x8018)
+}
+
+DoTab() {
+; Call this when the Tab key is pressed.
+	SendToInKey(0x8017)
+}
+
+DoEnter() {
+; Call this when the Enter key is pressed.
+	SendToInKey(0x8016)
+}
+
+Back(ct=1) {
+; Back up a specified number of characters
+	return SendToInKey(0x8013, ct)
+}
+
+DeleteChar(numCharsToDel=1, endingPos=1) {
+; DeleteChar(1,1) is virtually equivalent to a backspace.
+; DeleteChar(2, 3) when context is "abXXcd" will delete the 2 X'es that end 3 characters back.
+	return SendToInKey(0x8014, numCharsToDel, endingPos)
+}
+
+ReplaceChar(cp, numCharsToRep=1, endingPos=1, uFlags=0) {
+; Replace one or more characters with the character of the specified codepoint (up to 0xFFFF)
+; The characters to replace are identified by their count and their ending position.
+; e.g. If the context is "abXXde", then ReplaceChar(42, 2, 3) will make it "ab*de".
+	s := cp . "," . numCharsToRep . "," . endingPos . "," . uFlags
+	return SendData(0x9002, s)
+}
+
+
+ReplaceText(newText, numCharsToRep=1, endingPos=1, uFlags=0) {
+;  TODO:  Implement on InKey engine side.
+; Replace one or more characters with specified text.
+; The characters to replace are identified by their count and their ending position.
+; e.g. If the context is "abXXde", then ReplaceText("LM", 2, 3) will make it "abLMde".
+	;~ s := u . "," . numCharsToRep . "," . endingPos . "," . uFlags
+	;~ return SendData(0x9012, s)
+	MsgBox Sorry.  ReplaceText() function is not yet implemented.
+	return
+}
+
+
+InsertChar(u, uFlags=0) {
+; Insert a character (whose code is u) immediately prior to the most recent character.
+		; TO DO: Implement an optional parameter pos=1 so that the function will
+		; insert a character (whose code is u) at pos number of characters back in the context.
+		; e.g. InsertChar(42, uFlags, 1) would insert character 42 immediately prior to the most recent character.
+	s := u . "," . uFlags
+	return SendData(0x9003, s)
+}
+
+InsertChars(ChList, uFlags=0, pos=1) {
+; Consider using InsertText() instead.
+; Insert characters (whose codes are specified in a tab-delimited string ChList) at pos number of characters back in the context.
+	; e.g. InsertChars("42,43", uFlags, 1) would insert characters 42 and 43 immediately prior to the most recent character.
+	VarSetCapacity(v, 256, 0)
+		; struct:  	UInt uFlags
+		;		UShort pos
+		; 		UShort numChars
+		; 		UShort[]  charArray
+	NumPut(uFlags, v, 0, "UInt")  ; "UInt" - 32 bits
+	NumPut(pos, v, 4, "UShort")  ; "UShort" - 16 bits
+	numCh := 0
+	Loop parse, ChList, CSV
+		NumPut(A_LoopField, v, (2 * numCh++) + 8, "UShort")
+	NumPut(numCh, v, 6, "UShort")
+	return SendData(0x900B, v, 0, numCh*2 + 8)
+}
+
+InsertText(ByRef CharString, uFlags=0, pos=1) {
+; Insert a text string at pos number of characters back in the context.
+	; e.g. InsertChars("Ba", uFlags, 1) would insert "Ba" immediately prior to the most recent character.
+; Optionally remembers on each character the same 32-bit flag value.
+	len := StrLen(CharString)
+	size := len*2+10
+	VarSetCapacity(v, size, 0)
+		; struct:  	UInt uFlags
+		;		UShort pos
+		; 		UShort numChars
+		; 		UShort[]  charArray
+	NumPut(uFlags, v, 0, "UInt")  ; "UInt" - 32 bits
+	NumPut(pos, v, 4, "UShort")  ; "UShort" - 16 bits
+	NumPut(len, v, 6, "UShort")
+	StrPut(CharString, &v+8, size, "UTF-16")
+	return SendData(0x900B, v, pos, size)
+}
+
+TrayTipQ(txt, title="", ms=2000) {
+; Show a tip at the tray icon
+	s := txt . "|" . title . "|" . ms
+	SendData(0x9001, s)
+	return
+}
+
+ToolTipU(txt, ms=0) {
+; Show text in the preview tip window
+; If time is not specified, it will use InKey's SpeedRotaPeriod setting.
+	s := txt . "|" . ms
+	SendData(0x9007, s)
+	return
+}
+
+PreviewChar(cp, ms=0) {
+; Show a character specified by the given codepoint (up to U+FFFF) in the preview tip window.
+; If time is not specified, it will use InKey's SpeedRotaPeriod setting.
+	s := cp . "|" . ms
+	SendData(0x9008, s)
+	return
+}
+
+RegisterRota(id, list, def=0, uFlags=0, back=0, style=0) {
+; Register a rotation sequence.
+; The parameters are:
+;	id		- A positive decimal number that uniquely identifies this rotation sequence within the script.
+; 			  Calling RegisterRota() again with the same ID will replace the previous version.
+; 	list		- Unicode string containing one or more sets of strings/characters to cycle through for replacement.
+;			  (Be sure to save your script as a UTF-8 file!)
+;			  Each set will be cycled through independently of the other sets.
+;			  > The sets are separated from each other by newline characters (i.e. a character 10).
+;			  > Within each set, items are separated by a space.
+;			  > If the last item in a set is separated by a tab instead of a space, that set will not loop back.
+; 	def		- Unicode value of the character to send if no match.  If zero, no character will be sent.
+;	uFlags		- Flag value to set on any character that is sent via this rota (including the default character).
+;			  See also comments on style 8 for Expiring rotas.
+;	back		- Unicode value of the character to send if BkSp is pressed next after this rota is done.  0 if none.
+;			  (Note: That functionality is not yet implemented, but provide a value anyway.)
+; 	style		- Styles (if not incompatible) can be combined by adding.  Styles implemented so far:
+;			1	Single-Line.  A tab in the rota string marks the start of a new set in place of newline (chr(10)).
+;			2	Non-Looping.  Rota will not loop back to the beginning of any set.
+;				Use this only for single-line rotas, where non-looping cannot be indicated with tabs.
+;			4	Non-Looping first set.  Indicates that just the first set in a single-line rota
+;				should be interpretted as non-looping.  NOT YET IMPLEMENTED
+;			8	Expiring rota.  Rota string will not be searched for a match if the previous call to do this rota
+;				was more than a user-defined number of milliseconds ago, or if the flags on the last character in
+;				the context differ from this rota's uFlags parameter.
+;				For this style to be useful, either <def> must match a character in the rota, or <def> must be 0
+;				and the keyboard script must follow up with an appropriate SendChar with the same flags as <uFlags>.
+;			16	Preview.  Show a preview of the rota's next character in a tool-tip.
+;   Remarks:
+; 	The rota string is searched from left to right for the first match.  Thus, a string of "cat" would typically need to be to the
+; 	left of "at".  The exception to this is that if the rota has just been performed when it is called again, matching will
+; 	begin at the beginning of the set in which a match was most-recently found.  Thus, multiple sets in a rota list may
+;	contain the same character or string. e.g.
+;	 	rota = blue orange white%A_Tab%apple orange pear
+;		RegisterRota(17, rota, 0, 0, 0, 1)
+;	When DoRota(17) is called, if the last thing typed is "blue", it will be replaced with "orange".  If called again,
+;	that will be replaced with "white", and then back to "blue".  However, if the last thing typed is "apple", that will
+;	be replaced by "orange", which will this time be replaced by "pear", not "white", since we are cycling through the
+;	second set this time.
+;
+	global K_FileID
+	if RegExMatch(id, "\W") {
+		FatalError("Error: Invalid ID " . id . " in call to RegisterRota")
+	}
+	if (RegExMatch(list, "\s\s")) {
+		FatalError("Error: Double whitespace in rota string " . id)
+	}
+	s := K_FileID . "_" . id . "|" . def . "|" . uFlags . "|" . back . "|" . style . "|" . list
+	SendData(0x9004, s)
+}
+
+DoRota(id) {
+; Perform a rotation sequence.
+; Parameters:
+;   id		- Identifies a sequence already registered by RegisterRota()
+; Return Value:  Currently, 1 if a match was found.  0 otherwise.  (This may change.)
+	global K_FileID
+	s := K_FileID . "_" . id
+	x := SendData(0x9005, s)
+	outputdebug DoRota(%id%) [%s%] => %x%
+	if (x = 4)
+		MsgBox 16, , DoRota(%id%)`nNo such rota exists
+	if (x < 2 or x > 3)
+		outputdebug ** ERROR: DoRota error code %x%
+
+	return (x = 2 ? 1 : 0)
+}
+
+SendRotaChar(id, u, uFlags) {
+; For a rota that has no default char, instead of following DoRota() with SendChar(), follow it with SendRotaChar().
+; This is particularly important for a rota with the Preview style, so that the preview can be updated.
+	global K_FileID
+	if (not (id and u)) {
+		outputdebug **** ERROR: SendRotaChar(%id%, %u%, %uFlags%)
+		return
+	}
+	s := K_FileID . "_" . id . "|" . u . "|" . uFlags
+	outputdebug Sending SendRotaChar message: %s%
+	x := SendData(0x9009, s)
+}
+
+FatalError(str) {
+; Terminate this keyboard due to an error condition.  (If you merely do ExitApp, InKey may keep trying to run this script.)
+	s = %str%`nTerminating %A_ScriptName%
+	SendData(0x9006, s)
+	ExitApp
+}
+
+UseUpperCase(){
+; Returns True if the upper-case version of a character should be output, based on both Shift and CAPS statuses.
+	return GetKeyState("Shift") ^ GetKeyState("CapsLock", "T")
+}
+
+;=======================================
+; Functions after this point are internal, and should not be directly called by keyboard scripts.
+
+OnMsgSuspend() {
+	Suspend On
+	outputdebug suspending %A_ScriptName%
+	return 3
+}
+
+OnMsgResume() {
+	Suspend Off
+	outputdebug resuming %A_ScriptName%
+	return 3
+}
+
+OnMsgClose() {
+	Suspend Off
+	ExitApp
+}
+
+Receive_WM_COPYDATA(wParam, lParam)
+{	; This function can receive string data from the main InKey app.
+	; Any processing done in response must return quickly. If necessary, set a timer to kick off a longer process.
+	;GLOBAL ; Vital!!  Otherwise,our GoSubs will be in local context
+	SetFormat integer, H
+	K_dwNum := NumGet(lParam + 0)+0
+	K_StringAddress := NumGet(lParam + A_PtrSize+4)  ; address of CopyDataStruct's lpData member.
+
+	; InKey currently passes strings to InkeyLib as UTF-8, but this script is being run with UTF-16 strings.  TODO!!!!!!!!!!!!!!!!!  update!!!
+	; We need to convert the UTF8 string to what is native to this script.
+	K_StringLength := DllCall("lstrlenA", UInt, K_StringAddress)
+	if (K_StringLength > 0) {
+		K_StringData := StrGet(K_StringAddress, K_StringLength, "utf-8")
+	}
+	outputdebug %A_ScriptName% received command %K_dwNum% with string of length: %K_StringLength%
+
+	if (K_StringLength > 0) {
+		outputdebug String received: %K_StringData%
+
+			; Handle string passed as a Reinitialize command (0x9201)
+			if (K_dwNum = 0x9201 and RegExMatch(K_StringData,"^(?P<kbd>.*)\|(?P<par>.*)", K_ov_)) {
+				outputdebug received Reinitialize message: %K_ov_kbd%, %K_ov_par%
+				Reinit(K_ov_kbd, K_ov_par)
+				return 3  ; Sometimes Windows doesn't deliver the message, but returns 1 or 0.  We will never return 1 or 0, so that that can be recognized as unprocessed.
+			}
+	} else {
+		K_StringData := ""
+	}
+
+	Outputdebug *** ERROR: %A_ScriptName% has no handler for received string: %dwNum%, "%K_StringData%"
+	return 2  ; Tell sender that we didn't process this string
+}
+
+Reinit(kbd, par) {
+	global  ; Must be global because we are GoSubbing to code expecting globals!
+	Suspend On
+	K_Params := par
+	K_ID := kbd
+	outputdebug Reinit(%kbd%, %par%) K_LoadedIDs=%K_LoadedIDs%
+	if (not InStr(K_LoadedIDs, ":" . K_ID . ":")) {
+		outputdebug K_LoadedIDs=%K_LoadedIDs% before
+		K_LoadedIDs .= K_ID . ":"
+		outputdebug K_LoadedIDs=%K_LoadedIDs% after
+		Label = OnLoadKeyboard
+		if (IsLabel(Label))
+			GoSub %Label%
+	}
+	Label = OnKeyboardInit
+	if (IsLabel(Label))
+		GoSub %Label%
+	Suspend Off
+}
+
+; Receive_WM_COPYDATA(wParam, lParam)
+; {	; ;This function can receive string data from the main InKey app.
+	; Any processing done in response must return quickly. If necessary, set a timer to kick off a longer process.
+	; global K_Params
+
+   ;x := NumGet(lParam + 0)  ;    We aren't currently using the dwData element, but we could.
+	; outputdebug %A_ScriptName% received WM_COPYDATA
+	; StringAddress := NumGet(lParam + 8)  ; lParam+8 is the address of CopyDataStruct's lpData member.
+	; StringLength := DllCall("lstrlen", UInt, StringAddress)
+   ; if (StringLength <= 0)
+		; StringData := ""
+	; else
+	; {
+		; VarSetCapacity(StringData, StringLength)
+		; DllCall("lstrcpy", "str", StringData, "uint", StringAddress)  ; Copy the string out of the structure.
+		; outputdebug %A_ScriptName% received string message: %StringData%
+
+		; Handle string passed as a reinitialization command
+		; if (SubStr(StringData,1,3) = "R: ") {  ; If we receive a string beginning with "R: ", this is a parameter string for reinitialization
+			; Suspend Off
+			; K_Params := SubStr(StringData, 4)
+			; K_ID := 1
+			; GoSub OnLoadKeyboard
+			; GoSub OnKeyboardInit
+			; return 2  ; Sometimes Windows doesn't deliver the message, but returns 1.  We will never return 1, so that that can be recognized as unprocessed.
+		; }
+	; }
+	; Outputdebug No handler for received string: >>%StringData%<<
+	; return false  ; Tell sender that we didn't process this string
+; }
+
+/* Apparently unused
+StrPutVar(string, ByRef var, encoding)
+{
+	; Ensure capacity.
+	VarSetCapacity( var, StrPut(string, encoding)
+		; StrPut returns char count, but VarSetCapacity needs bytes.
+		* ((encoding="utf-16"||encoding="cp1200") ? 2 : 1) )
+	; Copy or convert the string.
+	return StrPut(string, &var, encoding)
+}
+*/
+
+
+SendData(cmdID, ByRef Data, wParam=0, DataSize=-1)  ; ByRef saves a little memory in this case.
+; This function sends the specified number and string (or data block) to the InKey window and returns the reply.
+; The reply is 1 if the target window processed the message, or 0 if it ignored it.
+; Parameters:
+;    cmdID:     Identifies request to make
+;    Data:      String or block of data to pass
+;    wParam:    Optional additional numeric parameter. Size is A_PtrSize, but best not to use values above 32 bits.
+;    DataSize:  Omit for string data.  Otherwise, size in bytes of data block.
+{
+	global K_InkeyHwnd
+	; struct COPYDATASTRUCT    - size: A_PtrSize*2+4
+	;             UPtr   dwData  (4 or 8 bytes)  Offset: 0.           Value to be passed.
+	;             UInt   cbData  (4 bytes)       Offset: A_PtrSize.   The size, in bytes, of the data pointed to by the lpData member.
+	;             UPtr   lpData  (4 or 8 bytes)  Offset: A_PtrSize+4. Ptr to data to be passed.
+	VarSetCapacity(CopyDataStruct, A_PtrSize*2+4, 0)  ; Set up the structure's memory area.
+	NumPut(cmdID, CopyDataStruct, 0, "UPtr")  ;
+	if (DataSize = -1) {
+		; First set the structure's cbData member to the size of the string, including its zero terminator:
+		DataSize := (StrLen(Data) + 1) * 2
+	}
+	NumPut(DataSize, CopyDataStruct, A_PtrSize, "UInt")
+	NumPut(&Data, CopyDataStruct, A_PtrSize+4, "UPtr")  ; Set lpData to point to the string itself.
+	;~ result := SendMessage, 0x4a, dwNum, &CopyDataStruct,, ahk_id %K_InkeyHwnd%  ; 0x4a is WM_COPYDATA. Must use Send not Post.
+	;~ if (result = FAIL) {
+		;~ SoundPlay *16
+		;~ outputdebug ************ CRITICAL ERROR: Send_WM_COPYDATA(%dwNum%, %StringToSend%) failed!
+	;~ }
+
+	r := DllCall("SendMessage", UPtr, GetInkeyHwnd(), UInt, 0x4A, UPtr, wParam, UPtr, &CopyDataStruct)
+	if (ErrorLevel) {
+		SoundPlay *16
+		outputdebug ************ CRITICAL ERROR: SendData(%cmdID%, %StringToSend%) failed!
+	}
+	;~ VarSetCapacity(CopyDataStruct, 12, 0)  ; Set up the structure's memory area.
+	;~ NumPut(dwNum, CopyDataStruct, 0)  ;
+	;~ tmpStr := ""
+	;~ dwSize:=(StrLen(StringToSend) + 1) * 2
+	;~ NumPut((StrLen(StringToSend) + 1) * 2, CopyDataStruct, 4)  ; Set the structure's cbData member to the size of the string, including its zero terminator: OS requires that this be done.
+	;~ NumPut(&StringToSend, CopyDataStruct, 8)  ; Set lpData to point to the string itself.
+	;~ ;outputdebug Sending: dwNum=%dwNum%, dwSize=%dwSize%
+	;~ r := DllCall("SendMessage", UInt, GetInkeyHwnd(), UInt, 0x4A, UInt, 0, UInt, &CopyDataStruct)
+	;~ if (ErrorLevel) {
+		;~ SoundPlay *16
+		;~ outputdebug ************ CRITICAL ERROR: Send_WM_COPYDATA(%dwNum%, %StringToSend%) failed!
+	;~ }
+	return r
+}
+
+/*
+SendData(dwNum, dataSize, ByRef lpData )  ; ByRef saves a little memory in this case.
+; This function sends the specified number and data structure to the InKey window and returns the reply.
+; The reply is 1 if the target window processed the message, or 0 if it ignored it.
+{
+	VarSetCapacity(CopyDataStruct, A_PtrSize*3, 0)  ; Set up the structure's memory area.
+	NumPut(dwNum, CopyDataStruct, 0)  ;
+	NumPut(dataSize, CopyDataStruct, A_PtrSize)  ;     ; Set the structure's cbData member
+	NumPut(&lpData, CopyDataStruct, A_PtrSize*2)  ; Set lpData member
+	r := DllCall("SendMessage", UInt, GetInkeyHwnd(), UInt, 0x4A, UInt, 0, UInt, &CopyDataStruct)
+	if (ErrorLevel) {
+		SoundPlay *16
+		outputdebug ************ CRITICAL ERROR: Send_WM_COPYDATA(%dwNum%, %StringToSend%) failed!
+	}
+	return r
+}
+*/
+
+params() {
+	global
+	local z=
+	local x=
+	Loop %0% {
+		local t := %A_Index%
+		OutputDebug params[%A_Index%] = %t%
+		if (A_Index = 1)
+			K_InkeyProtocolNum := %A_Index%
+		else if (A_Index = 2)
+			K_InkeyHwnd := %A_Index%
+		else if (A_Index = 3)
+			K_FileID := %A_Index%
+		else if (A_Index = 4)
+			K_ID := %A_Index%
+		else {
+			x:=%A_Index%
+			z = %z% %x%
+		}
+	}
+	return %z%
+}
+
+
+
+SendToInKey(msg, wParam=0, lParam=0)
+{
+	r := DllCall("SendMessage", UPtr, GetInkeyHwnd(), UInt, msg, UPtr, wParam, UPtr, lParam)
+	;outputdebug SendToInKey => %r%, e=%ErrorLevel%
+	return r
+}
+
+GetInkeyHwnd() {
+	global
+	return K_InkeyHwnd
+	; static inkeyHwnd = 0
+	; TargetScriptTitle := "InKey.exe"
+	; if (inkeyHwnd <> 0)
+		; return inkeyHwnd
+
+	; SetTitleMatchMode RegEx
+	; Prev_DetectHiddenWindows := A_DetectHiddenWindows
+	; Prev_TitleMatchMode := A_TitleMatchMode
+	; SetTitleMatchMode Regex
+	; DetectHiddenWindows On
+	; inkeyHwnd := WinExist("i)" . TargetScriptTitle . " ahk_class AutoHotkey")
+	; DetectHiddenWindows %Prev_DetectHiddenWindows%  ; Restore original setting for the caller.
+	; SetTitleMatchMode %Prev_TitleMatchMode%         ; Same.
+	; if (not inkeyHwnd) {
+		; Outputdebug "***ERROR: Could not find hwnd for INKEY.EXE!!
+		; soundplay *16
+	; }
+	; return inkeyHwnd
+}
+
+; OnMsgTest() {
+	; outputdebug %A_ScriptName% Got test message
+	; return 42
+; }
+
+K_DO_INITIALIZE:
+K_Params := params()
+SetWorkingDir %A_ScriptDir%
+if (not K_MinimumInKeyLibVersion)
+	FatalError("This keyboard script must specify a value for K_MinimumInKeyLibVersion.")
+if (K_InKeyLibVersion < K_MinimumInKeyLibVersion)
+	FatalError("This keyboard script requires at least version " . K_MinimumInKeyLibVersion . " of InKeyLib.ahki.")
+if (K_InkeyProtocolNum <> K_ProtocolNum)
+	FatalError("InKey is attempting to communicate using InKey protocol " . chr(10) . "version " . K_InkeyProtocolNum . ", but InKeyLib.ahki is using protocol version " . K_ProtocolNum . "." . chr(10) . chr(10) . "You must use matching versions." . chr(10))
+OnMessage(0x8001, "OnMsgSuspend")
+OnMessage(0x8002, "OnMsgResume")
+OnMessage(0x8003, "OnMsgClose")
+;OnMessage(0x8100, "OnMsgTest")
+OnMessage(0x4a, "Receive_WM_COPYDATA")  ; 0x4a is WM_COPYDATA.  It won't work to use a different message number.
+Label = OnLoadScript
+if (IsLabel(Label))
+	GoSub %Label%
+K_LoadedIDs := ":" . K_ID . ":"
+outputdebug K_LoadedIDs=%K_LoadedIDs%
+Label = OnLoadKeyboard
+if (IsLabel(Label))
+	GoSub %Label%
+Label = OnKeyboardInit
+if (IsLabel(Label))
+	GoSub %Label%
+if (K_UseContext) {
+	AddDefaultHotkey("$Backspace", "K_DO_BKSP")
+	AddDefaultHotkey("$Space", "K_DO_SPACE")
+	AddDefaultHotkey("$Tab", "K_DO_TAB")
+	AddDefaultHotkey("$Enter", "K_DO_ENTER")
+	keys = abcdefghijklmnopqrstuvwxyz
+	; Add default hotkey for shifted letters (bug fix in v 0.093)
+	Loop parse, keys
+	{	Hotkey $+%A_LoopField%, ON, UseErrorLevel
+		if (ErrorLevel) {
+			if (K_UseContext = 2) {
+				Hotkey $+%A_LoopField%, K_DO_CAPS_SHIFTED
+			} else {
+				Hotkey $+%A_LoopField%, K_DO_SHIFTED
+			}
+			;~ outputdebug DefaultHotkey: $+%A_LoopField%
+		} else {
+			;~ outputdebug Already defined: $+%A_LoopField%
+		}
+	}
+	; Add default hotkey for unshifted letters
+	Loop parse, keys
+	{	Hotkey $%A_LoopField%, ON, UseErrorLevel
+		if (ErrorLevel) {
+			if (K_UseContext = 2) {
+				Hotkey $%A_LoopField%, K_DO_CAPS_UNSHIFTED
+			} else {
+				Hotkey $%A_LoopField%, K_DO_UNSHIFTED
+			}
+			;~ outputdebug DefaultHotkey: $%A_LoopField%
+		} else {
+			;~ outputdebug Already defined: $%A_LoopField%
+		}
+	}
+	; Add default hotkey for all other characters
+	keys := "0123456789~!@#$^&*()-_=+[]{}\""|',./<>?%;"
+	Loop parse, keys
+	{	Hotkey $%A_LoopField%, ON, UseErrorLevel
+		if (ErrorLevel) {
+			Hotkey $%A_LoopField%, K_DO_UNSHIFTED
+			;~ outputdebug DefaultHotkey: $%A_LoopField%
+		} else {
+			;~ outputdebug Already defined: $%A_LoopField%
+		}
+	}
+	; colon is a special case
+	Hotkey $:, ON, UseErrorLevel
+	if (ErrorLevel and not IsLabel("$+;")) {
+		Hotkey $:, K_DO_UNSHIFTED
+		;~ outputdebug DefaultHotkey: $:
+	} else {
+		;~ outputdebug Already defined: $:
+	}
+	; so is backtick  (added in v 0.093)
+	Hotkey $``, ON, UseErrorLevel
+	if (ErrorLevel and not IsLabel("$``")) {
+		Hotkey $``, K_DO_UNSHIFTED
+		;~ outputdebug DefaultHotkey: $``
+	} else {
+		;~ outputdebug Already defined: $``
+	}
+
+}
+x := SendToInKey(0x8020, K_ProtocolNum, K_ID)
+outputdebug %A_ScriptName% initialization complete: %x%
+return
+
+
+AddDefaultHotkey(hk, Label) {
+	if (not IsLabel(hk)) {
+		;~ outputdebug DefaultHotkey: %hk%
+		hotkey %hk%, %Label%
+	}
+}
+
+K_DO_BKSP:
+UndoLast()
+return
+
+K_DO_SPACE:
+DoSpace()
+return
+
+K_DO_TAB:
+DoTab()
+return
+
+K_DO_ENTER:
+DoEnter()
+return
+
+K_DO_SHIFTED:    ; A_ThisHotKey contains "+"
+SendChar(Asc(SubStr(A_ThisHotKey,0)) - 32) ; send uppercase of final char of keystring (e.g. "$+m")
+return
+
+K_DO_UNSHIFTED:  ; A_ThisHotKey does not contain "+"
+SendChar(Asc(SubStr(A_ThisHotKey,0))) ; char is final char of keystring (e.g. "$+m")
+return
+
+K_DO_CAPS_UNSHIFTED:  ; A_ThisHotKey does not contain "+".  We must be sensitive to CAPS state.
+K_Val := Asc(SubStr(A_ThisHotKey,0))
+if (GetKeyState("CapsLock", "T")) {
+	K_Val -= 32
+}
+SendChar(K_Val)
+return
+
+K_DO_CAPS_SHIFTED:  ; A_ThisHotKey contains "+".  We must be sensitive to CAPS state.
+K_Val := Asc(SubStr(A_ThisHotKey,0))
+if (not GetKeyState("CapsLock", "T")) {
+	K_Val -= 32
+}
+SendChar(K_Val)
+return

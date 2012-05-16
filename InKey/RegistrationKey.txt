@@ -1,0 +1,6 @@
+[BOM]
+
+[InKey]
+LicenseStmt=Licensed under GPL.  Please check for updates at www.InKeySoftware.com
+Expiry=20251231
+Key=5983D0C1A5C13B02F781994FEEA8DB83
