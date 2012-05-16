@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="yes"?>
+<PMRaidDataSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.sil.org/computing/schemas/PMRaidData.xsd">
+  <BackupSet>
+	<BackupRoot>C:\Documents and Settings\DRM\My Documents\Unicode\AHK\InKeyDev\Package</BackupRoot>
+	<ZipAndMail ZipFilename="" AddDateToZipFile="false" ZipAllFiles="false" Password="" />
+	<ItemsToBackup>
+	  <ItemToBackup recurse="true" deleteObsolete="true">
+		<PathToSave>C:\Documents and Settings\DRM\My Documents\Unicode\AHK\InKeyDev\InKey</PathToSave>
+		<ExcludeFolders>
+		  <ExcludeFolder>CVS</ExcludeFolder>
+		</ExcludeFolders>
+	  </ItemToBackup>
+	</ItemsToBackup>
+  </BackupSet>
+</PMRaidDataSet>
