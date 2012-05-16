@@ -1,0 +1,5 @@
+The Help file was created using HelpMaker 7.4.4
+available from http://www.vizacc.com/Downloads.aspx
+
+The Installers were created using Inno Setup 5.3.10 Unicode
+available from http://www.jrsoftware.org/isdl.php
