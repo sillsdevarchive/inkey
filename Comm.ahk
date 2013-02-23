@@ -431,6 +431,7 @@ Receive_WM_COPYDATA(wParam, lParam)
 			global KbdHKL0
 			ChangeLanguage(KbdHKL0)
 			RequestKbd(0)
+			interpolate(StringData)
 			MsgBox %StringData%
 			return 3
 		}
@@ -438,6 +439,7 @@ Receive_WM_COPYDATA(wParam, lParam)
 		; Handle string passed as a ToolTipU command (0x9007)
 		if (dwNum = 0x9007 and RegExMatch(StringData,"^(?P<text>.*)\|(?P<ms>.+)", ov_)) {
 			outputdebug received tip message: %ov_text%, %ov_ms%
+			interpolate(ov_text)
 			UTip(ov_text, ov_ms ? ov_ms : rotaPeriod)
 			return 3
 		}
@@ -462,13 +464,14 @@ Receive_WM_COPYDATA(wParam, lParam)
 		; Handle string passed as a SendChars command (0x900A)
 		if (dwNum = 0x900A) {
 			outputdebug received SendChars message
-			TrayTip,,This keyboard uses the SendChars() function. It should be updated to use Send() instead.
+			;~ TrayTip,,This keyboard uses the SendChars() function. It should be updated to use Send() instead.
 			return SendChars(StringData)
 		}
 
 		; Handle string passed as a Send command (0x901A)
 		if (dwNum = 0x901A) {
 			outputdebug %A_LineNumber%: Send("%StringData%")
+			interpolate(StringData)
 			return CommitKeystroke("", StringData, wParam)
 		}
 
@@ -814,6 +817,8 @@ DoRota(id) {
 
 InContextSend(ByRef FindRegEx, ByRef SendTxt, ByRef ElseTxt="", uSendFlags=0, uElseFlags=0) {
 	global
+	interpolate(SendTxt)
+	interpolate(ElseTxt)
 	if (RegExMatch(StrGet(&ctxStack, stackIdx), FindRegEx . "$")) {
 		CommitKeystroke("", SendTxt, uSendFlags)
 		return 2 ; match found
@@ -832,12 +837,17 @@ InContextSend(ByRef FindRegEx, ByRef SendTxt, ByRef ElseTxt="", uSendFlags=0, uE
 InContextReplace(ByRef AfterRegEx, ByRef FindRegEx, ByRef ReplaceTxt, ByRef ElseTxt="", uSendFlags=0, uElseFlags=0) {
 	global
 	local context, c2, match, foundPos, repCt, delTxt, addTxt
+	interpolate(ReplaceTxt)
+	interpolate(ElseTxt)
 	context := StrGet(&ctxStack, stackIdx)
 	;~ foundPos := RegExMatch(context, "(" . AfterRegEx . ")" . FindRegEx . "$", match) + StrLen(match1)
 	foundPos := RegExMatch(context, "O)(" . AfterRegEx . ")" . FindRegEx . "$", match)
 	LBLen := match.Len(1)
 	if (ErrorLevel) {
 		TrayTip, InLBContextReplace: "%FindRegEx%" "%ReplaceTxt%", RegExMatch ERROR: %ErrorLevel%
+		OutputDebug InLBContextReplace: "%FindRegEx%" "%ReplaceTxt%", RegExMatch ERROR: %ErrorLevel%
+		dumpstr(FindRegEx, "FindRegEx:")
+		dumpstr(ReplaceTxt, "ReplaceTxt:")
 		return 4 ; regex error
 	}
 	OutputDebug %A_Linenumber%: foundPos = %foundPos%, match = %match%, LBLen = %LBLen%
@@ -870,6 +880,8 @@ InContextReplace(ByRef AfterRegEx, ByRef FindRegEx, ByRef ReplaceTxt, ByRef Else
 InContextReplaceUsingMap(ByRef AfterRegEx, ByRef FindRegEx, ByRef ReplaceTxt, ByRef Map, ByRef ElseTxt="", uSendFlags=0, uElseFlags=0) {
 	global
 	local context, c2, match, foundPos, repCt, delTxt, addTxt, alts, altFind
+	interpolate(ReplaceTxt)
+	interpolate(ElseTxt)
 	alts := "(?P<MAP>"
 	;~ mapTo := Object()		; Sadly, associative array indexes are compared case-insensitively.  We can use associative arrays once AHK fixes this.
 	;~ if (InStr(Map, "⇛")) 		; ToDo:  If any multi-tap arrows were used, treat them as such.

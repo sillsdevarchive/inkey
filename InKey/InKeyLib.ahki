@@ -400,10 +400,13 @@ ReplaceChar(cp, numCharsToRep=1, endingPos=1, uFlags=0) {
 	;~ s := cp . "," . numCharsToRep . "," . endingPos . "," . uFlags
 	;~ SendData(0x9002, s)
 	;~ return 1
+	setformat integerfast, H
+	cp += 0
+	cpstr := substr(cp, 3)
 	setformat integerfast, D
-	n := numCharsToDel + 0
+	n := numCharsToRep + 0
 	e := endingPos - 1
-	return InCase(Replace(".{" n "}(.{" e "}") with("\" char(cp) "$1", uFlags))
+	return InCase(Replace(".{" n "}(.){" e "}") with("\x{" cpstr "}$1", uFlags))
 }
 
 
