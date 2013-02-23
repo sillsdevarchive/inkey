@@ -12,6 +12,7 @@
 		ver 0.65	2011-02-10	Add offsets 112-113 to the range of characters recognized as consonants in Bengali script.
 		ver 0.66	2011-07-1	Adjustments for Gurmukhi
 		ver 0.67	2011-08-13	Swap MAL chillu from NONJOIN to JOIN.
+		ver 0.68	2012-11-30  More adjustments for Gurmukhi
 */
 
 ;________________________________________________________________________________________________________________
@@ -108,6 +109,9 @@ OnLoadScript:	; InKeyLib will call this subroutine just once, when the script is
 	RegisterRota(103, "( [ { ⌊	((", 0x28)
 	RegisterRota(104, ") ] } ⌋	))", 0x29)
 
+	; bindi/tippi for gurmukhi.  Optional: If certain characters always take tippi, never bindi, add those to the rota.
+	RegisterRota(105, "ਂ ੰ", 0x0A02)
+
 return
 
 ;--------------------------------
@@ -199,15 +203,11 @@ CANDRABINDU:					; 	Key: Shift+S
 SendChar(sbase + 1)			;	CANDRABINDU
 return
 
-TIPPI:						; 	Key: }
-if (script = 3)
-	SendChar(sbase + 112)
-else
-	SendChar(0x7D)		;	RIGHT CURLY BRACKET
-return
-
 ANUSVARA:					; 	Key: Shift+M
-SendChar(sbase + 2)		;	ANUSVARA
+if (script = 3)
+	DoRota(105)
+else
+	SendChar(sbase + 2)		;	ANUSVARA
 return
 
 VISARGA:					;	Key: Shift+H

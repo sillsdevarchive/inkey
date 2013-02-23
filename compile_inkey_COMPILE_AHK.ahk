@@ -1,6 +1,6 @@
 ;SCbin = c:\progra~1\AutoHotkey\Compiler\AutoHotkeySC.bin
 ;SCtmp = c:\progra~1\AutoHotkey\Compiler\AutoHotkeySC.tmp
-a2e = "C:\Program Files (x86)\AutoHotkey\Compiler\Compile_AHK.exe"
+a2e = "C:\Program Files (x86)\AutoHotkeyL\Compiler\Compile_AHK.exe"
 ;a2e = c:\progra~1\AutoHotkey\Compiler\AHK2EXE.exe
 base =
 

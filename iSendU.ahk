@@ -17,7 +17,6 @@ http://www.autohotkey.com
 
 Version: 0.0.11 2008-03-03
 License: GNU General Public License
-Author: FARKAS M�t� <http://fmate14.try.hu/> (My given name is M�t�)
 
 Tested Platform:  Windows XP/Vista
 Tested AutoHotkey Version: 1.0.47.04
@@ -53,6 +52,7 @@ Please correct my english misspellings...
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; PUBLIC FUNCTIONS
+
 
 SendCh( Ch ) ; Character number code, for example 97 (or 0x61) for 'a'
 {
@@ -92,7 +92,8 @@ SendCh( Ch ) ; Character number code, for example 97 (or 0x61) for 'a'
 		Send %Char%
 	} else {
 		; Unicode characters
-		SendU( Ch )
+		_SendU_Clipboard(Ch)
+		;~ SendU( Ch )
 	}
 }
 
@@ -200,6 +201,7 @@ SendU_Try_Dynamic_Mode()
 		mode = c
 	else
 		mode = i
+mode = c
 
 	if (mode == "i")
 		nummode=1
@@ -216,78 +218,78 @@ SendU_Try_Dynamic_Mode()
 	_SendU_Dynamic_Mode( "", 1 ) ; Clears the PrevProcess variable
 
 	; update UserAppList.txt
-;	IfNotExist, %A_WorkingDir%\UserAppList.txt
-;	{
-;		; create a blank file
-;		FileAppend,, %A_WorkingDir%\UserAppList.txt
-;	}
+	IfNotExist, %A_WorkingDir%\UserAppList.txt
+	{
+		; create a blank file
+		FileAppend,, %A_WorkingDir%\UserAppList.txt
+	}
 
 	; check to see if file is empty
-;	FileRead, Str, %A_WorkingDir%\UserAppList.txt
-;	If (Str == "")
-;	{
+	FileRead, Str, %A_WorkingDir%\UserAppList.txt
+	If (Str == "")
+	{
 		; blank file, so simply output the first entry
-;		newentry := Chr(34) . processName . Chr(34) . "," . nummode
-;		FileAppend, %newentry%, %A_WorkingDir%\UserAppList.txt
-;	}
-;	else
-;	{
+		newentry := Chr(34) . processName . Chr(34) . "," . nummode
+		FileAppend, %newentry%, %A_WorkingDir%\UserAppList.txt
+	}
+	else
+	{
 		; delete old file
-;		FileDelete, %A_WorkingDir%\UserAppList.txt
-;		entryadded := false
-;		firstentry := true
+		FileDelete, %A_WorkingDir%\UserAppList.txt
+		entryadded := false
+		firstentry := true
 
 		; loop through file contents looking to see if entry already exists
-;		Loop, Parse, Str, `n, `r
-;		{
-;			Loop, Parse, A_LoopField, CSV
-;			{
-;				CSV_%A_Index% := A_LoopField
-;			}
-;			If ( CSV_1 == processName )
-;			{
+		Loop, Parse, Str, `n, `r
+		{
+			Loop, Parse, A_LoopField, CSV
+			{
+				CSV_%A_Index% := A_LoopField
+			}
+			If ( CSV_1 == processName )
+			{
 				; write out new mode for existing entry
-;				if (firstentry)
-;				{
-;					updateentry := Chr(34) . processName . Chr(34) . "," . nummode
-;					firstentry := false
-;				}
-;				else
-;				{
-;					updateentry := Chr(10) . Chr(34) . processName . Chr(34) . "," . nummode
-;				}
-;				FileAppend, %updateentry%, %A_WorkingDir%\UserAppList.txt
-;				entryadded := true
-;			}
-;			else
-;			{
+				if (firstentry)
+				{
+					updateentry := Chr(34) . processName . Chr(34) . "," . nummode
+					firstentry := false
+				}
+				else
+				{
+					updateentry := Chr(10) . Chr(34) . processName . Chr(34) . "," . nummode
+				}
+				FileAppend, %updateentry%, %A_WorkingDir%\UserAppList.txt
+				entryadded := true
+			}
+			else
+			{
 				; write out line of file
-;				if (firstentry)
-;				{
-;					oldentry := Chr(34) . CSV_1 . Chr(34) . "," . Chr(34) . CSV_2 . Chr(34)
-;					firstentry := false
-;				}
-;				else
-;				{
-;					oldentry := Chr(10) . Chr(34) . CSV_1 . Chr(34) . "," . Chr(34) . CSV_2 . Chr(34)
-;				}
-;				FileAppend, %oldentry%, %A_WorkingDir%\UserAppList.txt
-;			}
-;		}
-;		If (not entryadded) then
-;		{
-;			if (firstentry)
-;			{
-;				newentry := Chr(34) . processName . Chr(34) . "," . nummode
-;				firstentry := false
-;			}
-;			else
-;			{
-;				newentry := Chr(10) . Chr(34) . processName . Chr(34) . "," . nummode
-;			}
-;			FileAppend, %newentry%, %A_WorkingDir%\UserAppList.txt
-;		}
-;	}
+				if (firstentry)
+				{
+					oldentry := Chr(34) . CSV_1 . Chr(34) . "," . Chr(34) . CSV_2 . Chr(34)
+					firstentry := false
+				}
+				else
+				{
+					oldentry := Chr(10) . Chr(34) . CSV_1 . Chr(34) . "," . Chr(34) . CSV_2 . Chr(34)
+				}
+				FileAppend, %oldentry%, %A_WorkingDir%\UserAppList.txt
+			}
+		}
+		If (not entryadded) then
+		{
+			if (firstentry)
+			{
+				newentry := Chr(34) . processName . Chr(34) . "," . nummode
+				firstentry := false
+			}
+			else
+			{
+				newentry := Chr(10) . Chr(34) . processName . Chr(34) . "," . nummode
+			}
+			FileAppend, %newentry%, %A_WorkingDir%\UserAppList.txt
+		}
+	}
 	return
 }
 
@@ -382,8 +384,21 @@ SendU_Utf_To_CodesPub( utf8, separator = "," ) {
 
 _SendU_Clipboard( UC, isUtfString = 0 )
 {
+OutputDebug _SendU_Clipboard(%UC%)
+Critical
+ClipSaved := ClipboardAll   ; Save the entire clipboard to a variable of your choice.
+
+Clipboard := Chr(UC)
+ClipWait
+Send +{Ins}
+Sleep, 50 ; see http://www.autohotkey.com/forum/viewtopic.php?p=159301#159306
+
+Clipboard := ClipSaved   ; Restore the original clipboard. Note the use of Clipboard (not ClipboardAll).
+ClipSaved =   ; Free the memory in case the clipboard was very large.
+Critical, Off
+return
 	Critical
-	restoreMode := SendU_Clipboard_Restore_Mode()
+	restoreMode := 1  ; SendU_Clipboard_Restore_Mode()
 	if ( isUtfString ) {
 		utf := UC
 	} else {
@@ -509,76 +524,74 @@ _SendU_Dynamic_Mode_Tooltip( processName = -1, mode = -1 )
 
 _SendU_Dynamic_Mode( processName, clearPrevProcess = -1 )
 {
-;	static prevProcess := "fOyj9b4f79YmA7sZRBrnDbp75dGhiauj" ; Nothing
-	static mode := "d"
-;	if ( clearPrevProcess == 1 )
-;		prevProcess := "fOyj9b4f79YmA7sZRBrnDbp75dGhiauj" ; Nothing
-;	if ( processName == prevProcess )
-;		return mode
-;	prevProcess := processName
-;	mode := _SendU_GetMode( processName )
-;	if ( mode == "" )
-;		mode = i
+	static prevProcess := "fOyj9b4f79YmA7sZRBrnDbp75dGhiauj" ; Nothing
+	static mode := ""
+	if ( clearPrevProcess == 1 )
+		prevProcess := "fOyj9b4f79YmA7sZRBrnDbp75dGhiauj" ; Nothing
+	if ( processName == prevProcess )
+		return mode
+	prevProcess := processName
+	mode := _SendU_GetMode( processName )
+	if ( mode == "" )
+		mode = i
 	return mode
 }
 
 ; http://www.autohotkey.com/forum/topic17838.html
 _SendU_SetMode( sKey, sItm )
 {
-;	static pdic := 0
-;	if ( pdic == 0 )
-;		_SendU_Get_Dictionary( pdic )
-;	pKey := SysAllocString(sKey)
-;	VarSetCapacity(var1, 8 * 2, 0)
-;	EncodeInteger(&var1 + 0, 8)
-;	EncodeInteger(&var1 + 8, pKey)
-;	pItm := SysAllocString(sItm)
-;	VarSetCapacity(var2, 8 * 2, 0)
-;	EncodeInteger(&var2 + 0, 8)
-;	EncodeInteger(&var2 + 8, pItm)
-;	DllCall(VTable(pdic, 8), "Uint", pdic, "Uint", &var1, "Uint", &var2)
-;	SysFreeString(pKey)
-;	SysFreeString(pItm)
+	static pdic := 0
+	if ( pdic == 0 )
+		_SendU_Get_Dictionary( pdic )
+	pKey := SysAllocString(sKey)
+	VarSetCapacity(var1, 8 * 2, 0)
+	EncodeInteger(&var1 + 0, 8)
+	EncodeInteger(&var1 + 8, pKey)
+	pItm := SysAllocString(sItm)
+	VarSetCapacity(var2, 8 * 2, 0)
+	EncodeInteger(&var2 + 0, 8)
+	EncodeInteger(&var2 + 8, pItm)
+	DllCall(VTable(pdic, 8), "Uint", pdic, "Uint", &var1, "Uint", &var2)
+	SysFreeString(pKey)
+	SysFreeString(pItm)
 }
 
 ; http://www.autohotkey.com/forum/topic17838.html
 _SendU_GetMode( sKey )
 {
-;	static pdic := 0
-;	if ( pdic == 0 )
-;		_SendU_Get_Dictionary( pdic )
-;	outputdebug pdic: %pdic%
-;	pKey := SysAllocString(sKey)
-;	VarSetCapacity(var1, 8 * 2, 0)
-;	EncodeInteger(&var1 + 0, 8)
-;	EncodeInteger(&var1 + 8, pKey)
-;	DllCall(VTable(pdic, 12), "Uint", pdic, "Uint", &var1, "intP", bExist)
-;	If bExist
-;	{
-;		VarSetCapacity(var2, 8 * 2, 0)
-;		DllCall(VTable(pdic, 9), "Uint", pdic, "Uint", &var1, "Uint", &var2)
-;		pItm := DecodeInteger(&var2 + 8)
-;		Unicode2Ansi(pItm, sItm)
-;		SysFreeString(pItm)
-;	}
-;	SysFreeString(pKey)
-;	outputdebug sKey: %sKey%, bExist: %bExist%, pItm: %pItm%, sItm: %sItm%
-;	Return sItm
+	static pdic := 0
+	if ( pdic == 0 )
+		_SendU_Get_Dictionary( pdic )
+
+	pKey := SysAllocString(sKey)
+	VarSetCapacity(var1, 8 * 2, 0)
+	EncodeInteger(&var1 + 0, 8)
+	EncodeInteger(&var1 + 8, pKey)
+	DllCall(VTable(pdic, 12), "Uint", pdic, "Uint", &var1, "intP", bExist)
+	If bExist
+	{
+		VarSetCapacity(var2, 8 * 2, 0)
+		DllCall(VTable(pdic, 9), "Uint", pdic, "Uint", &var1, "Uint", &var2)
+		pItm := DecodeInteger(&var2 + 8)
+		Unicode2Ansi(pItm, sItm)
+		SysFreeString(pItm)
+	}
+	SysFreeString(pKey)
+	Return sItm
 }
 
 _SendU_Get_Dictionary( ByRef mypdic )
 {
-;	static pdic := 0
-;	if ( pdic == 0 ) {
-;		; http://www.autohotkey.com/forum/topic17838.html
-;		CoInitialize()
-;		CLSID_Dictionary := "{EE09B103-97E0-11CF-978F-00A02463E06F}"
-;		IID_IDictionary := "{42C642C1-97E1-11CF-978F-00A02463E06F}"
-;		pdic := CreateObject(CLSID_Dictionary, IID_IDictionary)
-;		DllCall(VTable(pdic, 18), "Uint", pdic, "int", 1) ; Set text mode, i.e., Case of Key is ignored. Otherwise case-sensitive defaultly.
-;	}
-;	mypdic := pdic
-;	outputdebug Dictionary created: %mypdic%
+	static pdic := 0
+	if ( pdic == 0 ) {
+		; http://www.autohotkey.com/forum/topic17838.html
+		CoInitialize()
+		CLSID_Dictionary := "{EE09B103-97E0-11CF-978F-00A02463E06F}"
+		IID_IDictionary := "{42C642C1-97E1-11CF-978F-00A02463E06F}"
+		pdic := CreateObject(CLSID_Dictionary, IID_IDictionary)
+		DllCall(VTable(pdic, 18), "Uint", pdic, "int", 1) ; Set text mode, i.e., Case of Key is ignored. Otherwise case-sensitive defaultly.
+	}
+	mypdic := pdic
 }
 
 _SendU_Load_Dynamic_Modes()
@@ -588,49 +601,48 @@ _SendU_Load_Dynamic_Modes()
 ; i=static (mode 1)
 ; a=simulates ALT+numpad sequence (mode 2)
 ; c=clipboard (mode 3)
-;	IfExist, %A_WorkingDir%\AppList.txt
-;	{
-;		FileRead, Str, %A_WorkingDir%\AppList.txt
-;		Loop, Parse, Str, `n, `r
-;		{
-;			Loop, Parse, A_LoopField, CSV
-;			{
-;				CSV_%A_Index% := A_LoopField
-;			}
-;			if ( CSV_2 == "2" )
-;			{
-;				_SendU_SetMode( CSV_1, "a" )
-;			}
-;			if ( CSV_2 == "3" )
-;			{
-;				_SendU_SetMode( CSV_1, "c" )
-;			}
-;		}
-;	}
-;	else
-;	{
-;		TempString:=GetLang(112) . "`n" . GetLang(113) . "`n" . GetLang(114) ; Warning! The file AppList.txt is missing.`nSome programs may not receive Unicode characters correctly.`nPlease reinstall InKey.
-;		MsgBox, %TempString%
-;	}
-;	IfExist, %A_WorkingDir%\UserAppList.txt
-;	{
-;		FileRead, Str, %A_WorkingDir%\UserAppList.txt
-;		Loop, Parse, Str, `n, `r
-;		{
-;			Loop, Parse, A_LoopField, CSV
-;			{
-;				CSV_%A_Index% := A_LoopField
-;			}
-;			if ( CSV_2 == "2" )
-;			{
-;				_SendU_SetMode( CSV_1, "a" )
-;			}
-;			if ( CSV_2 == "3" )
-;			{
-;				_SendU_SetMode( CSV_1, "c" )
-;			}
-;		}
-;	}
+	IfExist, %A_WorkingDir%\AppList.txt
+	{
+		FileRead, Str, %A_WorkingDir%\AppList.txt
+		Loop, Parse, Str, `n, `r
+		{
+			Loop, Parse, A_LoopField, CSV
+			{
+				CSV_%A_Index% := A_LoopField
+			}
+			if ( CSV_2 == "2" )
+			{
+				_SendU_SetMode( CSV_1, "a" )
+			}
+			if ( CSV_2 == "3" )
+			{
+				_SendU_SetMode( CSV_1, "c" )
+			}
+		}
+	}
+	else
+	{
+		MsgBox, Warning!  The file AppList.txt is missing.`nSome programs may not receive Unicode characters correctly.`nPlease open the InKey.zip file and extract AppList.txt to the InKey directory.
+	}
+	IfExist, %A_WorkingDir%\UserAppList.txt
+	{
+		FileRead, Str, %A_WorkingDir%\UserAppList.txt
+		Loop, Parse, Str, `n, `r
+		{
+			Loop, Parse, A_LoopField, CSV
+			{
+				CSV_%A_Index% := A_LoopField
+			}
+			if ( CSV_2 == "2" )
+			{
+				_SendU_SetMode( CSV_1, "a" )
+			}
+			if ( CSV_2 == "3" )
+			{
+				_SendU_SetMode( CSV_1, "c" )
+			}
+		}
+	}
 }
 ; --------------------- other functions ----------------------------
 
@@ -655,34 +667,39 @@ _SendU_Default_Value( var, value )
 
 _SendU_Load_Locale()
 {
-;		TempString:=GetLang(62) . " $processName$`n($title$)`n" . GetLang(63) . " $modeName$ - $modeType$"
-;		_SendU_Default_Value("DYNAMIC_MODE_TOOLTIP", TempString) ; Setting mode for... to...
+	;stringLower, lang, A_Language
+	; if ( lang == "040e" ) { ; Hungarian
+		; _SendU_Default_Value("DYNAMIC_MODE_TOOLTIP", "ڪ m㤠a(z) $processName$ programhoz`n($title$)`n ""$mode$"" ($modeName$ - $modeType$)")
 
-;		TempString:=GetLang(64)  ; Method 1
-;		_SendU_Default_Value("Mode_Name_i", TempString)	; SendInput
-;		TempString:=GetLang(65) ; Clipboard
-;		_SendU_Default_Value("Mode_Name_c", TempString)
-;		TempString:=GetLang(66)  ; Method 3
-;		_SendU_Default_Value("Mode_Name_r", TempString)  ; Restore Clipboard
-;		TempString:=GetLang(67)  ; Method 2
-;		_SendU_Default_Value("Mode_Name_a", TempString)	; Alt+Numbers
-;		TempString:=GetLang(68) ; Automatic
-;		_SendU_Default_Value("Mode_Name_d", TempString)  ; dynamic
-;		TempString:=GetLang(69) ; Unknown
-;		_SendU_Default_Value("Mode_Name_0", TempString)
+		; _SendU_Default_Value("Mode_Name_i", "SendInput")
+		; _SendU_Default_Value("Mode_Name_c", "V᧳lap")
+		; _SendU_Default_Value("Mode_Name_r", "V᧳lap helyreᬬ���ssal")
+		; _SendU_Default_Value("Mode_Name_a", "Alt+Sz᭢illenty뺥t")
+		; _SendU_Default_Value("Mode_Name_d", "Dinamikus")
+		; _SendU_Default_Value("Mode_Name_0", "Ismeretlen")
 
-;		TempString:=GetLang(70) ; the fastest mode
-;		_SendU_Default_Value("Mode_Type_i", TempString)
-;		TempString:=GetLang(71) ; clears the clipboard
-;		_SendU_Default_Value("Mode_Type_c", TempString)
-;		TempString:=GetLang(72) ; slowest, but some apps need it
-;		_SendU_Default_Value("Mode_Type_r", TempString)
-;		TempString:=GetLang(73) ; second best, if it works
-;		_SendU_Default_Value("Mode_Type_a", TempString)
-;		TempString:=GetLang(74) ; automatic mode selection
-;		_SendU_Default_Value("Mode_Type_d", TempString)
-;		TempString:=GetLang(75) ; unknown mode
-;		_SendU_Default_Value("Mode_Type_0", TempString)
+		; _SendU_Default_Value("Mode_Type_i", "a legjobb, ha m뫶dik")
+		; _SendU_Default_Value("Mode_Type_c", "t沬i a v᧳lapot")
+		; _SendU_Default_Value("Mode_Type_r", "talᮠlassꢩ
+		; _SendU_Default_Value("Mode_Type_a", "talᮠnem m뫶dik")
+		; _SendU_Default_Value("Mode_Type_d", "programokt㬠f짧堤inamikus m㤢)
+		; _SendU_Default_Value("Mode_Type_0", "ismeretlen m㤢)
+	; } else { ; English
+		_SendU_Default_Value("DYNAMIC_MODE_TOOLTIP", "Setting mode for $processName$`n($title$)`nto $modeName$ - $modeType$")
+
+		_SendU_Default_Value("Mode_Name_i", "Method 1")	; SendInput
+		_SendU_Default_Value("Mode_Name_c", "Clipboard")
+		_SendU_Default_Value("Mode_Name_r", "Method 3")  ; Restore Clipboard
+		_SendU_Default_Value("Mode_Name_a", "Method 2")	; Alt+Numbers
+		_SendU_Default_Value("Mode_Name_d", "Automatic")  ; dynamic
+		_SendU_Default_Value("Mode_Name_0", "Unknown")
+
+		_SendU_Default_Value("Mode_Type_i", "the fastest mode")
+		_SendU_Default_Value("Mode_Type_c", "clears the clipboard")
+		_SendU_Default_Value("Mode_Type_r", "slowest, but some apps need it")
+		_SendU_Default_Value("Mode_Type_a", "second best, if it works")
+		_SendU_Default_Value("Mode_Type_d", "automatic mode selection")
+		_SendU_Default_Value("Mode_Type_0", "unknown mode")
 	; }
 }
 

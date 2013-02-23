@@ -52,6 +52,7 @@ Comments in this file that identify the unicode characters were automatically ge
 HISTORY:
 2008-11-19 DRM Updated to eliminate the need for Ctrl+Alt combinations
 2009-03-03 RDE & DRM: Added option to *require* deadkey before full vowels.
+2012-09-05 DRM: Press semi-colon twice to get semi-colon character instead of virama.
 
 */
 
@@ -275,7 +276,14 @@ $>::DoRota(11)			; Key: RightWedge (>)	rota: devanagari_sign_nukta (़)  and de
 $^!0::SendChar(0x970)		; Old DevRom key for devanagari_abbreviation_sign (॰)
 $^![::SendChar(0x93C)		; Old DevRom key for devanagari_sign_nukta (़)
 
-$;::SendChar(0x94D)		; Key: semi-colon (;)   => devanagari_sign_virama (्)
+$;::					; Key: semi-colon (;)   => devanagari_sign_virama (्)  .   Press again for literal semi-colon character.
+if (ctx()=0x094D)
+	ReplaceChar(0x003B)
+else
+	SendChar(0x94D)
+return
+
+; $$::SendChar(0x3b)	; Dollar sign key ($) produces semi-colon character (;).  Note: With this, there is no way to obtain dollar sign character.
 
 $x::        ; Key: X
 swap := (ctx()=0x939 ? SwapHalfH : 0)	 	;|	devanagari_letter_ha (ह)

@@ -1,3 +1,2 @@
-This program is provided for "registered beta testers only".
-The way that you register is by subscribing to the InKey announcement group at https://groups.google.com/d/forum/inkey.
-If you have not already done so, PLEASE REGISTER NOW!
+This version is provided for InKey keyboard developers and alpha testers only.
+Please subscribe to the InKey announcement group at https://groups.google.com/d/forum/inkey.

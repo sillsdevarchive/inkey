@@ -201,11 +201,11 @@ DoConfigure:
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Keyboard menu pop-up with double-tap:
 	Gui, 3:Add, Edit, x270 yp w80 vMenuDoubleTap, %MenuDoubleTap%
 
-;	IniRead, ChangeSendingMode, InKey.ini, InKey, ChangeSendingMode
-;	OldChangeSendingMode := ChangeSendingMode
-;	TempString:=GetLang(50)
-;	Gui, 3:Add, Text, xs w220, %TempString%  ; Change sending mode:
-;	Gui, 3:Add, Edit, x270 yp w80 vChangeSendingMode, %ChangeSendingMode%
+	IniRead, ChangeSendingMode, InKey.ini, InKey, ChangeSendingMode
+	OldChangeSendingMode := ChangeSendingMode
+	TempString:=GetLang(50)
+	Gui, 3:Add, Text, xs w220, %TempString%  ; Change sending mode:
+	Gui, 3:Add, Edit, x270 yp w80 vChangeSendingMode, %ChangeSendingMode%
 
 	IniRead, ResyncHotkey, InKey.ini, InKey, ResyncHotkey
 	OldResyncHotkey := ResyncHotkey
@@ -253,7 +253,7 @@ DoConfigure:
 	GuiControl,, PrevKbdDoubleTap, LControl
 	GuiControl,, MenuHotkey, ^#Up
 	GuiControl,, MenuDoubleTap, LShift
-;	GuiControl,, ChangeSendingMode, ^#=
+	GuiControl,, ChangeSendingMode, ^#=
 	GuiControl,, ResyncHotkey, #F12
 	GuiControl,, ReloadHotkey, ^#F12
 	GuiControl,, GrabContextHotkey, F12
@@ -264,7 +264,7 @@ FillKbdListAll() {
 	ImageListID := IL_Create(10)  ; Create an ImageList to hold 10 small icons.
 	LV_SetImageList(ImageListID)  ; Assign the above ImageList to the current ListView.
 	tFolderList =
-	idx = 0
+	idx1 = 0
 	Loop, *.*, 2
 		tFolderList = %tFolderList%%A_LoopFileName%`n
 	Sort, tFolderList
@@ -288,16 +288,16 @@ FillKbdListAll() {
 		{	if (A_LoopField = "") ; Ignore the blank item at the end of the list.
 				continue
 			tmpCurrIni = %tmpCurrFolder%\%A_LoopField%
-			idx++
+			idx1++
 ;		outputdebug processing file: %tmpCurrIni%
 			IniRead, enabled, %tmpCurrIni%, Keyboard, Enabled, %A_Space%
 			chk := (enabled) ? "check " : ""
 			IniRead, KbdLayoutName, %tmpCurrIni%, Keyboard, LayoutName, %A_Space%
 			IniRead, KbdIcon, %tmpCurrIni%, Keyboard, Icon, %A_Space%
 			KbdIcon = %tmpCurrFolder%\%KbdIcon%
-			ii := IL_Add(ImageListID, KbdIcon)  ; Omits the DLL's path so that it works on Windows 9x too.
-outputdebug	kbdicon=%kbdicon%	ii=%ii% iconIdx=%iconIdx%	LV_Add(%chk%%iconIdx%, "", KbdLayoutName, tmpCurrIni)
-			iconIdx := (ii) ? " Icon" . ii : ""
+			ii1 := IL_Add(ImageListID, KbdIcon)  ; Omits the DLL's path so that it works on Windows 9x too.
+;~ outputdebug	kbdicon=%kbdicon%	ii1=%ii1% iconIdx=%iconIdx%	LV_Add(%chk%%iconIdx%, "", KbdLayoutName, tmpCurrIni)
+			iconIdx := (ii1) ? " Icon" . ii1 : ""
 			LV_Add(chk . iconIdx, "", KbdLayoutName, tmpCurrIni)
 		}
 	}
@@ -424,11 +424,11 @@ SaveTab1Changes() {
 	global needsRestart
 	Loop % LV_GetCount()
 	{
-		RowNumber := A_Index
+		RowNumberL := A_Index
 		Gui +LastFound
-		SendMessage, 4140, RowNumber - 1, 0xF000, SysListView321  ; 4140 is LVM_GETITEMSTATE.  0xF000 is LVIS_STATEIMAGEMASK.
-		IsChecked := (ErrorLevel >> 12) - 1  ; This sets IsChecked to true if RowNumber is checked or false otherwise.
-		LV_GetText(tmpCurrIni, RowNumber, 3)
+		SendMessage, 4140, RowNumberL - 1, 0xF000, SysListView321  ; 4140 is LVM_GETITEMSTATE.  0xF000 is LVIS_STATEIMAGEMASK.
+		IsChecked := (ErrorLevel >> 12) - 1  ; This sets IsChecked to true if RowNumberL is checked or false otherwise.
+		LV_GetText(tmpCurrIni, RowNumberL, 3)
 		IniRead, enabled, %tmpCurrIni%, Keyboard, Enabled, 0
 		if (enabled <> IsChecked) {
 			IniWrite, %IsChecked%, %tmpCurrIni%, Keyboard, Enabled
@@ -621,6 +621,7 @@ SaveTab3Changes() {
 			IniWrite, %MenuHotkey%, InKey.ini, InKey, MenuHotkey
 		}
 	}
+
 	if MenuDoubleTap<>
 	{
 		If MenuDoubleTap <> OldMenuDoubleTap
@@ -638,23 +639,25 @@ SaveTab3Changes() {
 			IniWrite, %MenuDoubleTap%, InKey.ini, InKey, MenuDoubleTap
 		}
 	}
-;	if ChangeSendingMode<>
-;	{
-;		If ChangeSendingMode <> OldChangeSendingMode
-;		{
-;			Hotkey, %OldChangeSendingMode%, _SendU_Change_Dynamic_Mode, UseErrorLevel Off
-;			Hotkey, %ChangeSendingMode%, _SendU_Change_Dynamic_Mode, UseErrorLevel On
-;			IniWrite, %ChangeSendingMode%, InKey.ini, InKey, ChangeSendingMode
-;		}
-;	}
-;	else
-;	{
-;		If ChangeSendingMode <> OldChangeSendingMode
-;		{
-;			Hotkey, %OldChangeSendingMode%, _SendU_Change_Dynamic_Mode, UseErrorLevel Off
-;			IniWrite, %ChangeSendingMode%, InKey.ini, InKey, ChangeSendingMode
-;		}
-;	}
+
+	if ChangeSendingMode<>
+	{
+		If ChangeSendingMode <> OldChangeSendingMode
+		{
+			Hotkey, %OldChangeSendingMode%, ChangeSendingMode, UseErrorLevel Off
+			Hotkey, %ChangeSendingMode%, ChangeSendingMode, UseErrorLevel On
+			IniWrite, %ChangeSendingMode%, InKey.ini, InKey, ChangeSendingMode
+		}
+	}
+	else
+	{
+		If ChangeSendingMode <> OldChangeSendingMode
+		{
+			Hotkey, %OldChangeSendingMode%, ChangeSendingMode, UseErrorLevel Off
+			IniWrite, %ChangeSendingMode%, InKey.ini, InKey, ChangeSendingMode
+		}
+	}
+
 	if ResyncHotkey<>
 	{
 		If ResyncHotkey <> OldResyncHotkey

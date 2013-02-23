@@ -1,4 +1,9 @@
 installorupdatefromzip(ZipPathFile) {
+	local errorcheck
+	local NewLang
+	local Pos
+	local TempString
+
 	errorcheck = 0
 	updatingkeyboard = false
 	; delete temporary folder (if it exists)

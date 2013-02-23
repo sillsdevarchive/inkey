@@ -88,7 +88,7 @@ DoValidationChecks(byref md5) {
 	;~ copyright := chr(169)  ; necessary because this script is saved in utf8 format
 	;~ spacer := chr(32)+chr(32)
 	;~ Gui, Add, Text, x25 y230 w130 h40 backgroundtrans cWhite gCancel, %spacer% %copyright% 2008-2012`nInKey Software
-	Gui, Add, Text, x25 y230 w130 h40 backgroundtrans cWhite gCancel,   © 2008-2012`nInKey Software
+	Gui, Add, Text, x25 y230 w130 h40 backgroundtrans cWhite gCancel,   © 2008-2013`nInKey Software
 	Gui, Font, underline,
 	Gui, Add, Text, x150 y240 w140 h20 cBlue backgroundtrans gLaunchURL +Center, www.InKeySoftware.com
 	Gui, Font, norm,

@@ -44,9 +44,9 @@ ConfigureKeyboard(kbd)
 	IniRead, IniKbdLang, % KbdIniFile%kbd%, Keyboard, Lang, %A_Space%
 
 	; Convert language code to language name
-	tmpLangName:=ConvertCodeToName(IniKbdLang)
+	tmpLangName1:=ConvertCodeToName(IniKbdLang)
 	global LangNameGUI
-	Gui, 5:Add, Edit, x100 y128 w150 h20 ReadOnly vLangNameGUI, %tmpLangName%
+	Gui, 5:Add, Edit, x100 y128 w150 h20 ReadOnly vLangNameGUI, %tmpLangName1%
 	tmpString:=GetLang(81)
 	Gui, 5:Add, Button, x270 y128 w140 h20 g5ChangeLocaleButton, %tmpString%  ; Change...
 
@@ -78,8 +78,8 @@ ConfigureKeyboard(kbd)
 	Gui, 5:Add, Picture, x70 y207 w20 h20 Border vIconPicGUI, % KbdIconFile%kbd%
 
 	Icon := % KbdIconFile%kbd%
-	StringGetPos, tmpPos, Icon, \, R
-	StringRight, Icon, Icon, StrLen(Icon) - tmpPos -1
+	StringGetPos, tmpPos1, Icon, \, R
+	StringRight, Icon, Icon, StrLen(Icon) - tmpPos1 -1
 	global IconGUI
 	Gui, 5:Add, Edit, x100 y208 w150 h20 ReadOnly vIconGUI, %Icon%
 	tmpString:=GetLang(81)
