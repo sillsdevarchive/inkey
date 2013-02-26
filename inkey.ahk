@@ -10,13 +10,13 @@ Execution_Level=2
 Set_Version_Info=1
 Company_Name=InKeySoftware
 File_Description=InKey Keyboard Manager
-File_Version=0.9.0.2
+File_Version=0.9.0.3
 Inc_File_Version=0
 Internal_Name=inkey
 Legal_Copyright=(c) 2008-2013 InKeySoftware
 Original_Filename=InKey.ahk
 Product_Name=InKey Keyboard Manager
-Product_Version=0.9.0.2
+Product_Version=0.9.0.3
 [ICONS]
 Icon_1=%In_Dir%\inkey.ico
 
@@ -29,7 +29,7 @@ Icon_1=%In_Dir%\inkey.ico
 
 ; Main initialization
 	Outputdebug ___________________________ INKEY.AHK ___________________
-	ver = 0.902 ;
+	ver = 0.903
 	K_ProtocolNum := 4 ; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number should be incremented in both files.
 	SetWorkingDir %A_ScriptDir%
 	onExit DoCleanup

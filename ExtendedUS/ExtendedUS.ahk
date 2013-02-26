@@ -16,7 +16,7 @@ HISTORY:
 ;________________________________________________________________________________________________________________
 ; This section is required at the top of every InKey keyboard script:
 
-K_MinimumInKeyLibVersion = 0.900
+K_MinimumInKeyLibVersion = 0.903
 	; The version number of the InKeyLib.ahki file that the keyboard developer used while writing this script.
 	; Look it up near the top of the InKeyLib.ahki file, and enter it here.
 	; It may be lower than the InKey version number.
@@ -29,8 +29,10 @@ K_MinimumInKeyLibVersion = 0.900
 
 ;________________________________________________________________________________________________________________
 OnLoadScript:	; InKeyLib will call this subroutine just once, when the script is first loaded, for any script initialization.
-
-return
+	OnScreen(Button("→", "Alt+Period", "w24 h24", thenSend("→"))
+			, Button("⇛", "Alt+Equals", "wp hp", thenSend("⇛"))
+			, Button("↺", "Alt+Comma", "wp hp", thenSend("↺")))
+	return
 
 ;________________________________________________________________________________________________________________
 ;   Key Handlers
