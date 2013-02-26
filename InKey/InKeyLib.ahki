@@ -8,7 +8,7 @@
 #LTrim			; This command causes leading whitespace in continuation sections (e.g. multi-line rota strings) to be trimmed.
 				; If you prefer otherwise, use #LTrim Off
 
-K_InKeyLibVersion = 0.900	; At the top of your script, the very first line of code
+K_InKeyLibVersion = 0.903	; At the top of your script, the very first line of code
 	; should set K_MinimumInKeyLibVersion to this number.
 	; This will ensure that if a user has an older version of InKeyLib.ahki that
 	; does not support the functionality that your script requires, he will be
