@@ -63,6 +63,7 @@ InCase(ByRef CaseCommand) {
 ; The commands are made up of one or more clauses that contain regular expressions, maps, and literal text.
 ; The following clause combinations are valid: (Square brackets indicates optional clause.)
 	;   Map(M) [ elseSend(T2) ]
+	;   thenSend(T1)
 	;   After(RE) thenSend(T1)  [ elseSend(T2) ]
 	;   [ After(LB)  ] Replace(RE) with(BT)  [ elseSend(T2) ]
 	;   [ After(LB)  ] Replace(F) with(R)  usingMap(M) [ elseSend(T2) ]
@@ -135,7 +136,7 @@ Map(rotaSets*) {
 	str := ""
 	for index,param in rotaSets
 		str .= param chr(0x13)
-	return "M:" str chr(0x1e)
+	return "M:" str chr(0x1c)
 }
 
 LoopMap(rotaSets*) {
@@ -143,23 +144,23 @@ LoopMap(rotaSets*) {
 	str := ""
 	for index,param in rotaSets
 		str .= param chr(0x14) chr(0x13)
-	return "M:" str chr(0x1e)
+	return "M:" str chr(0x1c)
 }
 
 After(RE)	{
-	return "A:"  RE  chr(0x1e)
+	return "A:"  RE  chr(0x1c)
 }
 
 thenSend(T1, uFlags=0)	{
-	return "S:" T1 chr(0x1e) "Sf:" uFlags chr(0x1e)
+	return "S:" T1 chr(0x1c) "Sf:" uFlags chr(0x1c)
 }
 
 Replace(RE)	{
-	return "R:" RE chr(0x1e)
+	return "R:" RE chr(0x1c)
 }
 
 with(BT, uFlags=0)		{
-	return "W:" BT chr(0x1e) "Wf:" uFlags chr(0x1e)
+	return "W:" BT chr(0x1c) "Wf:" uFlags chr(0x1c)
 }
 
 usingMap(rotaSets*) {  ;  e.g. usingMap("n→ɲ→ŋ↺", "N→ɴ→Ŋ↺")
@@ -173,14 +174,60 @@ usingMap(rotaSets*) {  ;  e.g. usingMap("n→ɲ→ŋ↺", "N→ɴ→Ŋ↺")
 	str := ""
 	for index,param in rotaSets
 		str .= param chr(0x13)
-	return "U:" str chr(0x1e)
+	return "U:" str chr(0x1c)
 }
 
 elseSend(T2, uFlags=0) {
-		return "E:" T2 chr(0x1e) "Ef:" uFlags chr(0x1e)
+		return "E:" T2 chr(0x1c) "Ef:" uFlags chr(0x1c)
 }
 
+;_________________________ On Screen Keyboard Functions __________
 
+; 0x1f divides K_OnScreenDef into separate screenitems
+; 0x1e divides a screenitem into components. one such component is a cases string.
+; 0x1d divides cases strings into separate case items.
+; 0x1c divides case items into clauses
+; 0x13 divides map clauses into map strings.
+
+
+OnScreen(OnScreenItems*) {
+; Defines the elements for an on-screen keyboard.
+; These items can be calls to the following functions:
+; 	Button()
+;   OnScreenCmd()
+	global K_OnScreenDef
+	str := ""
+	for index,param in OnScreenItems
+		str .= param chr(0x1f)
+	K_OnScreenDef := SubStr(str, 1, -1)
+	;~ OutputDebug K_OnScreenDef = "%K_OnScreenDef%"
+}
+
+Button(Label, Tip, Options, ActionCases) {
+; Adds a button to the on-screen keyboard GUI.
+; Parameters:
+;   Label:  Text to appear on the button
+;   Tip:    Help text to appear on mouse-over, to teach keystroke(s)
+;   Options:  Position and size of button. See GUI command in AHK help file for details.
+;   ActionCases: A case command (as would be passed to InCase()) or a set of alternative case commands
+;                grouped using the Cases() function.
+	return "B:" Label chr(0x1e) Tip chr(0x1e) Options chr(0x1e) ActionCases chr(0x1e)
+}
+
+OnScreenCmd(cmd, param2="", param3="", param4="") {
+; Causes an arbitrary GUI command to be performed, such as to set the font name, size, etc.,
+; or to add non-button elements, such as Tab2 page controls.
+; See AHK Help file for details.
+	return "C:" cmd chr(0x1e) param2 chr(0x1e) param3 chr(0x1e) param4 chr(0x1e)
+}
+
+Cases(CaseStrings*) {
+;  Use this to concatenate multiple Cases into a Cases parameter, as used by the Button() function.
+	str := ""
+	for index,param in CaseStrings
+		str .= param chr(0x1d)
+	return SubStr(str, 1, -1)
+}
 
 ; ___________  Phase and Deadkey ______________________________
 ; The difference between a Phase and a Deadkey is that pressing Backspace after a deadkey will
@@ -297,6 +344,12 @@ FatalError(str) {
 	s = %str%`nTerminating %A_ScriptName%
 	SendData(0x9006, s)
 	ExitApp
+}
+
+RegisterVirtualKeyboardHwnd(hwnd) {
+	SendToInKey(0x8019)
+	return 1
+
 }
 
 ; _____________________________________________________ No need to call these directly if you use K_UseContext = 1 or 2
@@ -551,7 +604,7 @@ CreateRota(id, rotaSets, defTxt="", style=0, uFlags=0) {
 	if (RegExMatch(rotaSets, "\s\s")) {
 		FatalError("Error: Double whitespace in rota string " . id)
 	}
-	SendData(0x9004, K_FileID . "_" . id . chr(0x1e) . rotaSets . chr(0x1e) . defTxt . chr(0x1e) . style . chr(0x1e) . uFlags)
+	SendData(0x9004, K_FileID . "_" . id . chr(0x1c) . rotaSets . chr(0x1c) . defTxt . chr(0x1c) . style . chr(0x1c) . uFlags)
 	K_RegRotas.Insert(id, 1)
 	;~ outputdebug % ">>>>>>>>>>create rota " id ". k_regrotas[id]=" K_RegRotas[id]
 }
@@ -628,7 +681,7 @@ SendRotaChar(id, u, uFlags) {
 ;~ ;   $i::InContextSend("[क-हक़-य़]\x{93c}?", "ि") or DoRota(37)
 
 ;~ ; Experimental.  Subject to change.  Not very efficient yet.
-	;~ x := SendData(0x9015, FindRegEx . chr(0x1e) . SendTxt . chr(0x1e) . ElseTxt . chr(0x1e) . uSendFlags . chr(0x1e) . uElseFlags)
+	;~ x := SendData(0x9015, FindRegEx . chr(0x1c) . SendTxt . chr(0x1c) . ElseTxt . chr(0x1c) . uSendFlags . chr(0x1c) . uElseFlags)
 	;~ if (x < 2 or x > 3)
 		;~ outputdebug ** ERROR: InContextSend error code %x%
 
@@ -647,7 +700,7 @@ SendRotaChar(id, u, uFlags) {
 ;~ ;   $+r::InContextReplace("", "([क-हक़-य़]\x{93c}?)", "र्$1") or DoRota(37)
 
 ;~ ; Experimental.  Subject to change.
-	;~ x := SendData(0x9016, LookBehind . chr(0x1e) . FindRegEx . chr(0x1e) . ReplaceTxt . chr(0x1e) . ElseTxt . chr(0x1e) . uSendFlags . chr(0x1e) . uElseFlags)
+	;~ x := SendData(0x9016, LookBehind . chr(0x1c) . FindRegEx . chr(0x1c) . ReplaceTxt . chr(0x1c) . ElseTxt . chr(0x1c) . uSendFlags . chr(0x1c) . uElseFlags)
 	;~ if (x < 2 or x > 3)
 		;~ outputdebug ** ERROR: InContextReplace error code %x%
 
@@ -656,7 +709,7 @@ SendRotaChar(id, u, uFlags) {
 
 ;~ InContextReplace(FindRegEx, ReplaceTxt, ElseTxt="", uSendFlags=0, uElseFlags=0) {
 	;~ ; as above, but without LookBehind parameter
-	;~ x := SendData(0x9016,  chr(0x1e) . FindRegEx . chr(0x1e) . ReplaceTxt . chr(0x1e) . ElseTxt . chr(0x1e) . uSendFlags . chr(0x1e) . uElseFlags)
+	;~ x := SendData(0x9016,  chr(0x1c) . FindRegEx . chr(0x1c) . ReplaceTxt . chr(0x1c) . ElseTxt . chr(0x1c) . uSendFlags . chr(0x1c) . uElseFlags)
 	;~ if (x < 2 or x > 3)
 		;~ outputdebug ** ERROR: InContextReplace error code %x%
 
@@ -689,7 +742,7 @@ InRota(MapCmd) {
 	rotaID := K_InRotas[MapCmd]
 	if (not rotaID) {
 		rotaID := K_FileID "i" ct++
-		SendData(0x9024, rotaID chr(0x1e) MapCmd)  ; Register this rota now
+		SendData(0x9024, rotaID chr(0x1c) MapCmd)  ; Register this rota now
 		K_InRotas.Insert(MapCmd, rotaID)
 	}
 
@@ -722,12 +775,12 @@ InRota(MapCmd) {
 	;~ str := ""
 	;~ for index,param in rotaSets
 		;~ str .= param . chr(10)
-	;~ rotaStr := SubStr(str, 1, -1) chr(0x1e) props["def"] chr(0x1e) props["style"] chr(0x1e) props["flags"]
+	;~ rotaStr := SubStr(str, 1, -1) chr(0x1c) props["def"] chr(0x1c) props["style"] chr(0x1c) props["flags"]
 
 	;~ rotaID := K_InRotas[rotaStr]
 	;~ if (not rotaID) {
 		;~ rotaID := K_FileID "i" ct++
-		;~ SendData(0x9004, rotaID chr(0x1e) rotaStr)  ; Register this rota now
+		;~ SendData(0x9004, rotaID chr(0x1c) rotaStr)  ; Register this rota now
 		;~ K_InRotas.Insert(rotaStr, rotaID)
 	;~ }
 
@@ -742,14 +795,27 @@ InRota(MapCmd) {
 ;~ }
 
 OnMsgSuspend() {
+	global
 	Suspend On
 	outputdebug suspending %A_ScriptName%
+	if (K_OnScreenDef and K_ScrKbdHwnd) {
+		WinClose ahk_id %K_ScrKbdHwnd%
+		K_ShowOnScreenAfterResume := 1
+	} else {
+		K_ShowOnScreenAfterResume := 0
+	}
 	return 3
 }
 
 OnMsgResume() {
+	global
 	Suspend Off
 	outputdebug resuming %A_ScriptName%
+	if (K_ShowOnScreenAfterResume) {
+		OnMsgOnScreen()
+		;~ OutputDebug K_ScrKbdHwnd=%K_ScrKbdHwnd%
+		return K_ScrKbdHwnd
+	}
 	return 3
 }
 
@@ -777,8 +843,8 @@ Receive_WM_COPYDATA(wParam, lParam)
 		; Handle string passed as a Reinitialize command (0x9201)
 		if (dwNum = 0x9201 and RegExMatch(StringData,"^(?P<kbd>.*)\|(?P<par>.*)", K_ov_)) {
 			outputdebug received Reinitialize message: %K_ov_kbd%, %K_ov_par%
-			Reinit(K_ov_kbd, K_ov_par)
-			return 3  ; Sometimes Windows doesn't deliver the message, but returns 1 or 0.  We will never return 1 or 0, so that that can be recognized as unprocessed.
+			return Reinit(K_ov_kbd, K_ov_par)
+			  ; Sometimes Windows doesn't deliver the message, but returns 1 or 0.  We will never return 1 or 0, so that that can be recognized as unprocessed.
 		}
 	}
 	setformat integerfast, H
@@ -805,7 +871,14 @@ Reinit(kbd, par) {
 	Label = OnKeyboardInit
 	if (IsLabel(Label))
 		GoSub %Label%
+	if (K_ShowOnScreenAfterResume) {
+		OnMsgOnScreen()
+		OutputDebug K_ScrKbdHwnd=%K_ScrKbdHwnd%
+		Suspend Off
+		return K_ScrKbdHwnd
+	}
 	Suspend Off
+	return 3
 }
 
 ; Receive_WM_COPYDATA(wParam, lParam)
@@ -974,6 +1047,15 @@ GetInkeyHwnd() {
 ; }
 
 K_DO_INITIALIZE:
+;~ OutputDebug K_DO_INITIALIZE
+K_ShowOnScreenAfterResume := 0
+K_ScrKbdHwnd := 0
+K_ScrKbdShowing := 0
+K_XX := 0
+K_YY := 500
+K_MouseX := 0
+K_MouseY := 0
+K_OnScreenDef := ""
 K_Params := params()
 K_RegRotas := Object()
 ;~ K_InRotas := Object()
@@ -987,6 +1069,7 @@ if (K_InkeyProtocolNum <> K_ProtocolNum)
 OnMessage(0x8001, "OnMsgSuspend")
 OnMessage(0x8002, "OnMsgResume")
 OnMessage(0x8003, "OnMsgClose")
+OnMessage(0x8004, "OnMsgOnScreen")
 ;OnMessage(0x8100, "OnMsgTest")
 OnMessage(0x4a, "Receive_WM_COPYDATA")  ; 0x4a is WM_COPYDATA.  It won't work to use a different message number.
 Label = OnLoadScript
@@ -1117,3 +1200,136 @@ if (not GetKeyState("CapsLock", "T")) {
 }
 SendChar(K_Val)
 return
+
+
+
+WM_MOVE(wParam, lParam, msg, hwnd)
+{
+	;~ global K_ScrKbdHwnd
+	global
+	;~ x := lParam && 0xFFFF
+	;~ y := lParam >> 16
+	if (K_ScrKbdShowing) {
+		WinGetPos K_XX, K_YY,,, ahk_id %K_ScrKbdHwnd%
+		SetFormat integerfast, D
+		K_Pos := "x" K_XX " y" K_YY
+		IniWrite, %K_Pos%, %A_ScriptDir%\OnScreen.ini, OnScreen, position
+		if (ErrorLevel)
+			OutputDebug error in IniWrite
+		;~ OutputDebug K_ScrKbdHwnd=%K_ScrKbdHwnd%
+		;~ OutputDebug wm_move: %lparam% => (%x%, %y%).  [%K_XX%, %K_YY%]
+		;~ OutputDebug wm_move: [%K_XX%, %K_YY%]
+	}
+}
+
+WM_MOUSEMOVE()
+{
+	global K_MouseX, K_MouseY
+	static CurrControl, PrevControl
+	static Btn=0  ; Btn is kept blank for use by the ToolTip command below.
+	CurrControl := A_GuiControl
+	If (SubStr(CurrControl, 1, 5) = "K_Btn")
+	{
+		CoordMode mouse, screen
+		MouseGetPos, K_MouseX, K_MouseY
+		currBtn := substr(A_GuiControl, 6)
+		if (currBtn = Btn)
+			return
+		Btn := currBtn
+		ToolTip % K_SKTip%Btn%  ; The leading percent sign tell it to use an expression.
+		;~ OutputDebug % "A_GuiControl=" A_GuiControl ". Btn=" btn "  => K_SKTip: " K_SKTip%Btn%  ; The leading percent sign tell it to use an expression.
+		SetTimer, CheckRemoveToolTip, 3000
+		;~ OutputDebug mousemove: btn=%btn%
+	} ;else
+		;~ OutputDebug ignored mousemove
+
+	return
+
+
+	CheckRemoveToolTip:
+	MouseGetPos, K_MouseX2, K_MouseY2
+	;~ OutputDebug checktip
+	if (K_MouseX2 <> K_MouseX or K_MouseY2 <> K_MouseY) {
+		Tooltip
+		SetTimer, CheckRemoveToolTip, off
+		Btn := 0
+		;~ OutputDebug tip off
+	}
+	return
+}
+
+
+GuiClose:
+Gui Destroy
+K_ScrKbdShowing := 0
+K_ScrKbdHwnd := 0
+;~ OutputDebug GuiClose
+return
+
+
+BtnPress:
+K_Btn := substr(A_GuiControl, 6)
+K_delimit := chr(0x1d)
+loop, parse, K_SKAction%K_Btn%, %K_delimit%
+{
+	if (InCase(A_Loopfield))
+		break
+}
+;~ OutputDebug Btn = %K_Btn%
+return
+
+
+OnMsgOnScreen() {
+; InKey requests that we launch the on-screen keyboard.  We return a handle to its window.
+	global
+	;~ OutputDebug Kbd received msg onScreen : [%K_OnScreenDef%]
+	if (not K_OnScreenDef)
+		return 0   ; Has not been defined
+	;~ OutputDebug K_ScrKbdShowing = %K_ScrKbdShowing%
+
+	if (K_ScrKbdShowing) {   ; If it's already showing, activate it so user can navigate with tab/arrows
+		WinActivate ahk_id %K_ScrKbdHwnd%
+		return K_ScrKbdHwnd
+	}
+
+	; Create and show the GUI
+	K_SKCtrlCt = 0
+	IniRead K_Pos, %A_ScriptDir%\OnScreen.ini, OnScreen, position, x0 y500
+	Gui new, ,%A_Space%
+	Gui, Color, EEAA99
+	Gui +LastFound  ; Make the GUI window the last found window for use by the line below.
+	WinSet, TransColor, EEAA99 210
+	Gui, Font, s16, Arial Unicode MS
+	Gui, Margin, 0, 0
+	Gui, +ToolWindow
+	Gui, +AlwaysOnTop +HwndK_ScrKbdHwnd  		; -Caption
+	;~ OutputDebug K_ScrKbdHwnd=%K_ScrKbdHwnd%
+	K_delim := chr(0x1f)
+	loop, parse, K_OnScreenDef, %K_delim%
+	{
+		if (RegexMatch(A_LoopField, "^C:([^\x{1e}]*)\x{1e}([^\x{1e}]*)\x{1e}([^\x{1e}]*)\x{1e}([^\x{1e}]*)\x{1e}", K_grp)) {
+			Gui %K_grp1%, %K_grp2%, %K_grp3%, %K_grp4%
+		} else if (RegexMatch(A_LoopField, "^B:([^\x{1e}]*)\x{1e}([^\x{1e}]*)\x{1e}([^\x{1e}]*)\x{1e}([^\x{1e}]*)\x{1e}", K_grp)) {
+			OnScreenAdd(K_grp1, K_grp2, K_grp3, K_grp4)
+		} else {
+			MsgBox,,, Invalid OnScreen item:`n %A_LoopField%
+		}
+	}
+		; TODO: Check that K_Pos is not outside current screen limits
+	Gui, show, NoActivate %K_Pos%
+	OnMessage(0x200, "WM_MOUSEMOVE")
+	OnMessage(0x003, "WM_MOVE")
+	K_ScrKbdShowing := 1
+	return K_ScrKbdHwnd
+}
+
+
+OnScreenAdd(Label, Tip, Options, ActionCases) {
+	global
+	K_SKCtrlCt++
+	K_SKTip%K_SKCtrlCt% := Tip
+	K_SKAction%K_SKCtrlCt% := ActionCases
+	local opts := "vK_Btn" K_SKCtrlCt " gBtnPress " Options
+	;~ OutputDebug Gui, Add, Button, %opts%, %Label%
+	Gui, Add, Button, %opts%, %Label%
+}

@@ -66,6 +66,14 @@ _ChangeText(ByRef DelText, byref AddText, uFlags=0) {
 ; This also updates the context stack accordingly, but does not affect the Keystroke stack.
 ; This is not called directly except by CommitKeystroke and UndoKeystroke, which also update the Keystroke stack.
 	global
+
+	if (VKbdShowing and WinExist("A")=VKbdHwnd) {
+		; We don't want to send these characters to the active window if the active window is the virtual keyboard.
+		; Set the last active window to be the active window again.
+		WinActivate ahk_id %hwndLastActive%
+		;~ OutputDebug VKbd is active.  reactivating %Vkbdhwnd%
+	}
+
 ;~ TrayTip,, _ChangeText("%DelText%" "%AddText%")
 	; Back up as many times as necessary to delete the DelText.
 	local  unitsToBack := StrLen(DelText)
@@ -251,7 +259,13 @@ setupCallbacks() {
 	OnMessage(0x8031, "OnSetDeadkey")
 	OnMessage(0x8032, "OnIfDeadkey")
 	OnMessage(0x8033, "OnGetDeadkey")
+	OnMessage(0x8034, "OnRegisterVirtualKeyboardHwnd")
 	OnMessage(0x10, "On_WM_CLOSE")
+}
+
+OnRegisterVirtualKeyboardHwnd(hwnd) {
+	global
+	VKbdHwnd := hwnd
 }
 
 OnSetPhase(nPhaseNum) {
@@ -373,7 +387,7 @@ Receive_WM_COPYDATA(wParam, lParam)
 
 		; Handle string passed as a InCase command (0x9020)
 		if (dwNum = 0x9020) {
-			if (RegExMatch(StringData,"^(?:A:(?P<A>[^\x{1e}]*)\x{1e})?(?:S:(?P<S>[^\x{1e}]*)\x{1e})?(?:Sf:(?P<Sf>[^\x{1e}]*)\x{1e})?(?:R:(?P<R>[^\x{1e}]*)\x{1e})?(?:W:(?P<W>[^\x{1e}]*)\x{1e})?(?:Wf:(?P<Wf>[^\x{1e}]*)\x{1e})?(?:U:(?P<U>[^\x{1e}]*)\x{1e})?(?:E:(?P<E>[^\x{1e}]*)\x{1e})?(?:Ef:(?P<Ef>[^\x{1e}]*)\x{1e})?", ov_)) {
+			if (RegExMatch(StringData,"^(?:A:(?P<A>[^\x{1c}]*)\x{1c})?(?:S:(?P<S>[^\x{1c}]*)\x{1c})?(?:Sf:(?P<Sf>[^\x{1c}]*)\x{1c})?(?:R:(?P<R>[^\x{1c}]*)\x{1c})?(?:W:(?P<W>[^\x{1c}]*)\x{1c})?(?:Wf:(?P<Wf>[^\x{1c}]*)\x{1c})?(?:U:(?P<U>[^\x{1c}]*)\x{1c})?(?:E:(?P<E>[^\x{1c}]*)\x{1c})?(?:Ef:(?P<Ef>[^\x{1c}]*)\x{1c})?", ov_)) {
 				;~ OutputDebug received TryThis: A=>"%ov_A%" S=>"%ov_S%" Sf=>"%ov_Sf%" R=>"%ov_R%" W=>"%ov_W%" Wf=>"%ov_Wf%" E=>"%ov_E%" Ef=>"%ov_Ef%"
 				if (ov_A and ov_S)
 					return InContextSend(ov_A, ov_S, ov_E, ov_Sf ? ov_Sf : 0, ov_Ef ? ov_Ef : 0)
@@ -381,6 +395,11 @@ Receive_WM_COPYDATA(wParam, lParam)
 					return InContextReplaceUsingMap(ov_A, ov_R, ov_W, ov_U, ov_E, ov_Wf ? ov_Wf : 0, ov_Ef ? ov_Ef : 0)
 				if (ov_R and ov_W)
 					return InContextReplace(ov_A, ov_R, ov_W, ov_E, ov_Wf ? ov_Wf : 0, ov_Ef ? ov_Ef : 0)
+				if (ov_S) {
+					interpolate(ov_S)
+					CommitKeystroke("", ov_S, ov_Sf ? ov_Sf : 0)
+					return 2
+				}
 			}
 			TrayTip, Syntax error in InCase() command:,%StringData%
 			return 2
@@ -395,25 +414,25 @@ Receive_WM_COPYDATA(wParam, lParam)
 		}
 
 		;~ ; Handle string passed as a InContextSend command (0x9015)
-		;~ if (dwNum = 0x9015 and RegExMatch(StringData,"^(.*)\x{1e}(.*)\x{1e}(.*)\x{1e}(.*)\x{1e}(.*)", grp)) {
+		;~ if (dwNum = 0x9015 and RegExMatch(StringData,"^(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)", grp)) {
 			;~ outputdebug received InContextSend message: %grp1%, %grp2%, %grp3%, %grp4%, %grp5%
 			;~ return InContextSend(grp1, grp2, grp3, grp4, grp5)
 		;~ }
 
 		;~ ; Handle string passed as a InContextReplace command (0x9016)
-		;~ if (dwNum = 0x9016 and RegExMatch(StringData,"^(.*)\x{1e}(.*)\x{1e}(.*)\x{1e}(.*)\x{1e}(.*)\x{1e}(.*)", grp)) {
+		;~ if (dwNum = 0x9016 and RegExMatch(StringData,"^(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)", grp)) {
 			;~ outputdebug received InContextSend message: %grp1%, %grp2%, %grp3%, %grp4%, %grp5%, %grp6%
 			;~ return InContextReplace(grp1, grp2, grp3, grp4, grp5, grp6)
 		;~ }
 
 		; Handle string passed as a RegisterRota command (0x9004)
-		if (dwNum = 0x9004 and RegExMatch(StringData,"^(.*)\x{1e}(.*)\x{1e}(.*)\x{1e}(.*)\x{1e}(.*)", grp)) {
+		if (dwNum = 0x9004 and RegExMatch(StringData,"^(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)", grp)) {
 			RegisterRota(grp1, grp2, grp3, grp4, grp5)  ; id, rotaSets, defTxt, style, uFlags
 			return 3
 		}
 
 		; Handle string passed to register rota by InRota command (0x9024)
-		if (dwNum = 0x9024 and RegExMatch(StringData,"^(?P<ID>\w+)\x{1e}M:(?P<RS>[^\x{1e}]+)\x{1e}(?:E:(?P<E>[^\x{1e}]*)\x{1e})?(?:Ef:(?P<Ef>[^\x{1e}]*)\x{1e})?", ov_)) {
+		if (dwNum = 0x9024 and RegExMatch(StringData,"^(?P<ID>\w+)\x{1c}M:(?P<RS>[^\x{1c}]+)\x{1c}(?:E:(?P<E>[^\x{1c}]*)\x{1c})?(?:Ef:(?P<Ef>[^\x{1c}]*)\x{1c})?", ov_)) {
 			RegisterMap(ov_ID, ov_RS, ov_E, 0, ov_Ef ? ov_Ef : 0)  ; id, rotaSets, defTxt, style, uFlags
 			;~ OutputDebug *********** ov̠E = [%ov_E%]
 			return 3  ; TODO: check that if there is no E: this time but there was last time, is E set to empty??
@@ -1262,8 +1281,8 @@ SendChar(ch, uFlags=0) {
 ReplaceChar(u, numCharsToRep=1, endingPos=1, uFlags=0) {
 	global
 	Gui 2:Hide
-	outputdebug ReplaceChar(%u%, %numCharsToRep%, %endingPos%, %uFlags%)
-	outputdebug stackIdx=%stackIdx%  endingPos=%endingPos%
+	;~ outputdebug ReplaceChar(%u%, %numCharsToRep%, %endingPos%, %uFlags%)
+	;~ outputdebug stackIdx=%stackIdx%  endingPos=%endingPos%
 	local toBack := numCharsToRep + endingPos - 1
 	if (stackIdx < toBack) {
 		outputdebug Not enough on the stack to back up %toBack% chars

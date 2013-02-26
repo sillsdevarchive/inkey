@@ -10,13 +10,13 @@ Execution_Level=2
 Set_Version_Info=1
 Company_Name=InKeySoftware
 File_Description=InKey Keyboard Manager
-File_Version=0.9.0.1
+File_Version=0.9.0.2
 Inc_File_Version=0
 Internal_Name=inkey
 Legal_Copyright=(c) 2008-2013 InKeySoftware
 Original_Filename=InKey.ahk
 Product_Name=InKey Keyboard Manager
-Product_Version=0.9.0.1
+Product_Version=0.9.0.2
 [ICONS]
 Icon_1=%In_Dir%\inkey.ico
 
@@ -29,7 +29,7 @@ Icon_1=%In_Dir%\inkey.ico
 
 ; Main initialization
 	Outputdebug ___________________________ INKEY.AHK ___________________
-	ver = 0.901 ;
+	ver = 0.902 ;
 	K_ProtocolNum := 4 ; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number should be incremented in both files.
 	SetWorkingDir %A_ScriptDir%
 	onExit DoCleanup
@@ -46,6 +46,7 @@ Icon_1=%In_Dir%\inkey.ico
 	ActiveKbdHwnd =
 	ActiveHKL := 0
 	Kbd2RegCt := 0
+	ActiveAtLastReq := 0
 	LastKbdActivationTC := 0
 	ShowKeyboardNameBalloon := 0
 	oHKLDisplayName := Object()
@@ -60,6 +61,8 @@ Icon_1=%In_Dir%\inkey.ico
 	CounterBefore := 0
 	CounterAfter := 0
 	thisAppDoesGreedyBackspace := 0
+	VKbdHwnd := 0
+	VKbdShowing := 0
 
 	SetFormat, IntegerFast, D
 	outputdebug Default HKL=%KbdHKL0%
@@ -326,7 +329,19 @@ Icon_1=%In_Dir%\inkey.ico
 		HotKey %ii%, DblTapDefKbd, UseErrorLevel
 	}
 
-	; NextKbdHotkey
+	; ToggleKbdHotkey
+	IniRead ii, InKey.ini, InKey, ToggleKbdHotkey, %A_Space%
+	if (ii)
+		Hotkey %ii%, HotkeyToggleKbd, UseErrorLevel
+
+	; ToggleKbdDoubleTap
+	IniRead ii, InKey.ini, InKey, ToggleKbdDoubleTap, %A_Space%
+	if (ii) {
+		HotKey %ii% & ~s, Nothing, UseErrorLevel   ; Make key a prefix by using it in front of "&" at least once. Use tilde so normal behavior occurs.
+		HotKey %ii%, DblTapToggleKbd, UseErrorLevel
+	}
+
+; NextKbdHotkey
 	IniRead ii, InKey.ini, InKey, NextKbdHotkey, %A_Space%
 	if (ii)
 		Hotkey %ii%, RequestNextKbd, UseErrorLevel
@@ -767,12 +782,16 @@ ShowKbdMenu:
 
 	if (not gotKbdReq) { ; user must not have selected a keyboard
 
-		; TODO: This is common functionality with DeactivateKbd(). Combine.
+
 		if (ActiveKbd) {
 			ActiveKbdHwnd := GetKbdHwnd(ActiveKbd)
-			if (ActiveKbdHwnd)
-				DllCall("PostMessage", UInt, ActiveKbdHwnd, UInt, 0x8002)
-			else {
+			if (ActiveKbdHwnd) {
+				resumeResult := DllCall("SendMessage", UInt, ActiveKbdHwnd, UInt, 0x8002)
+				if (resumeResult>10) {
+					VKbdHwnd := resumeResult
+					VKbdShowing := 1
+				}
+			} else {
 				outputdebug Error, could not resume kbd file: %ActiveKbdFile%
 			}
 		}
@@ -906,6 +925,7 @@ MenuAutoGrab:
 
 RequestKbd(kbd) {
 	global
+	ActiveAtLastReq := ActiveKbd
 	OUTPUTDEBUG ***** RequestKbd(%kbd%)
 	if (kbd = 0 and ActiveHKL = KbdHKL0) {
 		;outputdebug user is trying to go to default kbd when InKey thinks default is already on.
@@ -951,6 +971,7 @@ RequestPrevKbd:
 	else
 		RequestKbd(ActiveKbd - 1)
 	return
+
 
 
  ; Slow but sure method to refresh the language bar
@@ -1095,6 +1116,19 @@ DoHelp:
 	Run InKey.chm
 	return
 
+$#V::ShowOnScreen()  ; TODO: map to user-config hotkey / menu
+
+ShowOnScreen() {
+	global
+	if (ActiveKbd) {
+		local kbdHwnd := GetKbdHwnd(ActiveKbd)
+		if (kbdHwnd) {
+			;~ OutputDebug showonscreen
+			VKbdHwnd := DllCall("SendMessage", UInt, kbdHwnd, UInt, 0x8004)
+			VKbdShowing := 1
+		}	; TODO:  Kbd should send a message to set VKbdShowing to 0 when closed, for faster _ChangeText
+	}
+}
 
 DeactivateKbd() {
 	global
@@ -1128,7 +1162,7 @@ CHECKLOCALE:
 	if (la = hwndTray)
 		return
 
-	if (la <> SelfHwnd) and (la <>0) {
+	if ((la <> SelfHwnd) and (la <>0) and (la <> VKbdHwnd)) {
 		if (la <> hwndLastActive) {
 			outputdebug Active window changed from %hwndlastactive% to %la%
 			hwndLastActive := la
@@ -1173,8 +1207,12 @@ ReinitKeyboard(n) {
 	outputdebug ReinitKeyboard(%n%) Send_WM_COPYDATA => %rk%  .  s = "%s%"
 	if (rk=3)  ; Means that InKeyLib.ahki received and processed it OK.
 		return 0
-	else
-		SoundPlay *32	;
+	if (rk>10) {  ; Means that a virtual keyboard was reinintialized, and this is its handle
+		VKbdHwnd := rk
+		VKbdShowing := 1
+		return 0
+	}
+	SoundPlay *32	;
 	return 1
 }
 
@@ -1292,7 +1330,7 @@ TrayIcon(kbd, hkl) {
 	TempHKL:=hkl+0
 	SetFormat IntegerFast, D
 	;~ if (not HKLDisplayName%TempHKL%)
-	OutputDebug % "temphkl=" temphkl " ohkldisplayname=>" oHKLDisplayName[TempHKL]
+	;~ OutputDebug % "temphkl=" temphkl " ohkldisplayname=>" oHKLDisplayName[TempHKL]
 	if (not oHKLDisplayName[TempHKL])
 		oHKLDisplayName[TempHKL] := GetHKLDisplayName(TempHKL)
 	;~ local tipTxt := "InKey" . (HKLDisplayName%TempHKL% ? " - " . HKLDisplayName%TempHKL% : "")
@@ -1625,6 +1663,23 @@ LShift::
  return
 */
 Nothing:
+	return
+
+DblTapToggleKbd:
+	if (dblTap = 5) {
+		dblTap =
+		goto HotkeyToggleKbd
+	} else {
+		dblTap = 5
+		SetTimer DoubleTapTimer, -400
+	}
+	return
+
+HotkeyToggleKbd:
+	OutputDebug ActiveKbd = %Activekbd%, LastActiveKbd = %lastactivekbd%
+	;~ pausedKbd := ActiveKbd
+	RequestKbd(ActiveAtLastReq)
+	;~ LastActiveKbd := pausedKbd
 	return
 
 DblTapDefKbd:

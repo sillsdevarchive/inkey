@@ -189,6 +189,18 @@ DoConfigure:
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Change to previous keyboard with double-tap:
 	Gui, 3:Add, Edit, x270 yp w80 vPrevKbdDoubleTap, %PrevKbdDoubleTap%
 
+	IniRead, ToggleKbdHotkey, InKey.ini, InKey, ToggleKbdHotkey
+	OldToggleKbdHotkey := ToggleKbdHotkey
+	TempString:=GetLang(151)
+	Gui, 3:Add, Text, xs w220, %TempString%  ; Toggle keyboard:
+	Gui, 3:Add, Edit, x270 yp w80 vToggleKbdHotkey, %ToggleKbdHotkey%
+
+	IniRead, ToggleKbdDoubleTap, InKey.ini, InKey, ToggleKbdDoubleTap
+	OldToggleKbdDoubleTap := ToggleKbdDoubleTap
+	TempString:=GetLang(152)
+	Gui, 3:Add, Text, xs w220, %TempString%  ; Toggle keyboard with double-tap:
+	Gui, 3:Add, Edit, x270 yp w80 vToggleKbdDoubleTap, %ToggleKbdDoubleTap%
+
 	IniRead, MenuHotkey, InKey.ini, InKey, MenuHotkey
 	OldMenuHotkey := MenuHotkey
 	TempString:=GetLang(48)
@@ -232,7 +244,7 @@ DoConfigure:
 	Gui, 3:Add, Edit, x270 yp w80 vAutoGrabContextHotkey, %AutoGrabContextHotkey%
 
 	TempString:=GetLang(55)
-	Gui, 3:Add, Button, x280 y480 w160 h40, %TempString%  ; Restore Defaults
+	Gui, 3:Add, Button, xs yp+30 w160 h20, %TempString%  ; Restore Defaults
 
 	Gui, 3:Show, xCenter yCenter h580 w460, InKey Options
 	if (welcome)
@@ -249,8 +261,10 @@ DoConfigure:
 	GuiControl,, DefaultKbdDoubleTap, RShift
 	GuiControl,, NextKbdHotkey, ^#Right
 	GuiControl,, PrevKbdHotkey, ^#Left
+	GuiControl,, ToggleKbdHotkey, ^#/
 	GuiControl,, NextKbdDoubleTap, RControl
 	GuiControl,, PrevKbdDoubleTap, LControl
+	GuiControl,, ToggleKbdDoubleTap, LControl
 	GuiControl,, MenuHotkey, ^#Up
 	GuiControl,, MenuDoubleTap, LShift
 	GuiControl,, ChangeSendingMode, ^#=
@@ -602,6 +616,40 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldPrevKbdDoubleTap%, DblTapPrevKbd, UseErrorLevel Off
 			IniWrite, %PrevKbdDoubleTap%, InKey.ini, InKey, PrevKbdDoubleTap
+		}
+	}
+	if ToggleKbdHotkey<>
+	{
+		If ToggleKbdHotkey <> OldToggleKbdHotkey
+		{
+			Hotkey, %OldToggleKbdHotkey%, RequestToggleKbd, UseErrorLevel Off
+			Hotkey, %ToggleKbdHotkey%, RequestToggleKbd, UseErrorLevel On
+			IniWrite, %ToggleKbdHotkey%, InKey.ini, InKey, ToggleKbdHotkey
+		}
+	}
+	else
+	{
+		If ToggleKbdHotkey <> OldToggleKbdHotkey
+		{
+			Hotkey, %OldToggleKbdHotkey%, RequestToggleKbd, UseErrorLevel Off
+			IniWrite, %ToggleKbdHotkey%, InKey.ini, InKey, ToggleKbdHotkey
+		}
+	}
+	if ToggleKbdDoubleTap<>
+	{
+		If ToggleKbdDoubleTap <> OldToggleKbdDoubleTap
+		{
+			Hotkey, %OldToggleKbdDoubleTap%, DblTapToggleKbd, UseErrorLevel Off
+			Hotkey, %ToggleKbdDoubleTap%, DblTapToggleKbd, UseErrorLevel On
+			IniWrite, %ToggleKbdDoubleTap%, InKey.ini, InKey, ToggleKbdDoubleTap
+		}
+	}
+	else
+	{
+		If ToggleKbdDoubleTap <> OldToggleKbdDoubleTap
+		{
+			Hotkey, %OldToggleKbdDoubleTap%, DblTapToggleKbd, UseErrorLevel Off
+			IniWrite, %ToggleKbdDoubleTap%, InKey.ini, InKey, ToggleKbdDoubleTap
 		}
 	}
 	if MenuHotkey<>
