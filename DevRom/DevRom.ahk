@@ -58,7 +58,7 @@ HISTORY:
 ;________________________________________________________________________________________________________________
 ; This section is required at the top of every InKey keyboard script:
 
-K_MinimumInKeyLibVersion = 0.092
+K_MinimumInKeyLibVersion = 0.903
 	; The version number of the InKeyLib.ahki file that the keyboard developer used while writing this script.
 	; It can be found near the top of the InKeyLib.ahki file.
 	; It may be lower than the InKey version number.
@@ -83,7 +83,7 @@ OnLoadScript:	; InKeyLib will call this subroutine just once, when the script is
 	UseLLA := GetParam("UseLLA", 1) ; for languages that don't need LLA (ळ), shift+L can give a shortcut for lo-R (e.g in क्र) normally obtained by typing  ; r
 	SmartQuotes := GetParam("SmartQuotes", 0)
 	ApostropheForTone := GetParam("ApostropheForTone", 0)
-	OnlyDeadKeyForVowels := GetParam("OnlyDeadKeyForVowels", 0)
+	UseSmartVowels := not GetParam("OnlyDeadKeyForVowels", 0)
 
 ; Now we can register the rotas.
 RegisterRota(1, "। . ॥	…"
@@ -101,21 +101,7 @@ RegisterRota(3, "र्	ऋ")
 ;|	र्		 0930 094D		 devanagari_letter_ra devanagari_sign_virama
 ;|	ऋ		 090B		 devanagari_letter_vocalic_r
 
-; Alternate keying for ksHa as k;z.  You could also type it at k;S or simply Z
-RegisterRota(4, "क्	क्ष"
-;|	क्		 0915 094D		 devanagari_letter_ka devanagari_sign_virama
-;|	क्ष		 0915 094D 0937		 devanagari_letter_ka devanagari_sign_virama devanagari_letter_ssa
-	, 0x936)	;|	devanagari_letter_sha (श)
 
-; Add candra mark to create candra E and O, or press twice to create OM.
-RegisterRota(5, "ा ॉ	ए ऍ	ो ॉ	आ ऑ	ओ ऑ	े ॅ	ॅ ॐ"
-;|	ा ॉ		 093E |  0949		 devanagari_vowel_sign_aa |  devanagari_vowel_sign_candra_o
-;|	ए ऍ		 090F |  090D		 devanagari_letter_e |  devanagari_letter_candra_e
-;|	ो ॉ		 094B |  0949		 devanagari_vowel_sign_o |  devanagari_vowel_sign_candra_o
-;|	आ ऑ		 0906 |  0911		 devanagari_letter_aa |  devanagari_letter_candra_o
-;|	ओ ऑ		 0913 |  0911		 devanagari_letter_o |  devanagari_letter_candra_o
-;|	े ॅ		 0947 |  0945		 devanagari_vowel_sign_e |  devanagari_vowel_sign_candra_e
-	, 0x945, 0, 0, 3) ;|	devanagari_vowel_sign_candra_e (ॅ)
 
 ; Pressing colon key.  If you use ः more often than ऽ, just swap their order in this rota.
 RegisterRota(6, ": ऽ ः	::"
@@ -134,139 +120,130 @@ RegisterRota(9, "]	⌋", 0x5D) ;|	right_square_bracket (])
 ;|	]		 005D		 right_square_bracket
 ;|	⌋		 230B		 right_floor
 
-; Pressing Y key:   n;y for NYA, g;y for GYA (and nxy and gxy as alternatives to nY and gY)
-RegisterRota(10, "न् ञ	न्‍ न्य	ग् ज्ञ	ग्‍ ग्य", 0x92F, 0, 0, 1)
+
 
 ; Pressing GreaterThan key (>) for nukta and abbreviation symbol
 RegisterRota(11, "़ ॰", 0x93C)
+
+reConsN = [क-हक़-य़]\x{93c}?
+reSyll = %reConsN%(?:\x{94d}[\x{200d}\x{200c}]*%reConsN%)*(?:[\x{93e}-\x{94c}])?
 
 return
 
 ;=================================================================================================
 
-;*** BkSp / Sp / Tab
-; $Backspace::UndoLast()
-; $Space::DoSpace()
-; $Tab::DoTab()
-; $Enter::DoEnter()
-;*
 
-;*** Some general-purpose functions we utilize.
-; More efficient than using a store.  More maintainable than embedding conditions directly in the code.
-IsConsonant(c) {
-	return (c >= 0x915 and c <= 0x939)	;|	devanagari_letter_ka (क)  devanagari_letter_ha (ह)
-}
+; Key: Shift +R   - The flying reph typed in written (not phonetic) order.
+; You can get a flying reph in phonetic order by typing r ; before the syllable.
+; DevRom also allows you to obtain a flying reph by typing R at any point during or
+; following the construction of the syllable.
+; e.g. कर्ल़ि can be typed kl>iR or kl>Ri or klR>i.
+$+r::InCase(Replace(reSyll) With("र्$0") ElseSend("र्"))
 
-IsConsOrNukta(c) {
-	return (IsConsonant(c) or c=0x93C)	;|	devanagari_sign_nukta (़)
-}
-
-IsMatra(c) {
-	return (c >= 0x93E and c <= 0x94C)	;|	devanagari_vowel_sign_aa (ा)  devanagari_vowel_sign_au (ौ)
-}
-;*
 
 ;*** VOWELS
 
-$q::SendChar(1, 1)	; Deadkey 1: For forcing independent vowels
+$q::SetDeadkey(1)	; Deadkey 1: For forcing independent vowels
 
-DoVowel(syl, dep) {
-	global OnlyDeadKeyForVowels
-	outputdebug ODKFV = "%OnlyDeadKeyForVowels%"
-	if (OnlyDeadKeyForVowels)
-		SendChar(flags() = 1 ? syl : dep)
-	else
-		SendChar(IsConsOrNukta(ctx()) ? dep : syl)
+
+SendVowel(syl, dep) {
+; Shortcut for performing normal vowel behavior.  Could be a preprocessor macro in TINKER.
+	global
+	if (Option("UseSmartVowels")) {    ; This if-else construction would be a preprocessor conditional in TINKER
+		return (IsDeadkey(1) ? Send(syl) : InCase(After(reConsN)  ThenSend(dep)  ElseSend(syl)))
+	} else {
+		return (Send(IsDeadkey(1) ? syl : dep))
+	}
 }
 
-$a::
-if (ctx() = 0x905)		; just as with DevRom, a syllabic A followed by 'a' gives syllabic AA
-	ReplaceChar(0x906)	;|	devanagari_letter_aa (आ)
-else
-	DoVowel(0x905, 0x93E)		;|	devanagari_letter_a (अ)  devanagari_vowel_sign_aa (ा)
-return
+$i::InCase(Map("ि⇛ी", "इ⇛ई"))                          ; double tap to turn short i into long ii
+	|| (InCase(After(reConsN) Replace("र्") with(IsDeadKey(1) ? "ऋ" : "ृ")))   ; r;qi / r;i shortcut for ऋ / ृ
+	|| SendVowel("इ", "ि")
 
-$i::
-cc3 := ctx(3)
-DoRota(IsConsOrNukta(cc3) ? 2 : 3) ; Check for r;i shortcut for ऋ / ृ
-	or DoVowel(0x907, 0x93F) ;|	devanagari_letter_i (इ)  devanagari_vowel_sign_i (ि)
-return
+$+i::SendVowel("ई","ी")
 
-$+a::DoVowel(0x906, 0x93E)	;|	devanagari_letter_aa (आ)  devanagari_vowel_sign_aa (ा)
-$+i::DoVowel(0x908, 0x940)	;|	devanagari_letter_ii (ई)  devanagari_vowel_sign_ii (ी)
-$u::DoVowel(0x909, 0x941)	;|	devanagari_letter_u (उ)  devanagari_vowel_sign_u (ु)
-$+u::DoVowel(0x90A, 0x942)	;|	devanagari_letter_uu (ऊ)  devanagari_vowel_sign_uu (ू)
-$e::DoVowel(0x90F, 0x947)	;|	devanagari_letter_e (ए)  devanagari_vowel_sign_e (े)
-$+e::DoVowel(0x910, 0x948)	;|	devanagari_letter_ai (ऐ)  devanagari_vowel_sign_ai (ै)
-$o::DoVowel(0x913, 0x94B)	;|	devanagari_letter_o (ओ)  devanagari_vowel_sign_o (ो)
-$+o::DoVowel(0x914, 0x94C)	;|	devanagari_letter_au (औ)  devanagari_vowel_sign_au (ौ)
-$+h::DoRota(5)		; Shift+H adds candra.  Two of them makes OM.   (ॐ)
-$^!l::DoVowel(0x90B, 0x943)	; Old DevRom keys for devanagari_letter_vocalic_r (ऋ)  devanagari_vowel_sign_vocalic_r (ृ).  You can also use r;i
-;*
+$a::InCase(Replace("अ") with("आ"))  ; just as with DevRom, a syllabic A followed by 'a' gives syllabic AA
+	or SendVowel("अ", "ा")
+
+$+a::SendVowel("आ", "ा")	;|	devanagari_letter_aa (आ)  devanagari_vowel_sign_aa (ा)
+
+$u::InCase(Map("ु⇛ू", "उ⇛ऊ"))                          ; double tap to turn short u into long uu
+	|| SendVowel("उ", "ु")
+
+$+u::SendVowel("ऊ", "ू")	;|	devanagari_letter_uu (ऊ)  devanagari_vowel_sign_uu (ू)
+
+$e::SendVowel("ए", "े")	;|	devanagari_letter_e (ए)  devanagari_vowel_sign_e (े)
+
+$+e::InCase(Map("े⇛ै", "ए⇛ऐ"))                          ; double tap to turn e into ai
+	|| SendVowel("ऐ", "ै")	;|	devanagari_letter_ai (ऐ)  devanagari_vowel_sign_ai (ै)
+
+$o::InCase(Map("ो⇛ौ", "ओ⇛औ"))                          ; double tap to turn e into ai
+	|| SendVowel("ओ", "ो")	;|	devanagari_letter_o (ओ)  devanagari_vowel_sign_o (ो)
+
+$+o::SendVowel("औ", "ौ")	;|	devanagari_letter_au (औ)  devanagari_vowel_sign_au (ौ)
+
+$+h::InCase(Map("→ॅ→ॐ", "ा→ॉ", "ए→ऍ", "ो→ॉ", "आ→ऑ", "ओ→ऑ", "े→ॅ"))   ; Shift+H adds candra.  Two of them makes OM.   (ॐ)
+
+$^!l::SendVowel("ऋ", "ृ")	; Old DevRom keys for devanagari_letter_vocalic_r (ऋ)  devanagari_vowel_sign_vocalic_r (ृ).  You can also use r;i
+
 
 ;*** CONSONANTS
-$k::SendChar(0x915)		;|	devanagari_letter_ka (क)
-$+k::SendChar(0x916)		;|	devanagari_letter_kha (ख)
-$g::SendChar(0x917)		;|	devanagari_letter_ga (ग)
-$+g::SendChar(0x918)		;|	devanagari_letter_gha (घ)
-$+m::SendChar(0x919)		;|	devanagari_letter_nga (ङ)
-$c::SendChar(0x91A)		;|	devanagari_letter_ca (च)
-$+c::SendChar(0x91B)		;|	devanagari_letter_cha (छ)
-$j::SendChar(0x91C)		;|	devanagari_letter_ja (ज)
-$+j::SendChar(0x91D)		;|	devanagari_letter_jha (झ)
-$^!n::SendChar(0x91E)		;|	devanagari_letter_nya (ञ)
-$f::SendChar(0x91F)		;|	devanagari_letter_tta (ट)
-$+f::SendChar(0x920)		;|	devanagari_letter_ttha (ठ)
-$v::SendChar(0x921)		;|	devanagari_letter_dda (ड)
-$+v::SendChar(0x922)		;|	devanagari_letter_ddha (ढ)
-$+n::SendChar(0x923)		;|	devanagari_letter_nna (ण)
-$t::SendChar(0x924)		;|	devanagari_letter_ta (त)
-$+t::SendChar(0x925)		;|	devanagari_letter_tha (थ)
-$d::SendChar(0x926)		;|	devanagari_letter_da (द)
-$+d::SendChar(0x927)		;|	devanagari_letter_dha (ध)
-$n::SendChar(0x928)		;|	devanagari_letter_na (न)
-$p::SendChar(0x92A)		;|	devanagari_letter_pa (प)
-$+p::SendChar(0x92B)		;|	devanagari_letter_pha (फ)
-$b::SendChar(0x92C)		;|	devanagari_letter_ba (ब)
-$+b::SendChar(0x92D)		;|	devanagari_letter_bha (भ)
-$m::SendChar(0x92E)		;|	devanagari_letter_ma (म)
-$r::SendChar(0x930)		;|	devanagari_letter_ra (र)
-$l::SendChar(0x932)		;|	devanagari_letter_la (ल)
-$w::SendChar(0x935)		;|	devanagari_letter_va (व)
-$h::SendChar(0x939)		;|	devanagari_letter_ha (ह)
-$+w::SendChars("0x926,0x94D,0x935")	; Shortcut for dwa ;|	devanagari_letter_da (द)  devanagari_sign_virama (्)  devanagari_letter_va (व)
+$k::Send("क")
+$+k::Send("ख")
+$g::Send("ग")
+$+g::Send("घ")
+$+m::Send("ङ")
+$c::Send("च")
+$+c::Send("छ")
+$j::Send("ज")
+$+j::Send("झ")
+$^!n::Send("ञ")
+$f::Send("ट")
+$+f::Send("ठ")
+$v::Send("ड")
+$+v::Send("ढ")
+$+n::Send("ण")
+$t::Send("त")
+$+t::Send("थ")
+$d::Send("द")
+$+d::Send("ध")
+$n::Send("न")
+$p::Send("प")
+$+p::Send("फ")
+$b::Send("ब")
+$+b::Send("भ")
+$m::Send("म")
+$r::Send("र")
+$l::Send("ल")
+$w::Send("व")
+$h::Send("ह")
+$+w::Send("द्व")	; Shortcut for dwa ;|	devanagari_letter_da (द)  devanagari_sign_virama (्)  devanagari_letter_va (व)
+$y::InCase(Map("न्→ञ", "न्‍→न्य", "ग्→ज्ञ", "ग्‍→ग्य")  elseSend("य"))	; Pressing Y key:   n;y for NYA, g;y for GYA (and nxy and gxy as alternatives to nY and gY)
 
-$y::DoRota(10)	; for NYA, GYA, etc.
 $^!2::		; old DevRom keys for GYA
-$^!j::SendChars("0x91C,0x94D,0x91E")	;|	devanagari_letter_ja (ज)  devanagari_sign_virama (्)  devanagari_letter_nya (ञ)
-$+y::SendChars("0x94D,0x92F")		; shortcut for join -ya  ;|	devanagari_sign_virama (्)  devanagari_letter_ya (य)
+$^!j::Send("ज्ञ")	;|	devanagari_letter_ja (ज)  devanagari_sign_virama (्)  devanagari_letter_nya (ञ)
+$+y::Send("्य")		; shortcut for join -ya  ;|	devanagari_sign_virama (्)  devanagari_letter_ya (य)
 
-$s::SendChar(0x938)		;|	devanagari_letter_sa (स)
-$+z::SendChars("0x915,0x94D,0x937")	; shortcut for ksHa ;|	devanagari_letter_ka (क)  devanagari_sign_virama (्)  devanagari_letter_ssa (ष)
-$+s::SendChar(SwapSHA ? 0x936 : 0x937)		;|	devanagari_letter_ssa (ष)
+$s::Send("स")
+$+z::Send("क्ष")	; shortcut for ksHa ;|	devanagari_letter_ka (क)  devanagari_sign_virama (्)  devanagari_letter_ssa (ष)
+$+s::Send(SwapSHA ? "श" : "ष")		;|	devanagari_letter_ssa (ष)
 $z::
 if (SwapSHA)
-	SendChar(0x937)
+	Send("ष")
 else
-	DoRota(4)			; Alternate keying for ksHa as k;z.
+	InCase(Map("क्→क्ष") elseSend("श"))  ; Alternate keying for ksHa as k;z.  You could also type it at k;S or simply Z
 return
 
-$+l::
-if (UseLLA)
-	SendChar(0x933)	;|	devanagari_letter_lla (ळ)
- else
-	SendChars("0x94D,0x930")	;|	devanagari_sign_virama (्)  devanagari_letter_ra (र)
-return
-;*
+$+l::Send(UseLLA ? "ळ" : "्र")
 
 ;*** MISC:
 
 $+`;::DoRota(6)  ; Colon key => rota: colon, avagraha, visarga
-$^!h::SendChar(0x93D)		; Old DevRom key for devanagari_sign_avagraha (ऽ)
-$^!;::SendChar(0x903)		; Old DevRom key for devanagari_sign_visarga (ः)
+$^!h::Send("ऽ")		; Old DevRom key for devanagari_sign_avagraha (ऽ)
+$^!;::Send("ः")		; Old DevRom key for devanagari_sign_visarga (ः)
 
-$`::SendChar(0x901)		;|	devanagari_sign_candrabindu (ँ)
-$~::SendChar(0x902)		;|	devanagari_sign_anusvara (ं)
+$`::Send("ँ")    ;    0x901)		;|	devanagari_sign_candrabindu (ँ)
+$~::Send("ं") ; 0x902)		;|	devanagari_sign_anusvara (ं)
 
 $.::DoRota(1)			; Key: Period (.)
 $^!3::SendChar(0x2026)		; Old DevRom key for horizontal_ellipsis (…)
@@ -277,35 +254,24 @@ $^![::SendChar(0x93C)		; Old DevRom key for devanagari_sign_nukta (़)
 
 $;::SendChar(0x94D)		; Key: semi-colon (;)   => devanagari_sign_virama (्)
 
-$x::        ; Key: X
-swap := (ctx()=0x939 ? SwapHalfH : 0)	 	;|	devanagari_letter_ha (ह)
-SendChar(0x94D)	;|	devanagari_sign_virama (्)
-SendChar(swap ? 0x200C : 0x200D) 	 ;|	zero_width_non-joiner (‌)  zero_width_joiner (‍)
-return
-
-$+x::		; Key: Shift+X
-swap := (ctx()=0x939 ? SwapHalfH : 0)	 	;|	devanagari_letter_ha (ह)
-SendChar(0x94D)	;|	devanagari_sign_virama (्)
-SendChar(swap ? 0x200D : 0x200C) 	 ;|	zero_width_joiner (‍)  zero_width_non-joiner (‌)
-return
-
-$+r::DoReph()		; Key: Shift +R   - quirkiest part of DevRom, the flying reph typed in written (not phonetic) order.
-	; You can always get a flying reph by typing r ; before the consonant.
-	; DevRom also allows you to obtain a flying reph by typing R _after_ the syllable.
-	; e.g. कर्ल़ि can be typed kl>iR or kl>Ri or klR>i.
-
-DoReph() {
-	c1 := ctx()
-	if (IsConsonant(c1))
-		return InsertChars("0x930,0x94D", 0, 1)	;|	devanagari_letter_ra (र)  devanagari_sign_virama (्)
-	c2 := ctx(2)
-	if (IsConsonant(c2) and (IsMatra(c1) or c1=0x93C))  ; Cons + (matra or nukta)
-		return InsertChars("0x930,0x94D", 0, 2)
-	c3 := ctx(3)
-	if (IsConsonant(c3) and c2=0x93C and IsMatra(c1)) ; Cons + nukta + matra
-		return InsertChars("0x930,0x94D", 0, 3)
-	SendChars("0x930,0x94D")
+$x::       ; Key: X		- For virama+ZWJ.  (Exception:  With SwapHalfH option, after HA send ZWNJ)
+if (SwapHalfH) {
+		InCase(After("ह") thenSend("्\x{200C}") elseSend("्\x{200D}"))
+} else {
+		Send("्\x{200D}")
 }
+return
+
+$+x::		; Key: Shift+X    - For virama+ZWNJ.  (Exception:  With SwapHalfH option, after HA send ZWJ)
+if (SwapHalfH) {
+		InCase(After("ह") thenSend("्\x{200D}") elseSend("्\x{200C}"))
+} else {
+		Send("्\x{200C}")
+}
+return
+
+
+
 ;*
 ;---------------------------------------------
 
