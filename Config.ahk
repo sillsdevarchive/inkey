@@ -139,6 +139,11 @@ DoConfigure:
 	}
 	Gui, 3:Add, DropDownList, xs+180 yp Choose%idx% vCurrentLangText, %AvailableLangs%
 
+	TempString:=GetLang(153) " " A_WorkingDir    ; InKey folder:
+	Gui, 3:Add, Text, xs yp+30, %TempString%
+	TempString:=GetLang(154)  ; Open
+	Gui, 3:Add, Button, xs yp+20 w160 h20 gOpenInKeyFolder, %TempString%
+
 	; TAB #3: INKEY HOTKEYS
 	Gui, 3:Tab, 3
 	TempString:=GetLang(38)
@@ -244,7 +249,7 @@ DoConfigure:
 	Gui, 3:Add, Edit, x270 yp w80 vAutoGrabContextHotkey, %AutoGrabContextHotkey%
 
 	TempString:=GetLang(55)
-	Gui, 3:Add, Button, xs yp+30 w160 h20, %TempString%  ; Restore Defaults
+	Gui, 3:Add, Button, xs yp+30 w160 h20 gRestoreDefaults, %TempString%  ; Restore Defaults
 
 	Gui, 3:Show, xCenter yCenter h580 w460, InKey Options
 	if (welcome)
@@ -256,7 +261,11 @@ DoConfigure:
 	}
 	Return
 
-3ButtonRestoreDefaults:
+OpenInKeyFolder:
+run explorer "%A_workingdir%"
+return
+
+RestoreDefaults:
 	GuiControl,, DefaultKbdHotkey, ^#Down
 	GuiControl,, DefaultKbdDoubleTap, RShift
 	GuiControl,, NextKbdHotkey, ^#Right
@@ -264,7 +273,7 @@ DoConfigure:
 	GuiControl,, ToggleKbdHotkey, ^#/
 	GuiControl,, NextKbdDoubleTap, RControl
 	GuiControl,, PrevKbdDoubleTap, LControl
-	GuiControl,, ToggleKbdDoubleTap, LControl
+	GuiControl,, ToggleKbdDoubleTap, LAlt
 	GuiControl,, MenuHotkey, ^#Up
 	GuiControl,, MenuDoubleTap, LShift
 	GuiControl,, ChangeSendingMode, ^#=

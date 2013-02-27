@@ -15,6 +15,7 @@ ChangeSendingMode:
 	OutputDebug ChangeSendingMode to %modestr%
 	TrayTip,,Sending Mode: %modestr%
 	; TODO: Save setting for this app
+	; TODO: regionalize text
 	return
 
 CommitKeystroke(ByRef DelText, ByRef AddText="", uFlags=0) {
@@ -59,6 +60,7 @@ _DoPureBackSp() {
 	CurrPhase := 0
 	CurrDeadkey := 0
 	LastRotId := 0
+	showstack()
 }
 
 _ChangeText(ByRef DelText, byref AddText, uFlags=0) {
@@ -155,6 +157,7 @@ _ChangeText(ByRef DelText, byref AddText, uFlags=0) {
 	CurrDeadkey := 0
 	CurrBS := 0
 	LastRotId := 0
+	showstack()
 	return 3 ; OK
 }
 
@@ -331,6 +334,7 @@ initContext()
 	varSetCapacity(ctxStack, 2048, 0)		; 2048 = maxstack * 2
 	varSetCapacity(flagStack, 4096, 0)		; 4096 = maxstack * 4
 		;setformat integerfast, d
+	OutputDebug Context cleared
 }
 
 /*
@@ -489,7 +493,7 @@ Receive_WM_COPYDATA(wParam, lParam)
 
 		; Handle string passed as a Send command (0x901A)
 		if (dwNum = 0x901A) {
-			outputdebug %A_LineNumber%: Send("%StringData%")
+			;~ outputdebug %A_LineNumber%: Send("%StringData%")
 			interpolate(StringData)
 			return CommitKeystroke("", StringData, wParam)
 		}
@@ -718,7 +722,7 @@ DoRota(id) {
 		;~ if (rotTime - priorRT > rotaPeriod) {
 			;showflags()
 			local ms := rotTime - priorRT
-			outputdebug % "rota expired or not match flags: " . priorRT . "|" . rotTime . " [" . ms . "] " . rotaPeriod . ", " . flags() . ", " . rotFlags%id%
+			;~ outputdebug % "rota expired or not match flags: " . priorRT . "|" . rotTime . " [" . ms . "] " . rotaPeriod . ", " . flags() . ", " . rotFlags%id%
 			if (rotDef%id%)
 				CommitKeystroke("", rotDef%id%, rotFlags%id%)
 			if (rotStyle%id% & 16)
@@ -869,7 +873,7 @@ InContextReplace(ByRef AfterRegEx, ByRef FindRegEx, ByRef ReplaceTxt, ByRef Else
 		dumpstr(ReplaceTxt, "ReplaceTxt:")
 		return 4 ; regex error
 	}
-	OutputDebug %A_Linenumber%: foundPos = %foundPos%, match = %match%, LBLen = %LBLen%
+	;~ OutputDebug %A_Linenumber%: foundPos = %foundPos%, match = %match%, LBLen = %LBLen%
 	foundPos += LBLen
 
 	if (foundPos) {
@@ -1152,11 +1156,11 @@ OnUndoLast() {
 	Gui 2:Hide
 	global currBS
 	BSCt := currBS + 1
-	if (BSCt < 4) 		; TODO:  This is currently hard-coded so that after 4 Undo actions, we'll just start doing pure backspaces.
+	;~ if (BSCt < 4) 		; TODO:  This is currently hard-coded so that after 4 Undo actions, we'll just start doing pure backspaces.
 									; Actually, sometimes a true undo would back up more than one BS (e.g. NFD), and 4 is too arbitrary.  May need to be based on a collapsed history.
 		UndoKeystroke()	; Also clears currBS
-	else
-		SendBackspace()
+	;~ else
+		;~ SendBackspace()
 	currBS := BSCt
 }
 
@@ -1183,19 +1187,20 @@ OnBack(ct) {
 OnEnter() {
 	Gui 2:Hide
 	Send {Enter}
-	push(13)
+	initContext()
 }
 
 OnTab() {
 	Gui 2:Hide
 	Send {Tab}
-	push(9)
+	initContext()
 }
 
 OnSpace() {
 	Gui 2:Hide
-	Send {Space}
-	push(32)
+	CommitKeystroke("", " ")
+	;~ Send {Space}
+	;~ push(32)
 }
 
 ; Send a character, optionally remembering a 32-bit flags value associated with it
@@ -1213,7 +1218,7 @@ SendChar(ch, uFlags=0) {
 		if (ch>1) {
 			CommitKeystroke("", chr(ch), uFlags)
 		} else {
-			TrayTip,, This keyboard uses SendChar(ch flags) with ch of 0 or 1. `nIt should be updated to use SetPhase() or SetDeadkey() instead.
+			OutputDebug This keyboard uses SendChar(ch flags) with ch of 0 or 1. `nIt should be updated to use SetPhase() or SetDeadkey() instead.
 			push(ch, uFlags)
 		}
 	} else {  ; SMP character. Convert to surrogate pair
@@ -1228,7 +1233,6 @@ SendChar(ch, uFlags=0) {
 		;~ push(trail, uFlags)
 	}
 	;~ global LastRotBack =
-	showstack()	; //DEBUG
 }
 
 ;~ SendSMPChar(lead, trail, uFlags=0) {
@@ -1451,35 +1455,36 @@ ctxStr(codeUnits) {
 showstack()
 {
 	global
-	local v
-	local s =
-	local s2 =
-	SetFormat integerfast, H
-	Loop %stackIdx%
-	{
-		v := numGet(ctxStack,2*(A_Index - 1), "UShort")
-		s = %s%|%v%
-	}
+	;~ local v
+	;~ local s =
+	;~ local s2 =
+	;~ SetFormat integerfast, H
+	;~ Loop %stackIdx%
+	;~ {
+		;~ v := numGet(ctxStack,2*(A_Index - 1), "UShort")
+		;~ s = %s%|%v%
+	;~ }
 
-	s2 := StrGet(&ctxStack, stackIdx)
-	OutputDebug ctxStack: %s2%
-	outputdebug ctxStack: %s%   [idx = %stackIdx%]
-	;~ showflags()
+	;~ s2 := StrGet(&ctxStack, stackIdx)
+	;~ OutputDebug ctxStack: %s2%
+	;~ outputdebug ctxStack: %s%   [idx = %stackIdx%]
+	;;showflags()
 	SetFormat integerfast, d
+	dumpstr(ctxStack, "context@" stackIdx ": ", stackIdx, 20)
 }
 ;A debug routine to show the flags
-showflags()
-{
-	global
-	local v
-	local s =
-	Loop %stackIdx%
-	{
-		v := numGet(flagStack,4*(A_Index - 1), "UInt")
-		s = %s%|%v%
-	}
-	outputdebug flagStack: %s%   [idx = %stackIdx%]
-}
+;~ showflags()
+;~ {
+	;~ global
+	;~ local v
+	;~ local s =
+	;~ Loop %stackIdx%
+	;~ {
+		;~ v := numGet(flagStack,4*(A_Index - 1), "UInt")
+		;~ s = %s%|%v%
+	;~ }
+	;~ outputdebug flagStack: %s%   [idx = %stackIdx%]
+;~ }
 
 
 ; <<DEBUG
@@ -1495,17 +1500,24 @@ pop()
 }
 */
 
-dumpStr(byref str, byref txt, len=-1)
+dumpStr(byref str, byref txt, len=-1, max=0)
 {
 	if (len=-1)
 		len := strlen(str)
-	s := "["
+	start := 0
+	s := "  ["
+	if (max>0 and len>max) {
+		start := len - max
+		s := "..."
+	}
+
 	setformat integerfast, H
-	Loop %len%
+
+	Loop % len - start
 	{
-		v := numGet(str,2*(A_Index - 1), "UShort")
+		v := numGet(str,2*(A_Index - 1 + start), "UShort")
 		if (v<32 or v>254)
-			s .= "<" v ">"
+			s .= "<" substr(v,3) ">"
 		else
 			s .= chr(v)
 	}

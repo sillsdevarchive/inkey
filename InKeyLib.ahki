@@ -8,7 +8,7 @@
 #LTrim			; This command causes leading whitespace in continuation sections (e.g. multi-line rota strings) to be trimmed.
 				; If you prefer otherwise, use #LTrim Off
 
-K_InKeyLibVersion = 0.903	; At the top of your script, the very first line of code
+K_InKeyLibVersion = 1.904	; At the top of your script, the very first line of code
 	; should set K_MinimumInKeyLibVersion to this number.
 	; This will ensure that if a user has an older version of InKeyLib.ahki that
 	; does not support the functionality that your script requires, he will be
@@ -25,7 +25,7 @@ K_InKeyLibVersion = 0.903	; At the top of your script, the very first line of co
 	; 0.300 SendText() and InsertText() functions
 	; 0.900 MAJOR: to be documented
 
-K_ProtocolNum = 4	; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number is incremented in both.
+K_ProtocolNum = 5	; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number is incremented in both.
 			; This ensures that communication conventions between InKey and a keyboard will match.
 
 goto K_DO_INITIALIZE
@@ -47,7 +47,7 @@ SendChar(cp, uFlags=0) {
 ; While this is theoretically more efficient than using Send(), the savings only amounts to about 0.2 milliseconds,
 ; so use whichever makes the keyboard easier to manage.
 	if (cp & 0xf800 = 0xd800)
-		TrayTipQ("This keyboard uses SendChar with surrogate code units.  Correct it to use actual codepoint.")
+		OutputDebug This keyboard uses SendChar with surrogate code units.  Correct it to use actual codepoint.
 
 	ok := SendToInKey(0x8010, cp, uFlags)
 	if (ok)
@@ -289,7 +289,7 @@ Beep(n="*-1") {
 ; If you use parameters differently, parse K_Params directly as appropriate.
 Option(optionName, defaultVal = 0) {
 	global K_Params
-	if RegExMatch(K_Params, "i)(?<=\b" . paramName . "=)\S+", v)
+	if RegExMatch(K_Params, "i)(?<=\b" . optionName . "=)\S+", v)
 		return v
 	return defaultVal
 }
@@ -467,8 +467,7 @@ ReplaceChar(cp, numCharsToRep=1, endingPos=1, uFlags=0) {
 InsertChar(u, uFlags=0) {
 ; DEPRECATED.  Use InCase() instead
 ; Insert a character (whose code is u) immediately prior to the most recent character.
-	w := "This keyboard uses the old InsertChar() function.  It should be updated to use InCase() instead."
-	TrayTipQ(w)
+	OutputDebug This keyboard uses the old InsertChar() function.  It should be updated to use InCase() instead.
 	return InCase(Replace(".") with(Char(u) "$0", uFlags))
 	;~ OutputDebug %s%
 	;~ s := u . "," . uFlags
@@ -493,8 +492,7 @@ InsertChars(ChList, uFlags=0, pos=1) {
 	;~ NumPut(numCh, v, 6, "UShort")
 	;~ SendData(0x900B, v, 0, numCh*2 + 8)
 	;~ return 1
-	w := "This keyboard uses the old InsertChar() function.  It should be updated to use InCase() instead."
-	TrayTipQ(w)
+	OutputDebug This keyboard uses the old InsertChar() function.  It should be updated to use InCase() instead.
 	VarSetCapacity(v, strlen(chlist)*2, 0)
 	numCh := 0
 	Loop parse, ChList, CSV
@@ -747,7 +745,7 @@ InRota(MapCmd) {
 	}
 
 	local x := SendData(0x9005, rotaID)
-	outputdebug InRota() [%rotaID%] => %x%
+	;~ outputdebug InRota() [%rotaID%] => %x%
 	if (x < 2 or x > 3)
 		outputdebug ** ERROR: InRota error code %x%
 
@@ -984,7 +982,7 @@ params() {
 	local x=
 	Loop %0% {
 		local t := %A_Index%
-		OutputDebug params[%A_Index%] = %t%
+		;~ OutputDebug params[%A_Index%] = %t%
 		if (A_Index = 1)
 			K_InkeyProtocolNum := %A_Index%
 		else if (A_Index = 2)
