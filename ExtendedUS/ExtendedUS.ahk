@@ -16,7 +16,7 @@ HISTORY:
 ;________________________________________________________________________________________________________________
 ; This section is required at the top of every InKey keyboard script:
 
-K_MinimumInKeyLibVersion = 0.903
+K_MinimumInKeyLibVersion = 1.903
 	; The version number of the InKeyLib.ahki file that the keyboard developer used while writing this script.
 	; Look it up near the top of the InKeyLib.ahki file, and enter it here.
 	; It may be lower than the InKey version number.
@@ -29,7 +29,7 @@ K_MinimumInKeyLibVersion = 0.903
 
 ;________________________________________________________________________________________________________________
 OnLoadScript:	; InKeyLib will call this subroutine just once, when the script is first loaded, for any script initialization.
-	OnScreen(Button("→", "Alt+Period", "w24 h24", thenSend("→"))
+	OnScreen(Button("→", "Alt+FullStop", "w24 h24", thenSend("→"))
 			, Button("⇛", "Alt+Equals", "wp hp", thenSend("⇛"))
 			, Button("↺", "Alt+Comma", "wp hp", thenSend("↺")))
 	return
@@ -49,3 +49,30 @@ $!,::Send("↺")		; Alt comma (same key as left wedge) for a looping arrow
 ; Dash key:  double-tap for n-dash, triple-tap for m-dash.  If more than that, just go back to all dashes.
 $-::InCase(After("----") thenSend("-"))
 		or InCase(Map("→-⇛–⇛—⇛----"))
+
+
+; ________________________________________________
+; Special cases:  Not a typical kind of keyboard behavior.  No need to implement in TINKER.
+
+; Alt-x will convert any preceding hex digits into the character of that codepoint, including SMP
+$!x::
+cc := context(6)
+if (cc = "")   ; No context to work with
+	return
+if (RegExMatch(cc, "[0-9A-Fa-f]+$", hexdigits)) {  ; Hex digits to convert to text
+		hh := "0x" hexdigits
+		hh += 0
+		InCase(Replace(hexdigits) with(Char(hh)))
+		return
+}
+; Text character to convert to hex codepoint
+SetFormat integerfast, H
+lastChar := SubStr(cc, 0)
+lastCode := Asc(lastChar)
+if  (lastCode & 0xdc00 = 0xdc00)   { ; if a trailing surrogate
+	lastChar := SubStr(cc, -1)  					; get the whole SMP character
+	lastCode := Ord(lastChar)
+}
+InCase(Replace(lastChar) with(SubStr(lastCode, 3)))
+SetFormat integerfast, D
+return

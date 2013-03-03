@@ -10,13 +10,13 @@ Execution_Level=2
 Set_Version_Info=1
 Company_Name=InKeySoftware
 File_Description=InKey Keyboard Manager
-File_Version=1.9.0.4
+File_Version=1.9.0.5
 Inc_File_Version=0
 Internal_Name=inkey
 Legal_Copyright=(c) 2008-2013 InKeySoftware
 Original_Filename=InKey.ahk
 Product_Name=InKey Keyboard Manager
-Product_Version=1.9.0.4
+Product_Version=1.9.0.5
 [ICONS]
 Icon_1=%In_Dir%\inkey.ico
 
@@ -29,7 +29,7 @@ Icon_1=%In_Dir%\inkey.ico
 
 ; Main initialization
 	Outputdebug ___________________________ INKEY.AHK ___________________
-	ver = 1.904
+	ver = 1.905
 	K_ProtocolNum := 5 ; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number should be incremented in both files.
 	SetWorkingDir %A_ScriptDir%
 	onExit DoCleanup
@@ -1201,6 +1201,8 @@ CHECKLOCALE:
 
 ReinitKeyboard(n) {
 	; NOT global
+	global	VKbdHwnd
+	global	VKbdShowing
 	initContext()
 	s := n . "|" . GetKbdParams(n)
 	rk := Send_WM_COPYDATA(n, 0x9201, s)
@@ -1637,6 +1639,8 @@ LoadSubstituteKeyboard(lang, ByRef layoutName) {
 ~*Up::
 ~*Home::
 ~*End::
+~^v::
+~+Ins::
 ~*PgUp::
 ~*PgDn::   ; BUG:  And there is an active Kbd??
 	; outputdebug arrow key: ucg = %AutoGrabContext%
@@ -1853,12 +1857,12 @@ refreshContext:
 	ClipSaved := ClipboardAll   ; Save the entire clipboard to a variable
 	clipboard =
 	initContext()
-	Send +{Left}^c			; Send Shift+Left to select, and then Ctrl+C to copy
+	Send ^+{Left}^c			; Send Ctrl+Shift+Left to select, and then Ctrl+C to copy
 	ClipWait 2	; Wait for clipboard
 	if (errorlevel) {
 		outputdebug No clipboard text found for refreshContext.
 	} else {
-		Send {Right}  ; To unselect text to the left
+		Send ^+{Right}{Left}  ; To unselect text to the left   ;TODO :BUG Does not work if text is last thing on line, moves left one.
 		x := clipboard
 		refreshStack(x)
 	}
