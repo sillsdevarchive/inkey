@@ -436,8 +436,8 @@ Receive_WM_COPYDATA(wParam, lParam)
 		}
 
 		; Handle string passed to register rota by InRota command (0x9024)
-		if (dwNum = 0x9024 and RegExMatch(StringData,"^(?P<ID>\w+)\x{1c}M:(?P<RS>[^\x{1c}]+)\x{1c}(?:E:(?P<E>[^\x{1c}]*)\x{1c})?(?:Ef:(?P<Ef>[^\x{1c}]*)\x{1c})?", ov_)) {
-			RegisterMap(ov_ID, ov_RS, ov_E, 0, ov_Ef ? ov_Ef : 0)  ; id, rotaSets, defTxt, style, uFlags
+		if (dwNum = 0x9024 and RegExMatch(StringData,"^(?P<ID>\w+)\x{1c}(?P<MT>M|T):(?P<RS>[^\x{1c}]+)\x{1c}(?:E:(?P<E>[^\x{1c}]*)\x{1c})?(?:Ef:(?P<Ef>[^\x{1c}]*)\x{1c})?", ov_)) {
+			RegisterMap(ov_ID, ov_RS, ov_E, (ov_MT="T" ? 8 : 0), ov_Ef ? ov_Ef : 0)  ; id, rotaSets, defTxt, style, uFlags
 			;~ OutputDebug *********** ov̠E = [%ov_E%]
 			return 3  ; TODO: check that if there is no E: this time but there was last time, is E set to empty??
 		}

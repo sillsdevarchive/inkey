@@ -47,8 +47,33 @@ $!,::Send("↺")		; Alt comma (same key as left wedge) for a looping arrow
 ; Other general-purpose auto-corrections
 
 ; Dash key:  double-tap for n-dash, triple-tap for m-dash.  If more than that, just go back to all dashes.
-$-::InCase(After("----") thenSend("-"))
-		or InCase(Map("→-⇛–⇛—⇛----"))
+;~ $-::InCase(After("----") thenSend("-"))
+		;~ or InCase(Map("→-⇛–⇛—⇛----"))
+
+;~ $-::InCase(Map("→-⇛–⇛—⇛----"))
+
+;~ $-::MultiTap() && InCase(Map("- – — ----"))
+		;~ or Send("-")
+
+
+$-::InCase(MultiTapMap("- – — ----"))
+		|| Send("-")
+
+$-::InCase(MultiTapMap("- – — ----") elseSend("-"))
+
+$-::InCase(DoMultiTapMap("- – — ----"))
+
+$i::InCase(MultiTapMap("ि ी", "इ ई"))
+	|| InCase(After("${Cons}")  thenSend("ि"))
+	|| Send("इ")
+
+$`::InCase(Map("\x{301} \x{300} \x{302} \x{30C} \x{304}"))
+	|| InCase(After() thenSend("\x{301}"))
+	|| Beep
+
+$`::InCase(DoMap("\x{301} \x{300} \x{302} \x{30C} \x{304}"))
+
+
 
 
 ; ________________________________________________

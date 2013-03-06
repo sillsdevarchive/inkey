@@ -76,7 +76,7 @@ InCase(ByRef CaseCommand) {
 	; F: Regex to find.  Must contain the symbol $F to indicate the position of the literal map-FROM text.
 	; R: Replacement expression.  Must contain $R to indicated the positon of the literal map-TO text.  May also contain backreferences such as $1.
 
-	if (SubStr(CaseCommand,1,1) = "M")  {
+	if (InStr("MT", SubStr(CaseCommand,1,1) )  {
 		return InRota(CaseCommand)
 	}
 
@@ -92,7 +92,7 @@ InCase(ByRef CaseCommand) {
 	return (x = 2 ? 1 : 0)
 }
 
-Map(rotaSets*) {
+Map(MapStringList*) {
 ;	 A Map is comprised of one or more mapping strings.
 ;		 Example with a single mapping string:  Map("n→ɲ→ŋ")
 ;		 Example with multiple mapping strings:  Map("a→ɐ", "e→ə", "i→ɩ", "o→ø", "u→ʌ→ʊ")
@@ -140,17 +140,26 @@ Map(rotaSets*) {
 ;        $+;::InCase(Map("ːː→ː→ˑ↺") elseSend("ː"))
 
 	str := ""
-	for index,param in rotaSets
+	for index,param in MapStringList
 		str .= param chr(0x13)
 	return "M:" str chr(0x1c)
 }
 
-LoopMap(rotaSets*) {
+LoopMap(MapStringList*) {
 ; Use in place of Map() to indicate that every mapping string is looping.
 	str := ""
-	for index,param in rotaSets
+	for index,param in MapStringList
 		str .= param chr(0x14) chr(0x13)
 	return "M:" str chr(0x1c)
+}
+
+MultiTapMap(MapStringList*) {
+; Use in place of Map() to indicate that the mapping applies only in the event of multi-tap timing.
+; Principle for good keyboard design:  Avoid requiring more than a triple tap.
+	str := ""
+	for index,param in MapStringList
+		str .= param chr(0x14)
+	return "T:" str chr(0x1c)
 }
 
 After(RE)	{
