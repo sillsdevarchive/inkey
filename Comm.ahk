@@ -658,12 +658,13 @@ RegisterMap(ByRef id, ByRef rotaSets, ByRef defTxt, style, flags) {   ; (id, def
 	if (InStr(rotaSets, "⇛")) 		; If any multi-tap arrows were used, set style to expiring.
 			rotStyle%id% := rotStyle%id% | 8
 
-	rotaSets := RegExReplace(rotaSets, "→|⇛", chr(0x11))   ; Replace arrows with x11
-	rotaSets := RegExReplace(rotaSets, "↺", chr(0x14))   ; Replace loop arrow with x14
+	;~ rotaSets := RegExReplace(rotaSets, "→|⇛", chr(0x11))   ; Replace arrows with x11
+	rotaSets := RegExReplace(rotaSets, "[ \t]", chr(0x11))   ; Replace whitespace with x11
+	;~ rotaSets := RegExReplace(rotaSets, "↺", chr(0x14))   ; Replace loop arrow with x14
 	interpolate(rotaSets)							; Now convert \x{} expressions into actual characters, which might theoretically include our literal arrow characters.
 
 	local match
-	if (RegExMatch(rotaSets, "O)^\x{11}([^\x{11}-\x{14}]+)", match))  {   ; Initial arrow means set default text to first segment.
+	if (RegExMatch(rotaSets, "O)^\x{11}([^\x{11}-\x{14}]+)", match))  {   ; Initial arrow means set default text to first segment.  ; TEMPORARY
 			rotaSets := SubStr(rotaSets, 2)
 			if (strlen(defTxt) = 0)
 				rotDef%id% := match.Value[1]
@@ -906,11 +907,12 @@ InContextReplaceUsingMap(ByRef AfterRegEx, ByRef FindRegEx, ByRef ReplaceTxt, By
 	interpolate(ReplaceTxt)
 	interpolate(ElseTxt)
 	alts := "(?P<MAP>"
-	;~ mapTo := Object()		; Sadly, associative array indexes are compared case-insensitively.  We can use associative arrays once AHK fixes this.
-	;~ if (InStr(Map, "⇛")) 		; ToDo:  If any multi-tap arrows were used, treat them as such.
-;~ dumpstr(Map, "usingMap begin:")
-	Map := RegExReplace(Map, "→|⇛", chr(0x11))   ; Replace arrows with x11
-	Map := RegExReplace(Map, "↺", chr(0x12))   ; Replace looping arrow with x12 before we interpolate
+					;~ mapTo := Object()		; Sadly, associative array indexes are compared case-insensitively.  We can use associative arrays once AHK fixes this.
+					;~ if (InStr(Map, "⇛")) 		; ToDo:  If any multi-tap arrows were used, treat them as such.
+				;~ dumpstr(Map, "usingMap begin:")
+	;~ Map := RegExReplace(Map, "→|⇛", chr(0x11))   ; Replace arrows with x11
+	Map := RegExReplace(Map, "[ \t]", chr(0x11))   ; Replace arrows with x11
+	;~ Map := RegExReplace(Map, "↺", chr(0x12))   ; Replace looping arrow with x12 before we interpolate
 	interpolate(Map)
 ;~ dumpstr(Map, "usingMap final:")
 	mapTo := chr(0x11) RegExReplace(Map, "([^\x{11}-\x{13}]+)((?:\x{11}[^\x{11}-\x{13}]+)+)\x{12}", "$1$2" chr(0x11) "$1")   ; Replace looping arrow with a mapping to the first sequence in the string, saving this as the MapTo table.

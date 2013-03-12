@@ -76,7 +76,7 @@ InCase(ByRef CaseCommand) {
 	; F: Regex to find.  Must contain the symbol $F to indicate the position of the literal map-FROM text.
 	; R: Replacement expression.  Must contain $R to indicated the positon of the literal map-TO text.  May also contain backreferences such as $1.
 
-	if (InStr("MT", SubStr(CaseCommand,1,1) )  {
+	if (InStr("MT", SubStr(CaseCommand,1,1)) )  {
 		return InRota(CaseCommand)
 	}
 
@@ -94,24 +94,24 @@ InCase(ByRef CaseCommand) {
 
 Map(MapStringList*) {
 ;	 A Map is comprised of one or more mapping strings.
-;		 Example with a single mapping string:  Map("n→ɲ→ŋ")
-;		 Example with multiple mapping strings:  Map("a→ɐ", "e→ə", "i→ɩ", "o→ø", "u→ʌ→ʊ")
+;		 Example with a single mapping string:  Map("n ɲ ŋ")
+;		 Example with multiple mapping strings:  Map("a ɐ", "e ə", "i ɩ", "o ø", "u ʌ ʊ")
 ;
 ;	 Each mapping string contains a set of two or more segments of literal text, mapping from left to right.
-;	 The segments are separated by the single arrow (→) or triple arrow (⇛) characters.
+;	 The segments are separated by the single arrow ( ) or triple arrow (⇛) characters.
 ;		 A single arrow separator indicates a normal mapping.
 ;		 A triple arrow separator indicates a mapping that applies only in the case of a multi-tap (i.e. rapid) key sequence.
 ;		 e.g.   Map("n⇛ɲ⇛ŋ")
 ;	Note that in the current implementation, the mapping between all segments in all mapping strings should use the same
-;	type of mapping: normal (→) or multi-tap (⇛).  At present, if any multi-tap arrows are present in any string, all mappings in all strings
+;	type of mapping: normal ( ) or multi-tap (⇛).  At present, if any multi-tap arrows are present in any string, all mappings in all strings
 ;	of that map will be treated as multi-tap.  In the future, this may change.
 ;
 ;	 If the mapping string is terminated with looping arrow (↺) character, the final segment maps back to the first segment.
-;		e.g. 	Map("a→ɐ↺", "e→ə↺", "i→ɩ↺", "o→ø↺", "u→ʌ→ʊ↺")
+;		e.g. 	Map("a ɐ↺", "e ə↺", "i ɩ↺", "o ø↺", "u ʌ ʊ↺")
 ;
 ;	 If the map should produce the first segment even if nothing matches, begin the mapping string with an arrow.
 ;		(Think of it as mapping from "nothing" to the "default segment".)
-;		e.g. 	Map("→n⇛ɲ⇛ŋ")   -A single tap produces "n"; a double tap produces "ɲ", and a triple tap produces "ŋ".
+;		e.g. 	Map(" n⇛ɲ⇛ŋ")   -A single tap produces "n"; a double tap produces "ɲ", and a triple tap produces "ŋ".
 ;      If the map has multiple mapping strings, this is valid only on the FIRST mapping string.
 ;      It is identical in behavior to specifying an elseSend() clause, though an elseSend() clause is also free to send text
 ;      not found in the mapping string.
@@ -119,25 +119,25 @@ Map(MapStringList*) {
 ;	Segments are always literal text.
 ;	The only exception is that characters may be represented by the notation "\x{H}", where H is the hexadecimal codepoint
 ;	of any Unicode character, including SMP characters.
-;		e.g.  Map("→\x{301}→\x{300}→\x{302}↺")
+;		e.g.  Map(" \x{301} \x{300} \x{302}↺")
 ;	The above example produces diacritic U+0301 by default, cycling that through the other diacritics, and then looping back to
 ;	diacritic U+0301 again.  Advanced Note: This map produces a rotation of three states.  If you want the fourth state of there being
 ;	no diacritic in the rotation, then add another arrow to "nothing" after the final segment, like this:
-;		e.g.  Map("→\x{301}→\x{300}→\x{302}→↺")
+;		e.g.  Map(" \x{301} \x{300} \x{302} ↺")
 ;
 ;	Note that the same segment may appear in more than one mapping string in a map.  In this case, whichever mapping string was
 ;	in use on the prior keystroke will be used again.  For example, the IPA keyboard uses the equals [=] key to cycle between various
 ;	forms of the prior letter. Here is a simplified extract of that map for the h-like and the y-like letters.
 ;	Note that the character "ɥ" appears in both mapping stringsː
-;			Map("h→ɥ→ħ→ɦ↺", "y→ɥ→ʏ↺")
+;			Map("h ɥ ħ ɦ↺", "y ɥ ʏ↺")
 ;	If the user was using this map to cycle through forms of "h", then "ɥ" maps to "ħ".
 ;	If he was using it to cycle through forms of "y", then "ɥ" maps to "ʏ".
 
 ; Caveat:  In the current version, if one segment is identical to the final portion of another segment, the longer segment should
 ;  be placed earlier in the string. For example, in the IPA keyboard, repeated presses on the colon key produce this sequence:
-;				ː    →   ˑ   →   ːː  (then it loops back to the start)
+;				ː        ˑ       ːː  (then it loops back to the start)
 ; So we use elseSend() to specify the default sequence, and reorder the string to put the longer one earlier:
-;        $+;::InCase(Map("ːː→ː→ˑ↺") elseSend("ː"))
+;        $+;::InCase(Map("ːː ː ˑ↺") elseSend("ː"))
 
 	str := ""
 	for index,param in MapStringList
@@ -158,7 +158,7 @@ MultiTapMap(MapStringList*) {
 ; Principle for good keyboard design:  Avoid requiring more than a triple tap.
 	str := ""
 	for index,param in MapStringList
-		str .= param chr(0x14)
+		str .= param chr(0x13)
 	return "T:" str chr(0x1c)
 }
 
@@ -178,17 +178,31 @@ with(BT, uFlags=0)		{
 	return "W:" BT chr(0x1c) "Wf:" uFlags chr(0x1c)
 }
 
-usingMap(rotaSets*) {  ;  e.g. usingMap("n→ɲ→ŋ↺", "N→ɴ→Ŋ↺")
+usingMap(rotaSets*) {  ;  e.g. usingMap("n ɲ ŋ", "N ɴ Ŋ")
 ; Differences from the Map() clause:
 ;   -You may not use an initial arrow as Map() does to specify a default character.
 ;   -Avoid using maps that contain the same segment in more than one mapping string,
 ;    as you cannot depend on which one will be matched with the usingMap() clause.
-;   -The multi-tap arrow (⇛) currently behaves the same as a normal arrow (→).
+;   -The multi-tap arrow (⇛) currently behaves the same as a normal arrow ( ).
 ;    This may change in future versions. For now, if you want multi-tap behavior,
 ;    use the MultiTap() function.  e.g.  MultiTap() and InCase(...)
 	str := ""
 	for index,param in rotaSets
 		str .= param chr(0x13)
+	return "U:" str chr(0x1c)
+}
+
+usingLoopMap(rotaSets*) {  ;  e.g. usingMap("n ɲ ŋ↺", "N ɴ Ŋ↺")
+; Differences from the Map() clause:
+;   -You may not use an initial arrow as Map() does to specify a default character.
+;   -Avoid using maps that contain the same segment in more than one mapping string,
+;    as you cannot depend on which one will be matched with the usingMap() clause.
+;   -The multi-tap arrow (⇛) currently behaves the same as a normal arrow ( ).
+;    This may change in future versions. For now, if you want multi-tap behavior,
+;    use the MultiTap() function.  e.g.  MultiTap() and InCase(...)
+	str := ""
+	for index,param in rotaSets
+		str .= param  chr(0x12) chr(0x13)
 	return "U:" str chr(0x1c)
 }
 
