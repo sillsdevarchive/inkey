@@ -8,7 +8,7 @@
 #LTrim			; This command causes leading whitespace in continuation sections (e.g. multi-line rota strings) to be trimmed.
 				; If you prefer otherwise, use #LTrim Off
 
-K_InKeyLibVersion = 1.904	; At the top of your script, the very first line of code
+K_InKeyLibVersion = 1.912	; At the top of your script, the very first line of code
 	; should set K_MinimumInKeyLibVersion to this number.
 	; This will ensure that if a user has an older version of InKeyLib.ahki that
 	; does not support the functionality that your script requires, he will be
@@ -28,6 +28,8 @@ K_InKeyLibVersion = 1.904	; At the top of your script, the very first line of co
 K_ProtocolNum = 5	; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number is incremented in both.
 			; This ensures that communication conventions between InKey and a keyboard will match.
 
+to := " "
+
 goto K_DO_INITIALIZE
 
 ;=========================================
@@ -40,20 +42,6 @@ Send(ByRef CharString) {
 ; e.g. Send("द्व")
 	SendData(0x901A, CharString)
 	return 1
-}
-
-SendChar(cp, uFlags=0) {
-; Send a character of the given codepoint (up to 0x10FFFF), optionally remembering a 32-bit flags value associated with it.
-; While this is theoretically more efficient than using Send(), the savings only amounts to about 0.2 milliseconds,
-; so use whichever makes the keyboard easier to manage.
-	if (cp & 0xf800 = 0xd800)
-		OutputDebug This keyboard uses SendChar with surrogate code units.  Correct it to use actual codepoint.
-
-	ok := SendToInKey(0x8010, cp, uFlags)
-	if (ok)
-		return
-	MsgBox Communication with InKey has been lost.`nPlease restart it.
-	ExitApp
 }
 
 
@@ -162,6 +150,14 @@ MultiTapMap(MapStringList*) {
 	return "T:" str chr(0x1c)
 }
 
+MultiTapSend(MapStringList*) {
+; Use in place of MultiTapMap() to indicate that the first element in the map is the default text to send.
+	str := " "
+	for index,param in MapStringList
+		str .= param chr(0x13)
+	return "T:" str chr(0x1c)
+}
+
 After(RE)	{
 	return "A:"  RE  chr(0x1c)
 }
@@ -265,6 +261,12 @@ Cases(CaseStrings*) {
 	;~ return "D:" chr(0x1c) str chr(0x1c)
 ;~ }
 
+DeadKey(n=1) {
+		if (n<1 or n>8)
+			FatalError("DeadKey number must be between 1 and 8")
+		return chr(n)
+}
+
 ; ___________  Phase and Deadkey ______________________________
 ; The difference between a Phase and a Deadkey is that pressing Backspace after a deadkey will
 ; consume that backspace in order to clear the deadkey without deleting the most recent real character.
@@ -286,23 +288,6 @@ IsPhase(n=1) {
 
 GetPhase() {
 	return SendToInkey(0x8023)
-}
-
-SetDeadkey(n=1) {
-; Sets a Deadkey that will be cleared (reset to 0) the next time characters are sent (or removed).
-; Also cleared whenever the context is lost, such as due to navigation keys, mouse clicks, etc.
-; The Deadkey can be any 32-bit number.
-; USING DEADKEYS IS USUALLY POOR KEYBOARD DESIGN.  AIM TO PROVIDE A MORE INTELLIGENT ALTERNATIVE.
-	SendToInkey(0x8031, n)
-	return 1
-}
-
-IsDeadkey(n=1) {
-	return SendToInkey(0x8032, n)
-}
-
-GetDeadkey() {
-	return SendToInkey(0x8033)
 }
 
 MultiTap() {
@@ -449,6 +434,37 @@ Back(ct=1) {
 }
 
 ; ------------------------------------------------------------------  The functions beyond this point should not be used in new keyboards.  Just for backwards compatibility.
+SetDeadkey(n=1) {
+; Sets a Deadkey that will be cleared (reset to 0) the next time characters are sent (or removed).
+; Also cleared whenever the context is lost, such as due to navigation keys, mouse clicks, etc.
+; The Deadkey can be any 32-bit number.
+; USING DEADKEYS IS USUALLY POOR KEYBOARD DESIGN.  AIM TO PROVIDE A MORE INTELLIGENT ALTERNATIVE.
+	SendToInkey(0x8031, n)
+	return 1
+}
+
+IsDeadkey(n=1) {
+	return SendToInkey(0x8032, n)
+}
+
+GetDeadkey() {
+	return SendToInkey(0x8033)
+}
+
+SendChar(cp, uFlags=0) {
+; Send a character of the given codepoint (up to 0x10FFFF), optionally remembering a 32-bit flags value associated with it.
+; While this is theoretically more efficient than using Send(), the savings only amounts to about 0.2 milliseconds,
+; so use whichever makes the keyboard easier to manage.
+	if (cp & 0xf800 = 0xd800)
+		OutputDebug This keyboard uses SendChar with surrogate code units.  Correct it to use actual codepoint.
+
+	ok := SendToInKey(0x8010, cp, uFlags)
+	if (ok)
+		return
+	MsgBox Communication with InKey has been lost.`nPlease restart it.
+	ExitApp
+}
+
 RegisterVirtualKeyboardHwnd(hwnd) {
 	SendToInKey(0x8019)
 	return 1
@@ -808,7 +824,7 @@ InRota(MapCmd) {
 	}
 
 	local x := SendData(0x9005, rotaID)
-	;~ outputdebug InRota() [%rotaID%] => %x%
+	outputdebug InRota() [%rotaID%] => %x%
 	if (x < 2 or x > 3)
 		outputdebug ** ERROR: InRota error code %x%
 

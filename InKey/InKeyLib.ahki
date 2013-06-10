@@ -8,7 +8,7 @@
 #LTrim			; This command causes leading whitespace in continuation sections (e.g. multi-line rota strings) to be trimmed.
 				; If you prefer otherwise, use #LTrim Off
 
-K_InKeyLibVersion = 1.904	; At the top of your script, the very first line of code
+K_InKeyLibVersion = 1.912	; At the top of your script, the very first line of code
 	; should set K_MinimumInKeyLibVersion to this number.
 	; This will ensure that if a user has an older version of InKeyLib.ahki that
 	; does not support the functionality that your script requires, he will be
@@ -28,6 +28,8 @@ K_InKeyLibVersion = 1.904	; At the top of your script, the very first line of co
 K_ProtocolNum = 5	; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number is incremented in both.
 			; This ensures that communication conventions between InKey and a keyboard will match.
 
+to := " "
+
 goto K_DO_INITIALIZE
 
 ;=========================================
@@ -40,20 +42,6 @@ Send(ByRef CharString) {
 ; e.g. Send("द्व")
 	SendData(0x901A, CharString)
 	return 1
-}
-
-SendChar(cp, uFlags=0) {
-; Send a character of the given codepoint (up to 0x10FFFF), optionally remembering a 32-bit flags value associated with it.
-; While this is theoretically more efficient than using Send(), the savings only amounts to about 0.2 milliseconds,
-; so use whichever makes the keyboard easier to manage.
-	if (cp & 0xf800 = 0xd800)
-		OutputDebug This keyboard uses SendChar with surrogate code units.  Correct it to use actual codepoint.
-
-	ok := SendToInKey(0x8010, cp, uFlags)
-	if (ok)
-		return
-	MsgBox Communication with InKey has been lost.`nPlease restart it.
-	ExitApp
 }
 
 
@@ -76,7 +64,7 @@ InCase(ByRef CaseCommand) {
 	; F: Regex to find.  Must contain the symbol $F to indicate the position of the literal map-FROM text.
 	; R: Replacement expression.  Must contain $R to indicated the positon of the literal map-TO text.  May also contain backreferences such as $1.
 
-	if (SubStr(CaseCommand,1,1) = "M")  {
+	if (InStr("MT", SubStr(CaseCommand,1,1)) )  {
 		return InRota(CaseCommand)
 	}
 
@@ -92,26 +80,26 @@ InCase(ByRef CaseCommand) {
 	return (x = 2 ? 1 : 0)
 }
 
-Map(rotaSets*) {
+Map(MapStringList*) {
 ;	 A Map is comprised of one or more mapping strings.
-;		 Example with a single mapping string:  Map("n→ɲ→ŋ")
-;		 Example with multiple mapping strings:  Map("a→ɐ", "e→ə", "i→ɩ", "o→ø", "u→ʌ→ʊ")
+;		 Example with a single mapping string:  Map("n ɲ ŋ")
+;		 Example with multiple mapping strings:  Map("a ɐ", "e ə", "i ɩ", "o ø", "u ʌ ʊ")
 ;
 ;	 Each mapping string contains a set of two or more segments of literal text, mapping from left to right.
-;	 The segments are separated by the single arrow (→) or triple arrow (⇛) characters.
+;	 The segments are separated by the single arrow ( ) or triple arrow (⇛) characters.
 ;		 A single arrow separator indicates a normal mapping.
 ;		 A triple arrow separator indicates a mapping that applies only in the case of a multi-tap (i.e. rapid) key sequence.
 ;		 e.g.   Map("n⇛ɲ⇛ŋ")
 ;	Note that in the current implementation, the mapping between all segments in all mapping strings should use the same
-;	type of mapping: normal (→) or multi-tap (⇛).  At present, if any multi-tap arrows are present in any string, all mappings in all strings
+;	type of mapping: normal ( ) or multi-tap (⇛).  At present, if any multi-tap arrows are present in any string, all mappings in all strings
 ;	of that map will be treated as multi-tap.  In the future, this may change.
 ;
 ;	 If the mapping string is terminated with looping arrow (↺) character, the final segment maps back to the first segment.
-;		e.g. 	Map("a→ɐ↺", "e→ə↺", "i→ɩ↺", "o→ø↺", "u→ʌ→ʊ↺")
+;		e.g. 	Map("a ɐ↺", "e ə↺", "i ɩ↺", "o ø↺", "u ʌ ʊ↺")
 ;
 ;	 If the map should produce the first segment even if nothing matches, begin the mapping string with an arrow.
 ;		(Think of it as mapping from "nothing" to the "default segment".)
-;		e.g. 	Map("→n⇛ɲ⇛ŋ")   -A single tap produces "n"; a double tap produces "ɲ", and a triple tap produces "ŋ".
+;		e.g. 	Map(" n⇛ɲ⇛ŋ")   -A single tap produces "n"; a double tap produces "ɲ", and a triple tap produces "ŋ".
 ;      If the map has multiple mapping strings, this is valid only on the FIRST mapping string.
 ;      It is identical in behavior to specifying an elseSend() clause, though an elseSend() clause is also free to send text
 ;      not found in the mapping string.
@@ -119,38 +107,55 @@ Map(rotaSets*) {
 ;	Segments are always literal text.
 ;	The only exception is that characters may be represented by the notation "\x{H}", where H is the hexadecimal codepoint
 ;	of any Unicode character, including SMP characters.
-;		e.g.  Map("→\x{301}→\x{300}→\x{302}↺")
+;		e.g.  Map(" \x{301} \x{300} \x{302}↺")
 ;	The above example produces diacritic U+0301 by default, cycling that through the other diacritics, and then looping back to
 ;	diacritic U+0301 again.  Advanced Note: This map produces a rotation of three states.  If you want the fourth state of there being
 ;	no diacritic in the rotation, then add another arrow to "nothing" after the final segment, like this:
-;		e.g.  Map("→\x{301}→\x{300}→\x{302}→↺")
+;		e.g.  Map(" \x{301} \x{300} \x{302} ↺")
 ;
 ;	Note that the same segment may appear in more than one mapping string in a map.  In this case, whichever mapping string was
 ;	in use on the prior keystroke will be used again.  For example, the IPA keyboard uses the equals [=] key to cycle between various
 ;	forms of the prior letter. Here is a simplified extract of that map for the h-like and the y-like letters.
 ;	Note that the character "ɥ" appears in both mapping stringsː
-;			Map("h→ɥ→ħ→ɦ↺", "y→ɥ→ʏ↺")
+;			Map("h ɥ ħ ɦ↺", "y ɥ ʏ↺")
 ;	If the user was using this map to cycle through forms of "h", then "ɥ" maps to "ħ".
 ;	If he was using it to cycle through forms of "y", then "ɥ" maps to "ʏ".
 
 ; Caveat:  In the current version, if one segment is identical to the final portion of another segment, the longer segment should
 ;  be placed earlier in the string. For example, in the IPA keyboard, repeated presses on the colon key produce this sequence:
-;				ː    →   ˑ   →   ːː  (then it loops back to the start)
+;				ː        ˑ       ːː  (then it loops back to the start)
 ; So we use elseSend() to specify the default sequence, and reorder the string to put the longer one earlier:
-;        $+;::InCase(Map("ːː→ː→ˑ↺") elseSend("ː"))
+;        $+;::InCase(Map("ːː ː ˑ↺") elseSend("ː"))
 
 	str := ""
-	for index,param in rotaSets
+	for index,param in MapStringList
 		str .= param chr(0x13)
 	return "M:" str chr(0x1c)
 }
 
-LoopMap(rotaSets*) {
+LoopMap(MapStringList*) {
 ; Use in place of Map() to indicate that every mapping string is looping.
 	str := ""
-	for index,param in rotaSets
+	for index,param in MapStringList
 		str .= param chr(0x14) chr(0x13)
 	return "M:" str chr(0x1c)
+}
+
+MultiTapMap(MapStringList*) {
+; Use in place of Map() to indicate that the mapping applies only in the event of multi-tap timing.
+; Principle for good keyboard design:  Avoid requiring more than a triple tap.
+	str := ""
+	for index,param in MapStringList
+		str .= param chr(0x13)
+	return "T:" str chr(0x1c)
+}
+
+MultiTapSend(MapStringList*) {
+; Use in place of MultiTapMap() to indicate that the first element in the map is the default text to send.
+	str := " "
+	for index,param in MapStringList
+		str .= param chr(0x13)
+	return "T:" str chr(0x1c)
 }
 
 After(RE)	{
@@ -169,17 +174,31 @@ with(BT, uFlags=0)		{
 	return "W:" BT chr(0x1c) "Wf:" uFlags chr(0x1c)
 }
 
-usingMap(rotaSets*) {  ;  e.g. usingMap("n→ɲ→ŋ↺", "N→ɴ→Ŋ↺")
+usingMap(rotaSets*) {  ;  e.g. usingMap("n ɲ ŋ", "N ɴ Ŋ")
 ; Differences from the Map() clause:
 ;   -You may not use an initial arrow as Map() does to specify a default character.
 ;   -Avoid using maps that contain the same segment in more than one mapping string,
 ;    as you cannot depend on which one will be matched with the usingMap() clause.
-;   -The multi-tap arrow (⇛) currently behaves the same as a normal arrow (→).
+;   -The multi-tap arrow (⇛) currently behaves the same as a normal arrow ( ).
 ;    This may change in future versions. For now, if you want multi-tap behavior,
 ;    use the MultiTap() function.  e.g.  MultiTap() and InCase(...)
 	str := ""
 	for index,param in rotaSets
 		str .= param chr(0x13)
+	return "U:" str chr(0x1c)
+}
+
+usingLoopMap(rotaSets*) {  ;  e.g. usingMap("n ɲ ŋ↺", "N ɴ Ŋ↺")
+; Differences from the Map() clause:
+;   -You may not use an initial arrow as Map() does to specify a default character.
+;   -Avoid using maps that contain the same segment in more than one mapping string,
+;    as you cannot depend on which one will be matched with the usingMap() clause.
+;   -The multi-tap arrow (⇛) currently behaves the same as a normal arrow ( ).
+;    This may change in future versions. For now, if you want multi-tap behavior,
+;    use the MultiTap() function.  e.g.  MultiTap() and InCase(...)
+	str := ""
+	for index,param in rotaSets
+		str .= param  chr(0x12) chr(0x13)
 	return "U:" str chr(0x1c)
 }
 
@@ -242,6 +261,12 @@ Cases(CaseStrings*) {
 	;~ return "D:" chr(0x1c) str chr(0x1c)
 ;~ }
 
+DeadKey(n=1) {
+		if (n<1 or n>8)
+			FatalError("DeadKey number must be between 1 and 8")
+		return chr(n)
+}
+
 ; ___________  Phase and Deadkey ______________________________
 ; The difference between a Phase and a Deadkey is that pressing Backspace after a deadkey will
 ; consume that backspace in order to clear the deadkey without deleting the most recent real character.
@@ -263,23 +288,6 @@ IsPhase(n=1) {
 
 GetPhase() {
 	return SendToInkey(0x8023)
-}
-
-SetDeadkey(n=1) {
-; Sets a Deadkey that will be cleared (reset to 0) the next time characters are sent (or removed).
-; Also cleared whenever the context is lost, such as due to navigation keys, mouse clicks, etc.
-; The Deadkey can be any 32-bit number.
-; USING DEADKEYS IS USUALLY POOR KEYBOARD DESIGN.  AIM TO PROVIDE A MORE INTELLIGENT ALTERNATIVE.
-	SendToInkey(0x8031, n)
-	return 1
-}
-
-IsDeadkey(n=1) {
-	return SendToInkey(0x8032, n)
-}
-
-GetDeadkey() {
-	return SendToInkey(0x8033)
 }
 
 MultiTap() {
@@ -426,6 +434,37 @@ Back(ct=1) {
 }
 
 ; ------------------------------------------------------------------  The functions beyond this point should not be used in new keyboards.  Just for backwards compatibility.
+SetDeadkey(n=1) {
+; Sets a Deadkey that will be cleared (reset to 0) the next time characters are sent (or removed).
+; Also cleared whenever the context is lost, such as due to navigation keys, mouse clicks, etc.
+; The Deadkey can be any 32-bit number.
+; USING DEADKEYS IS USUALLY POOR KEYBOARD DESIGN.  AIM TO PROVIDE A MORE INTELLIGENT ALTERNATIVE.
+	SendToInkey(0x8031, n)
+	return 1
+}
+
+IsDeadkey(n=1) {
+	return SendToInkey(0x8032, n)
+}
+
+GetDeadkey() {
+	return SendToInkey(0x8033)
+}
+
+SendChar(cp, uFlags=0) {
+; Send a character of the given codepoint (up to 0x10FFFF), optionally remembering a 32-bit flags value associated with it.
+; While this is theoretically more efficient than using Send(), the savings only amounts to about 0.2 milliseconds,
+; so use whichever makes the keyboard easier to manage.
+	if (cp & 0xf800 = 0xd800)
+		OutputDebug This keyboard uses SendChar with surrogate code units.  Correct it to use actual codepoint.
+
+	ok := SendToInKey(0x8010, cp, uFlags)
+	if (ok)
+		return
+	MsgBox Communication with InKey has been lost.`nPlease restart it.
+	ExitApp
+}
+
 RegisterVirtualKeyboardHwnd(hwnd) {
 	SendToInKey(0x8019)
 	return 1

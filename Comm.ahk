@@ -53,8 +53,19 @@ _DoPureBackSp() {
 		OutputDebug ********* %A_LineNumber% ASSERTION FAILED.  Keystroke history stack should have been emptied by now.
 ; <<DEBUG
 	Send {BS}
+
+	; First remove any deadkey(s) from the end of the context stack, as they aren't "real"
+	local cc := ctx()
+	loop {
+		cc := ctx()
+		if (cc>0 and cc<9)
+			stackIdx -= 1
+		else
+			break
+	}
+
 	;~ if ((cc >= 0xDC00) and (cc <= 0xDFFF)) {  ; If we're about to delete the trail surrogate (range DCC0-DFFF), BS will delete the leading surrogate too. (range D800-DBFF) We just need to ensure it gets deleted from history too.
-	stackIdx -=  (ctx()>>10 = 0x37) ? 2 : 1   ; that is,  if (DC00 <= ctx() <= DFFF), delete the extra code unit (range D800-DBFF)  from the context stack too
+	stackIdx -=  (cc>>10 = 0x37) ? 2 : 1   ; that is,  if (DC00 <= ctx() <= DFFF), delete the extra code unit (range D800-DBFF)  from the context stack too
 	if (stackIdx < 0 or thisAppDoesGreedyBackspace)
 		stackIdx := 0
 	CurrPhase := 0
@@ -68,6 +79,8 @@ _ChangeText(ByRef DelText, byref AddText, uFlags=0) {
 ; This also updates the context stack accordingly, but does not affect the Keystroke stack.
 ; This is not called directly except by CommitKeystroke and UndoKeystroke, which also update the Keystroke stack.
 	global
+	;~ dumpstr(DelText, "DelText:")
+	;~ dumpstr(AddText, "AddText:")
 
 	if (VKbdShowing and WinExist("A")=VKbdHwnd) {
 		; We don't want to send these characters to the active window if the active window is the virtual keyboard.
@@ -76,11 +89,18 @@ _ChangeText(ByRef DelText, byref AddText, uFlags=0) {
 		;~ OutputDebug VKbd is active.  reactivating %Vkbdhwnd%
 	}
 
+	; "Real" version of DelText and AddText has any deadkeys removed.
+	DelReal := RegExReplace(DelText, "[\x{1}-\x{8}]", "")
+	;~ dumpstr(DelReal, "DelReal:")
+	AddReal := RegExReplace(AddText, "[\x{1}-\x{8}]", "")
+
 ;~ TrayTip,, _ChangeText("%DelText%" "%AddText%")
-	; Back up as many times as necessary to delete the DelText.
-	local  unitsToBack := StrLen(DelText)
+	; Back up as many times as necessary to delete the DelReal.
+	local  unitsToBack := StrLen(DelReal)
+	local unitsToPop := StrLen(DelText)
+	;~ OutputDebug unitsToBack =%unitsToBack% unitsToPop =%unitsToPop%
 ;>>
-	local dbgStr := ctxStr(unitsToBack)
+	local dbgStr := ctxStr(unitsToPop)
 	if (dbgStr != DelText)
 		OutputDebug %A_LineNumber% ASSERTION FAILED: DelText=%DelText%,  from stack=%dbgStr%
 ;<<
@@ -126,7 +146,7 @@ _ChangeText(ByRef DelText, byref AddText, uFlags=0) {
 			; Back up the normal way, using {BS}
 			local  ctBS := unitsToBack
 			loop %unitsToBack% {
-				local cc  := NumGet(DelText, (A_Index - 1) * 2, "UShort")
+				local cc  := NumGet(DelReal, (A_Index - 1) * 2, "UShort")
 				;~ if ((cc >= 0xDC00) and (cc <= 0xDFFF)) {  ; If we're about to delete the trail surrogate (range DCC0-DFFF), BS will delete the leading surrogate too. (range D800-DBFF) We just need to ensure it gets deleted from history too.
 				if (cc>>10 = 0x37) { ; that is, DC00 <= cc <= DFFF
 					OutputDebug use one less BS due to trail surrogate: %cc%
@@ -136,22 +156,23 @@ _ChangeText(ByRef DelText, byref AddText, uFlags=0) {
 			;~ OutputDebug 			SendInput {BS %ctBS%}
 			SendInput {BS %ctBS%}
 		}
-
+	}
+	if (unitsToPop > 0) {
 		; Now adjust the stack
-		stackIdx -= unitsToBack
+		stackIdx -= unitsToPop
 		if stackIdx < 0
 			stackIdx := 0
 	}
 
 	; Now Send the text
 	local numCh
-	numCh := StrLen(AddText)
+	numCh := StrLen(AddReal)
 	if (numCh) {
-		SendTextToApp(AddText)  ; Typically equivalent to:   SendRaw %data%
-
-		Loop %numCh% {  ; Now add to the context stack
-			push(NumGet(AddText, (A_Index-1)*2, "UShort"), uFlags)
-		}
+		SendTextToApp(AddReal)  ; Typically equivalent to:   SendRaw %data%
+	}
+	numCh := StrLen(AddText)
+	Loop %numCh% {  ; Now add to the context stack
+		push(NumGet(AddText, (A_Index-1)*2, "UShort"), uFlags)
 	}
 	CurrPhase := 0
 	CurrDeadkey := 0
@@ -217,9 +238,9 @@ SendTextToApp(s) {
 }
 
 ; Send a character (up to character 0xFFFF only)
-SendChar16(c) {
-	SendTextToApp(Chr(c))
-}
+;~ SendChar16(c) {
+	;~ SendTextToApp(Chr(c))
+;~ }
 
 
 Send_WM_COPYDATA(Kbd, cmdID, ByRef StringToSend)  ; ByRef saves a little memory in this case.
@@ -1340,6 +1361,7 @@ TempString:=GetLang(61) ; Handling of greedy backspace is
 TrayTipQ(TempString . " " . gb)
 return
 
+/*
 ; The equivalent of sending ct number of Backspace characters, except that a mode is supported
 ; to handle apps that delete entire character sequences with a single backspace.
 ; Does not use or affect the context stack, so keyboards should never call this directly,
@@ -1398,7 +1420,7 @@ SendBkSpc(ct=1) {  ; BUG:  some callers of this function are providing a ct para
 	buf =
 	return di
 }
-
+*/
 
 
 ; ================================
