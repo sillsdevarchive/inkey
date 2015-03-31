@@ -1,6 +1,7 @@
 CANDRABINDU=+s
 ANUSVARA=+m
 VISARGA=+h
+AVAGRAHA=+f
 NUKTA=f
 A=a
 AA=+a
@@ -54,5 +55,3 @@ SHA=z
 SSA=+z
 SA=s
 HA=h
-JOIN=x
-NONJOIN=+x

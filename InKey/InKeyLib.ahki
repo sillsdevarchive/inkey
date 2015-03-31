@@ -809,22 +809,30 @@ chk() {
 ;~ OutputDebug A_ThisHotkey=%A_ThisHotkey%, A_PriorHotkey=%A_PriorHotkey%, A_PriorKey=%A_PriorKey%
 }
 
+array :=	ComObjCreate("Scripting.Dictionary")
+array.item("A") :=	"À"
+ , array.item("a") :=	"à"
+ , array.item("e") :=	"è"
+ , array.item("E") :=	"È"
+For key in array
+	MsgBox %	key " => " array.item(key)
+
 InRota(MapCmd) {
 	static ct := 1
-	static K_InRotas := object()
+	static K_InRotas := ComObjCreate("Scripting.Dictionary")
 	global
 	chk()
 	local str, index, param, rotaStr, rotaID
 
-	rotaID := K_InRotas[MapCmd]
+	rotaID := K_InRotas.item(MapCmd)
 	if (not rotaID) {
 		rotaID := K_FileID "i" ct++
 		SendData(0x9024, rotaID chr(0x1c) MapCmd)  ; Register this rota now
-		K_InRotas.Insert(MapCmd, rotaID)
+		K_InRotas.item(MapCmd) := rotaID
 	}
 
 	local x := SendData(0x9005, rotaID)
-	;~ outputdebug InRota() [%rotaID%] => %x%
+	outputdebug InRota() [%rotaID%] => %x%
 	if (x < 2 or x > 3)
 		outputdebug ** ERROR: InRota error code %x%
 

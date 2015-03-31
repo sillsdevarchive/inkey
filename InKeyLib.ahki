@@ -8,7 +8,7 @@
 #LTrim			; This command causes leading whitespace in continuation sections (e.g. multi-line rota strings) to be trimmed.
 				; If you prefer otherwise, use #LTrim Off
 
-K_InKeyLibVersion = 1.912	; At the top of your script, the very first line of code
+K_InKeyLibVersion = 1.913	; At the top of your script, the very first line of code
 	; should set K_MinimumInKeyLibVersion to this number.
 	; This will ensure that if a user has an older version of InKeyLib.ahki that
 	; does not support the functionality that your script requires, he will be
@@ -24,6 +24,7 @@ K_InKeyLibVersion = 1.912	; At the top of your script, the very first line of co
 	; 0.102 Improves support for CAPSLOCK functionality in default handlers. Adds UseUpperCase() function.
 	; 0.300 SendText() and InsertText() functions
 	; 0.900 MAJOR: to be documented
+	; 1.913 InRota() is now case-sensitive
 
 K_ProtocolNum = 5	; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number is incremented in both.
 			; This ensures that communication conventions between InKey and a keyboard will match.
@@ -809,18 +810,26 @@ chk() {
 ;~ OutputDebug A_ThisHotkey=%A_ThisHotkey%, A_PriorHotkey=%A_PriorHotkey%, A_PriorKey=%A_PriorKey%
 }
 
+array :=	ComObjCreate("Scripting.Dictionary")
+array.item("A") :=	"À"
+ , array.item("a") :=	"à"
+ , array.item("e") :=	"è"
+ , array.item("E") :=	"È"
+For key in array
+	MsgBox %	key " => " array.item(key)
+
 InRota(MapCmd) {
 	static ct := 1
-	static K_InRotas := object()
+	static K_InRotas := ComObjCreate("Scripting.Dictionary")
 	global
 	chk()
 	local str, index, param, rotaStr, rotaID
 
-	rotaID := K_InRotas[MapCmd]
+	rotaID := K_InRotas.item(MapCmd)
 	if (not rotaID) {
 		rotaID := K_FileID "i" ct++
 		SendData(0x9024, rotaID chr(0x1c) MapCmd)  ; Register this rota now
-		K_InRotas.Insert(MapCmd, rotaID)
+		K_InRotas.item(MapCmd) := rotaID
 	}
 
 	local x := SendData(0x9005, rotaID)

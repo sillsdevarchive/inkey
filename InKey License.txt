@@ -1,6 +1,6 @@
-This is an alpha version, not yet even beta tested.
-It is intended for keyboard developers only.
-It is scheduled for public release in March 2013.
+This is a pre-release version.
+With this version, only install keyboards created by authors you trust.
+Check back periodically for the official release.
 
 Some features are still in flux and may be changed prior to the public release.
 In particular, the way that the .ini files are used will probably change.
