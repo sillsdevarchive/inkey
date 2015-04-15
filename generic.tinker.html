@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html>
+<head>
+<META http-equiv=Content-Type content="text/html; charset=UTF-8">
+<title>Exported from Notepad++</title>
+<style type="text/css">
+span {
+  font-family: 'Courier New';
+  font-size: 10pt;
+  color: #000000;
+}
+.sc0 {
+  font-family: 'Gentium';
+}
+.sc2 {
+  font-family: 'Arial Unicode MS';
+  font-size: 8pt;
+  color: #008000;
+}
+.sc3 {
+}
+.sc4 {
+  font-family: 'Calibri';
+  font-weight: bold;
+  color: #000080;
+}
+.sc5 {
+  font-family: 'Calibri';
+  color: #408080;
+}
+.sc6 {
+  font-family: 'Calibri';
+  font-weight: bold;
+  color: #800000;
+}
+.sc12 {
+  font-family: 'Constantia';
+  font-weight: bold;
+  color: #FF0080;
+}
+.sc16 {
+  font-family: 'Arial Unicode MS';
+  color: #0000FF;
+}
+.sc18 {
+  font-family: 'Charis SIL';
+  color: #0000FF;
+}
+.sc19 {
+  font-family: 'Calibri';
+  font-weight: bold;
+  color: #000080;
+}
+.sc24 {
+}
+</style>
+</head>
+<body>
+<div style="float: left; white-space: pre; line-height: 1; background: #FFFFFF; "><span class="sc2">; Demo keyboard layout
+; The top section of this file contains settings that may optionally be overridden/localized in the user configuration file.
+</span><span class="sc19">[Settings]</span><span class="sc24">
+</span><span class="sc5">LayoutName</span><span class="sc12">=</span><span class="sc0">Tinker</span><span class="sc24"> </span><span class="sc0">Demo</span><span class="sc24">
+</span><span class="sc5">MenuText</span><span class="sc12">=</span><span class="sc0">Tinker</span><span class="sc24"> </span><span class="sc0">&amp;Demo</span><span class="sc24">
+</span><span class="sc5">DefaultLocale</span><span class="sc12">=</span><span class="sc3">0443</span><span class="sc24">          </span><span class="sc2">; Uzbek (Latin, Uzbekistan) Layout ID
+</span><span class="sc5">Icon</span><span class="sc12">=</span><span class="sc0">Generic.ico</span><span class="sc24">
+</span><span class="sc5">RequiredTinkerVersion</span><span class="sc12">=</span><span class="sc3">0.1</span><span class="sc24">
+
+
+</span><span class="sc19">[KeyHandlers]</span><span class="sc24">
+</span><span class="sc0">k</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc18">'क'</span><span class="sc24">
+</span><span class="sc0">+k</span><span class="sc24">  </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc18">'ख'</span><span class="sc24">
+
+
+</span><span class="sc19">[NormalizationRules]</span><span class="sc24">        </span><span class="sc2">; Series of rules that determine composition and reordering
+</span><span class="sc5">rule</span><span class="sc12">=</span><span class="sc6">NFD</span><span class="sc24">
+
+</span><span class="sc2">; Back-tick key as a pig-latinizer.
+</span><span class="sc0">`</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc6">Replace</span><span class="sc24"> </span><span class="sc16">"\b([bcdfghjklmnpqrstvwxyz]+)(\p{L}+)"</span><span class="sc24"> </span><span class="sc6">with</span><span class="sc24"> </span><span class="sc16">"$2$1ay"</span><span class="sc24">    </span><span class="sc2">; Reorder initial cons cluster.
+</span><span class="sc24">    </span><span class="sc12">||</span><span class="sc24">  </span><span class="sc6">After</span><span class="sc24"> </span><span class="sc16">"\b[aeiou] \p{L}*"</span><span class="sc24"> </span><span class="sc6">send</span><span class="sc24"> </span><span class="sc16">"way"</span><span class="sc24">     </span><span class="sc2">; For vowel-initial word, just append “way”.
+</span><span class="sc24">    </span><span class="sc12">||</span><span class="sc24">  </span><span class="sc6">Beep</span><span class="sc24"> </span><span class="sc12">&amp;&amp;</span><span class="sc24"> </span><span class="sc6">TrayTip</span><span class="sc12">(</span><span class="sc16">"Nothing to pig-latinize"</span><span class="sc12">)</span><span class="sc24">  </span><span class="sc2">; Not an eligible word.
+</span><span class="sc24">
+</span><span class="sc0">q</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc6">DeadKey</span><span class="sc12">(</span><span class="sc3">1</span><span class="sc12">)</span><span class="sc24">
+
+</span><span class="sc0">e</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc6">Map</span><span class="sc12">(</span><span class="sc6">DeadKey</span><span class="sc12">(</span><span class="sc3">1</span><span class="sc12">)</span><span class="sc24"> </span><span class="sc6">to</span><span class="sc24"> </span><span class="sc16">"ĕ"</span><span class="sc12">)</span><span class="sc24">
+    </span><span class="sc12">||</span><span class="sc24">  </span><span class="sc16">"e"</span><span class="sc24">
+
+</span><span class="sc0">|</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">
+
+</span><span class="sc0">$&gt;</span><span class="sc12">::</span><span class="sc0">InCase</span><span class="sc12">(</span><span class="sc6">Replace</span><span class="sc12">(</span><span class="sc16">"$F([aeiou])"</span><span class="sc12">)</span><span class="sc24"> </span><span class="sc6">with</span><span class="sc12">(</span><span class="sc16">"$R$1"</span><span class="sc12">)</span><span class="sc24"> </span><span class="sc0">usingMap</span><span class="sc12">(</span><span class="sc16">"a→*"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"+→B↺"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"c→C→k→K"</span><span class="sc12">))</span><span class="sc24">
+
+ </span><span class="sc2">; Map(M) [ elseSend(T2) ]
+</span><span class="sc24">    </span><span class="sc2">; ;   thenSend(T1)
+</span><span class="sc24">    </span><span class="sc2">; ;   After(RE) thenSend(T1)  [ elseSend(T2) ]
+</span><span class="sc24">    </span><span class="sc2">; ;   [ After(LB)  ] Replace(RE) with(BT)  [ elseSend(T2) ]
+</span><span class="sc24">    </span><span class="sc2">; ;   [ After(LB)  ] Replace(F) with(R)  usingMap(M) [ elseSend(T2) ]
+</span><span class="sc24">
+
+</span><span class="sc4">#define</span><span class="sc24"> </span><span class="sc0">Cons</span><span class="sc24"> </span><span class="sc16">"[क-हक़-य़]\x{93c}?"</span><span class="sc24">
+</span><span class="sc2">; #function DoVowel(syll, dep)
+</span><span class="sc24">    </span><span class="sc2">; :: After "${Cons}" send "${dep}"  ; Use dependent vowel after a consonant
+</span><span class="sc24">    </span><span class="sc2">; || "${syll}"  ; Use independent vowel otherwise
+</span><span class="sc24">
+</span><span class="sc2">; Add flying reph to Devanagari orthographic syllable.  (Characters must be inserted before syllable begins.)
+; Typed after the syllable, as would be the natural handwriting order.
+; (This would require 160 Keyman rules to handle all syllable patterns containing up to 4 joined consonants.)
+</span><span class="sc0">+r</span><span class="sc24">  </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc6">Replace</span><span class="sc24"> </span><span class="sc16">"${Cons}(?:\x{94d}[\x{200d}\x{200c}]*${Cons})*\p{M}*"</span><span class="sc24"> </span><span class="sc6">with</span><span class="sc24"> </span><span class="sc16">"र्$0"</span><span class="sc24">
+    </span><span class="sc12">||</span><span class="sc24">  </span><span class="sc16">"र्"</span><span class="sc24">        </span><span class="sc2">; If not after a syllable, this is reph for the next syllable.
+</span><span class="sc24">
+    </span><span class="sc2">; Do the i vowel.
+</span><span class="sc0">i</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc6">MultiTapMap</span><span class="sc12">:</span><span class="sc24">    </span><span class="sc2">; A double-tap turns i-vowel into ii-vowel.
+</span><span class="sc24">            </span><span class="sc16">"ि ी"</span><span class="sc24">
+            </span><span class="sc16">"इ ई"</span><span class="sc24">
+    </span><span class="sc12">||</span><span class="sc24">  </span><span class="sc0">DoVowel</span><span class="sc12">(</span><span class="sc16">"इ"</span><span class="sc12">,</span><span class="sc24"> </span><span class="sc16">"ि"</span><span class="sc12">)</span><span class="sc24">   </span><span class="sc2">; Use dependent i-vowel after a consonant, or independent i-vowel otherwise
+</span><span class="sc24">
+</span><span class="sc2">; Digit keys 1-5 produce circled digits.  Sequences are automatically reordered into the order ①②③④⑤
+</span><span class="sc3">5</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc16">"⑤"</span><span class="sc24">
+
+</span><span class="sc3">4</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc6">Replace</span><span class="sc24"> </span><span class="sc16">"[⑤]+"</span><span class="sc24"> </span><span class="sc6">with</span><span class="sc24"> </span><span class="sc16">"④$0"</span><span class="sc24">
+    </span><span class="sc12">||</span><span class="sc24">  </span><span class="sc16">"④"</span><span class="sc24">
+
+</span><span class="sc3">3</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc6">Replace</span><span class="sc24"> </span><span class="sc16">"[④⑤]+"</span><span class="sc24"> </span><span class="sc6">with</span><span class="sc24"> </span><span class="sc16">"③$0"</span><span class="sc24">
+    </span><span class="sc12">||</span><span class="sc24">  </span><span class="sc16">"③"</span><span class="sc24">
+
+</span><span class="sc3">2</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc6">Replace</span><span class="sc24"> </span><span class="sc16">"[③④⑤]+"</span><span class="sc24"> </span><span class="sc6">with</span><span class="sc24"> </span><span class="sc16">"②$0"</span><span class="sc24">
+    </span><span class="sc12">||</span><span class="sc24">  </span><span class="sc16">"②"</span><span class="sc24">
+
+</span><span class="sc3">1</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc6">Replace</span><span class="sc24"> </span><span class="sc16">"[②③④⑤]+"</span><span class="sc24"> </span><span class="sc6">with</span><span class="sc24"> </span><span class="sc16">"①$0"</span><span class="sc24">
+    </span><span class="sc12">||</span><span class="sc24">  </span><span class="sc16">"①"</span><span class="sc24">
+
+</span><span class="sc2">; The all-purpose “can’t remember the keystroke” cycle.
+</span><span class="sc12">=</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24"> </span><span class="sc6">Map</span><span class="sc12">:</span><span class="sc24">
+        </span><span class="sc16">"\ ="</span><span class="sc24">
+        </span><span class="sc16">"{combining plus sign below} +"</span><span class="sc24">     </span><span class="sc2">; These are to undo the diacritic keys
+</span><span class="sc24">        </span><span class="sc16">"{combining bridge below} {left curly bracket}"</span><span class="sc24">
+        </span><span class="sc16">"{modifier letter vertical line} {right curly bracket}"</span><span class="sc24">
+        </span><span class="sc16">"{combining minus sign below} _"</span><span class="sc24">
+    </span><span class="sc12">||</span><span class="sc24"> </span><span class="sc6">LoopMap</span><span class="sc12">:</span><span class="sc24">
+        </span><span class="sc18">'# ‿'</span><span class="sc24">
+        </span><span class="sc18">'. ‖'</span><span class="sc24">
+        </span><span class="sc18">'ǃ ǂ !'</span><span class="sc24">
+        </span><span class="sc18">'? ʔ ʕ ʡ ʢ'</span><span class="sc24">
+        </span><span class="sc18">'a ɑ ɐ æ ᴂ α ᶏ ᶐ ᴀ'</span><span class="sc24">
+        </span><span class="sc18">'ae æ ᴂ aə'</span><span class="sc24">
+        </span><span class="sc18">'A ᴂ'</span><span class="sc24">
+        </span><span class="sc18">'b β ɓ ᶀ ᵬ'</span><span class="sc24">
+        </span><span class="sc18">'B ʙ'</span><span class="sc24">
+        </span><span class="sc18">'c ç ƈ ɕ'</span><span class="sc24">
+        </span><span class="sc18">'d ð ɗ ɖ ȡ ᶑ ᶁ ᵭ'</span><span class="sc24">
+        </span><span class="sc18">'OE ɶ'</span><span class="sc24">
+        </span><span class="sc18">'E ɘ ɶ œ ᴇ'</span><span class="sc24">
+        </span><span class="sc18">'oe œ oə'</span><span class="sc24">
+        </span><span class="sc18">'e ə ɜ ɛ ʚ œ ᶒ ᶓ ᶔ ᶕ ɘ'</span><span class="sc24">
+        </span><span class="sc18">'f ɸ ᶂ ᵮ'</span><span class="sc24">
+        </span><span class="sc18">'g ɣ ɡ ɠ ᶃ'</span><span class="sc24">
+        </span><span class="sc18">'G ɢ ʛ'</span><span class="sc24">
+        </span><span class="sc18">'h ɥ ħ ɦ ђ ɧ'</span><span class="sc24">
+        </span><span class="sc18">'H ʜ'</span><span class="sc24">
+        </span><span class="sc18">'i ɪ ɩ ɨ ᵼ ᵻ ᶖ'</span><span class="sc24">
+        </span><span class="sc18">'I ɨ'</span><span class="sc24">
+        </span><span class="sc18">'j ɟ ʄ ʝ'</span><span class="sc24">
+        </span><span class="sc18">'k ƙ ᶄ'</span><span class="sc24">
+        </span><span class="sc18">'l ɬ ɮ ɭ ȴ ɺ ʎ ᶅ ɫ'</span><span class="sc24">
+        </span><span class="sc18">'L ʟ ɺ'</span><span class="sc24">
+        </span><span class="sc18">'m ɱ ᶆ ᵯ'</span><span class="sc24">
+        </span><span class="sc18">'n ɲ ŋ ɳ ȵ ᶇ ᵰ Ŋ'</span><span class="sc24">
+        </span><span class="sc18">'N ɴ Ŋ'</span><span class="sc24">
+        </span><span class="sc18">'O ɵ ɤ ɞ'</span><span class="sc24">
+        </span><span class="sc18">'o ɒ ø ɔ ᶗ'</span><span class="sc24">
+        </span><span class="sc18">'p ʘ ƥ ᶈ ᵱ'</span><span class="sc24">
+        </span><span class="sc18">'q ʠ'</span><span class="sc24">
+        </span><span class="sc18">'Q ʡ ʢ'</span><span class="sc24">
+        </span><span class="sc18">'R ʀ ʁ'</span><span class="sc24">
+        </span><span class="sc18">'r ɹ ɾ ɽ ɻ ᶉ ᵲ ᵳ'</span><span class="sc24">
+        </span><span class="sc18">'s ʃ σ ʂ ᶊ ᵴ ᶘ ᶋ'</span><span class="sc24">
+        </span><span class="sc18">'S ᶘ'</span><span class="sc24">
+        </span><span class="sc18">'t θ ʇ ƭ ʈ ȶ ᵵ'</span><span class="sc24">
+        </span><span class="sc18">'T ʇ'</span><span class="sc24">
+        </span><span class="sc18">'u ɯ ʉ ᵾ ʌ ʊ ɷ ʉ ᵾ ᶙ'</span><span class="sc24">
+        </span><span class="sc18">'U ʉ'</span><span class="sc24">
+        </span><span class="sc18">'v ʋ ⱱ ᶌ'</span><span class="sc24">
+        </span><span class="sc18">'w ʍ ɰ ⱳ'</span><span class="sc24">
+        </span><span class="sc18">'x χ ᶍ'</span><span class="sc24">
+        </span><span class="sc18">'y ʏ ɥ ʯ'</span><span class="sc24">
+        </span><span class="sc18">'Y ʯ'</span><span class="sc24">
+        </span><span class="sc18">'lz ɮ lʒ'</span><span class="sc24">
+        </span><span class="sc18">'z ʒ ᶚ ʑ ʐ ᶎ ᵶ ɿ ʅ'</span><span class="sc24">
+        </span><span class="sc18">'Z ᶚ'</span><span class="sc24">
+    </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc18">'='</span><span class="sc24">
+
+</span><span class="sc2">; Dash key to produce en-dash, em-dash, or a series of dashes.
+</span><span class="sc0">-</span><span class="sc24">   </span><span class="sc12">::</span><span class="sc24">  </span><span class="sc6">After</span><span class="sc24"> </span><span class="sc16">"----"</span><span class="sc24"> </span><span class="sc6">Send</span><span class="sc24"> </span><span class="sc16">"-"</span><span class="sc24">
+    </span><span class="sc12">||</span><span class="sc24">  </span><span class="sc6">MultiTapMap</span><span class="sc12">:</span><span class="sc24"> </span><span class="sc16">"- {en dash} {em dash} ----"</span><span class="sc24">
+    </span><span class="sc12">||</span><span class="sc24">  </span><span class="sc16">"-"</span><span class="sc24">
+
+
+
+
+</span></div></body>
+</html>

@@ -1,0 +1,25 @@
+connditions:
+which key pressed
+is multi press (same key pressed again within minimum timeframe)
+character context before
+char context after???
+key history   (e.g. bksp undoes result of prior key press)
+persistent variable (e.g. mode of western digits, smart quotes)
+uFlags??  e.g. devrom qr;i would require deadkey to be preserved
+deadkey
+
+actions:
+removing Text
+sending Text
+set variable
+sending uFlags
+deadkey - like a modifier keystroke in that bksp after composing a letter w/ deadkey does not only undo the last keystroke; it undoes the deadkey too.  also, deadkeys don't stack up. (pressing one after another leaves only the most recent one alive.)  notably, it does not interrupt the preceding context, so if a key is pressed that is not affected by the deadkey, the behavior can still be modified by the preceding context.
+UI: beep/sound, traytip, previewWindow
+
+when bksp should not do single-key undo:
+-if text was created by a multiple presses of the same key, delete whole thing
+(exception: "cann{backspace}" should revert to "can" not "ca")
+-if we've already been backing up, if it took multiple keystrokes to create a character (e.g. eng)
+  just the delete it in one BkSp
+
+Bksp should not resort to doing {BS 1} if more than one char was sent by a keystroke. (eg. NFD Tamil O)
