@@ -8,7 +8,7 @@
 #LTrim			; This command causes leading whitespace in continuation sections (e.g. multi-line rota strings) to be trimmed.
 				; If you prefer otherwise, use #LTrim Off
 
-K_InKeyLibVersion = 1.912	; At the top of your script, the very first line of code
+K_InKeyLibVersion = 1.913	; At the top of your script, the very first line of code
 	; should set K_MinimumInKeyLibVersion to this number.
 	; This will ensure that if a user has an older version of InKeyLib.ahki that
 	; does not support the functionality that your script requires, he will be
@@ -24,6 +24,7 @@ K_InKeyLibVersion = 1.912	; At the top of your script, the very first line of co
 	; 0.102 Improves support for CAPSLOCK functionality in default handlers. Adds UseUpperCase() function.
 	; 0.300 SendText() and InsertText() functions
 	; 0.900 MAJOR: to be documented
+	; 1.913 InRota() is now case-sensitive
 
 K_ProtocolNum = 5	; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number is incremented in both.
 			; This ensures that communication conventions between InKey and a keyboard will match.

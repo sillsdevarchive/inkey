@@ -373,6 +373,8 @@ Receive_WM_COPYDATA(wParam, lParam)
 {	; This function can receive string data from a keyboard.
 	; Any processing done in response must return quickly. If necessary, set a timer to kick off a longer process.
 	global rotaPeriod
+	local grp
+	local grp1
 	dwSize := NumGet(lParam+0, A_PtrSize, "UInt")  ;  address of CopyDataStruct's cbData member.
 	StringAddress := NumGet(lParam + A_PtrSize+4, "UPtr")  ; address of CopyDataStruct's lpData member.
 	if (dwSize = 0)
@@ -412,15 +414,15 @@ Receive_WM_COPYDATA(wParam, lParam)
 
 		; Handle string passed as a InCase command (0x9020)
 		if (dwNum = 0x9020) {
-			if (RegExMatch(StringData,"^(?:A:(?P<A>[^\x{1c}]*)\x{1c})?(?:S:(?P<S>[^\x{1c}]*)\x{1c})?(?:Sf:(?P<Sf>[^\x{1c}]*)\x{1c})?(?:R:(?P<R>[^\x{1c}]*)\x{1c})?(?:W:(?P<W>[^\x{1c}]*)\x{1c})?(?:Wf:(?P<Wf>[^\x{1c}]*)\x{1c})?(?:U:(?P<U>[^\x{1c}]*)\x{1c})?(?:E:(?P<E>[^\x{1c}]*)\x{1c})?(?:Ef:(?P<Ef>[^\x{1c}]*)\x{1c})?", ov_)) {
+			if (RegExMatch(StringData,"^(?:A:(?P<A>[^\x{1c}]*)\x{1c})?(?P<IsS>S:(?P<S>[^\x{1c}]*)\x{1c})?(?:Sf:(?P<Sf>[^\x{1c}]*)\x{1c})?(?:R:(?P<R>[^\x{1c}]*)\x{1c})?(?P<IsW>W:(?P<W>[^\x{1c}]*)\x{1c})?(?:Wf:(?P<Wf>[^\x{1c}]*)\x{1c})?(?:U:(?P<U>[^\x{1c}]*)\x{1c})?(?:E:(?P<E>[^\x{1c}]*)\x{1c})?(?:Ef:(?P<Ef>[^\x{1c}]*)\x{1c})?", ov_)) {
 				;~ OutputDebug received TryThis: A=>"%ov_A%" S=>"%ov_S%" Sf=>"%ov_Sf%" R=>"%ov_R%" W=>"%ov_W%" Wf=>"%ov_Wf%" E=>"%ov_E%" Ef=>"%ov_Ef%"
-				if (ov_A and ov_S)
+				if (ov_A and ov_IsS)
 					return InContextSend(ov_A, ov_S, ov_E, ov_Sf ? ov_Sf : 0, ov_Ef ? ov_Ef : 0)
-				if (ov_R and ov_W and ov_U)
+				if (ov_R and ov_IsW and ov_U)
 					return InContextReplaceUsingMap(ov_A, ov_R, ov_W, ov_U, ov_E, ov_Wf ? ov_Wf : 0, ov_Ef ? ov_Ef : 0)
-				if (ov_R and ov_W)
+				if (ov_R and ov_IsW)
 					return InContextReplace(ov_A, ov_R, ov_W, ov_E, ov_Wf ? ov_Wf : 0, ov_Ef ? ov_Ef : 0)
-				if (ov_S) {
+				if (ov_IsS) {
 					interpolate(ov_S)
 					CommitKeystroke("", ov_S, ov_Sf ? ov_Sf : 0)
 					return 2
@@ -654,7 +656,7 @@ RegisterRota(ByRef id, ByRef rotaSets, ByRef defTxt, style, flags) {   ; (id, de
 
 ; ________________________________________________________________________________
 interpolate(ByRef str) {
-	;local cc, dd
+	local match
 	setformat integerfast, H
 	Loop {
 		if (RegExMatch(str, "O)\\x\{([0-9a-fA-F]+)\}", match)) {

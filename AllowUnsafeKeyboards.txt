@@ -1,0 +1,1 @@
+If this file (AllowUnsafeKeyboards.txt) is present in the InKey folder, it will permit InKey to use legacy AHK keyboards. Legacy AHK keyboards have the power to do anything the user can do on the machine, so a malicious keyboard could prove extremely damaging. Please replace your legacy keyboards as soon as possible, and then delete or rename this file.

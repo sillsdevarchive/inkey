@@ -1,0 +1,46 @@
+[Settings]
+TinkerVersion=1.951
+UseContext=2
+
+▶ /*
+[Defines]
+usingmapChillu2Base = usingmap 【ൻ ന】【ൺ ണ】【ർ ര】【ൽ ല】【ൾ ള】【ൿ ക】【ം മ】【ഋ റ】
+SetOfLettersExceptSA = [അ-ഷഹ]
+SetOfRegularLettersAndVowelSigns = [അ-ഹഺാ-ൌൗൠ-ൣ]
+KA = 〔915〕
+▹...ZWNJ = 〔200C〕
+▹...ZWJ = 〔200D〕
+Cons = [क-हक़-य़]\x{93c}?
+
+[Functions]
+DoVowel 【syll】【dep】
+ after 〈Cons〉 send 〈dep〉 ▹... Use dependent vowel after a consonant
+  | 〈syll〉 ▹... Use independent vowel otherwise
+*/ ◀
+
+[KeystrokeRules]
+
+▹... Alt-Minus demonstrates a pig-latinizing function.
+!- > replace 【\b([bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]+)(\p{L}+)】 with 【$2$1ay】
+  | after 【\b[aeiouAEIOU]\p{L}*】 send 【way】
+  | beep
+
+
+▹..._____________________________
+▹... Other general-purpose auto-corrections
+
+▹... Dash key: double-tap for n-dash, triple-tap for m-dash. If more than that, just go back to all dashes.
+- > after 【----】 send 【-】
+  | multiTapSend 【- – — ----】
+
+[ > multiTapSend 【[ \x{3010}】
+{ > multiTapSend 【{ 〔】
+
+] > multiTapSend 【] \x{3011}】
+} > multiTapSend 【} 〕】
+
+▹...< > multiTapSend 【< 〈】
+
+▹...> > multiTapSend 【> 〉】
+
+/ > multiTapSend 【/ 〔25b9〕 〔25ba〕〔25c4〕】

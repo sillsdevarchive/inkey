@@ -7,8 +7,8 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{4D237339-E37B-4606-9E9D-68478AD8C943}
 AppName=InKey
-AppVerName=InKey 1.9.53
-VersionInfoVersion=1.9.53
+AppVerName=InKey 1.950
+VersionInfoVersion=1.9.50
 AppPublisher=InKey Software
 AppPublisherURL=http://www.inkeysoftware.com/
 AppSupportURL=http://www.inkeysoftware.com/
@@ -21,7 +21,7 @@ DefaultGroupName=InKey
 UninstallDisplayIcon={app}\InKey.exe
 AllowNoIcons=yes
 LicenseFile=InKey\InKey License.txt
-OutputBaseFilename=InKey Setup (IPA)
+OutputBaseFilename=InKeySetup(Mozhi)
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -67,7 +67,10 @@ Source: "InKey\Lang.ini"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKey\RegistrationKey.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKey\UnregisterKbds.ahk"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKey\Langs\*"; DestDir: "{app}\Langs"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "InKey\IPA\*"; DestDir: "{app}\IPA"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "InKey\Mozhi\*"; DestDir: "{app}\Mozhi"; Flags: ignoreversion recursesubdirs createallsubdirs
+;Source: "InKey\Indic-WinScript\*"; DestDir: "{app}\IPA"; Flags: ignoreversion recursesubdirs createallsubdirs
+;Source: "InKey\ExtendedUS\*"; DestDir: "{app}\ExtendedUS"; Flags: ignoreversion recursesubdirs createallsubdirs
+;Source: "InKey\Generic\*"; DestDir: "{app}\Generic"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

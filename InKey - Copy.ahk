@@ -10,13 +10,13 @@ Execution_Level=2
 Set_Version_Info=1
 Company_Name=InKeySoftware
 File_Description=InKey Keyboard Manager
-File_Version=1.9.5.3
+File_Version=1.9.1.2
 Inc_File_Version=0
 Internal_Name=inkey
-Legal_Copyright=(c) 2008-2015 InKeySoftware
+Legal_Copyright=(c) 2008-2013 InKeySoftware
 Original_Filename=InKey.ahk
 Product_Name=InKey Keyboard Manager
-Product_Version=1.9.5.3
+Product_Version=1.9.1.2
 [ICONS]
 Icon_1=%In_Dir%\inkey.ico
 
@@ -27,17 +27,10 @@ Icon_1=%In_Dir%\inkey.ico
 #SingleInstance force
 #Warn All, OutputDebug
 
-; To implement for TINKER
-; - SetPhase, IsPhase
-; SetMode(), IsMode for more persistent settings. e.g. smart/plain quote, dev/roman digits
-
-
 ; Main initialization
 	Outputdebug ___________________________ INKEY.AHK ___________________
-	ver = 1.953
+	ver = 1.912
 	K_ProtocolNum := 5 ; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number should be incremented in both files.
-	K_TinkerVersion := 1.953 ; Version of Tinker language
-	K_MinTinkerVersion := 1.951 ; Min required version of Tinker language
 	SetWorkingDir %A_ScriptDir%
 	onExit DoCleanup
 	;~ SetTitleMatchMode 3
@@ -73,17 +66,6 @@ Icon_1=%In_Dir%\inkey.ico
 
 	SetFormat, IntegerFast, D
 	outputdebug Default HKL=%KbdHKL0%
-
-	AllowUnsafe := 0
-	if (FileExist("AllowUnsafeKeyboards.txt")) {
-		MsgBox 308, Unsafe InKey Keyboards Permitted, InKey is currently configured to allow legacy AHK keyboards. This makes you vulnerable to any malicious keyboard that you might install. Once you have replaced your legacy keyboards with Tinker-format keyboards`, you should disallow unsafe keyboards.`n`nWould you like to disallow unsafe keyboards now?, 15
-		IfMsgBox Yes
-			FileDelete AllowUnsafeKeyboards.txt
-		else
-			AllowUnsafe := 1
-	}
-	TinkerDir = %A_AppData%\Tinker
-	FileCreateDir %TinkerDir%
 	ActivateKbd(0, KbdHKL0)
 	;~ HKLDisplayName%KbdHKL0% := GetLang(1)  ; "Default Keyboard"
 	oHKLDisplayName[KbdHKL0] := GetLang(1)  ; "Default Keyboard"
@@ -184,17 +166,11 @@ Icon_1=%In_Dir%\inkey.ico
 			continue
 
 		CurrFolder := A_LoopField
-		if (not FileExist(CurrFolder "\Class.ini"))
+		; For each keyboard class (i.e. folder), first read the keyboard program name
+		IniRead, CurrKbdCmd, %A_LoopField%\Class.ini, Class, Cmd, %A_Space%
+		if (CurrFolder <> "_Non-InKey" and not CurrKbdCmd)
 			continue
-		; For each keyboard class (i.e. folder), first read the AHK program name or TinkerFile name
-		IniRead, CurrKbdTinkerFile, %CurrFolder%\Class.ini, Class, TinkerFile, %A_Space%
-		if (CurrKbdTinkerFile)
-			CurrKbdCmd := CurrFolder . ".ahk"
-		else
-			IniRead, CurrKbdCmd, %CurrFolder%\Class.ini, Class, Cmd, %A_Space%
-
-		if ((not CurrKbdTinkerFile) and (not AllowUnsafe))
-			continue
+			;	outputdebug processing folder: %A_LoopField%.  CurrKbdCmd=%CurrKbdCmd%
 
 		; Loop for each *.kbd.ini file
 		KbdList =
@@ -216,7 +192,6 @@ Icon_1=%In_Dir%\inkey.ico
 			KbdIconNum%numKeyboards% := 0
 			KbdFileHwnd%numKeyboards% := 0
 			; KbdLayoutName%numKeyboards% := SubStr(A_LoopField, 1, InStr(A_LoopField, ".kbd.ini") - 1)
-			KbdTinkerFile%numKeyboards% := CurrKbdTinkerFile
 			IniRead, KbdLayoutName%numKeyboards%, %CurrIni%, Keyboard, LayoutName, %A_Space%
 			IniRead, KbdMenuText%numKeyboards%, %CurrIni%, Keyboard, MenuText, %A_Space%
 			IniRead, KbdHotkey%numKeyboards%, %CurrIni%, Keyboard, Hotkey, %A_Space%
@@ -224,14 +199,8 @@ Icon_1=%In_Dir%\inkey.ico
 			IniRead, KbdAltLang%numKeyboards%, %CurrIni%, Keyboard, AltLang, %A_Space%
 			IniRead, KbdIcon%numKeyboards%, %CurrIni%, Keyboard, Icon, %A_Space%
 			IniRead, KbdParams%numKeyboards%, %CurrIni%, Keyboard, Params, %A_Space%
+			IniRead, KbdConfigureGUI%numKeyboards%, %CurrIni%, Keyboard, ConfigureGUI, %A_Space%
 			IniRead, KbdDisplayCmd%numKeyboards%, %CurrIni%, Keyboard, DisplayCmd, %A_Space%
-			if (AllowUnsafe) {
-				IniRead, KbdConfigureGUI%numKeyboards%, %CurrIni%, Keyboard, ConfigureGUI, %A_Space%
-			} else {
-				if (not RegExMatch(KbdDisplayCmd%numKeyboards%, "i)(^http:)|(\.(pdf|png|doc|txt|htm|html|jpg)$)"))
-					KbdDisplayCmd%numKeyboards% =
-				KbdConfigureGUI%numKeyboards% =
-			}
 			IniRead, KbdKLID%numKeyboards%, %CurrIni%, Keyboard, KLID, %A_Space%
 			ProcessKbd()
 		}
@@ -503,7 +472,7 @@ ProcessKbdErrors:
 	; populate submenu for all enabled keyboards
 	Menu, DispConfigureSubmenu, add, % KbdMenuText%kk%, DispConfigureMenuItem
 
-	; populate submenu if keyboard has a layout help file
+	; populate subment if keyboard has a layout help file
 	if (KbdDisplayCmd%kk%) {
 		DispCmds++
 		; If the keyboard help file exists in the keyboard's folder, prepend path.
@@ -586,7 +555,7 @@ LangCodeOK:
 			KbdFiles .= "   " . KbdFileID%kk% . ":" . KbdFile%kk% . A_Tab
 		}
 		; first 4 parameters are K_ProtocolNum, InKeyHwnd, FileID, KbdId
-		RunCmd%kk% := GetAHKCmd(KbdFile%kk%) . (KbdTinkerFile%kk% ?  TinkerDir : KbdFolder%kk%) . "\" . KbdFile%kk% . " " . K_ProtocolNum . " " . selfHwnd . " " . KbdFileID%kk% . " " . kk . " " . KbdParams%kk%
+		RunCmd%kk% := GetAHKCmd(KbdFile%kk%) . KbdFolder%kk% . "\" . KbdFile%kk% . " " . K_ProtocolNum . " " . selfHwnd . " " . KbdFileID%kk% . " " . kk . " " . KbdParams%kk%
 
 		klid := FindKLID(KbdLayoutName%kk%, KbdLang%kk%)  ; See if keyboard named is registered
 		;outputdebug FindKLID => %klid%.
@@ -615,229 +584,6 @@ LangCodeOK:
 				Kbd2Reg%Kbd2RegCt% := kk
 			}
 		}
-
-		if (KbdTinkerFile%kk%) {
-
-			; Generate an AHK file from the TINKER file
-			local TinkerFile := KbdFolder%kk% . "\" . KbdTinkerFile%kk%
-			local AHKFile := TinkerDir . "\" . KbdFile%kk%
-			outputdebug Generating %AHKFile% from %TinkerFile%
-			FileEncoding UTF-8
-			FileRead tinkerLines, %TinkerFile%
-			if (ErrorLevel) {
-
-				MsgBox 0, Configuration Error, Unable to read file: %TinkerFile%
-				goto ProcessKbdErrors
-			}
-
-			; Remove all comments and trailing whitespace from the file
-			tinkerLines := RegExReplace(tinkerLines, "ms)(►.*?◄)|(\s*▹.*?$)|([ \t]*$)", "")
-			; tinkerLines := RegExReplace(tinkerLines, "\r", "`n")
-			; tinkerLines := RegExReplace(tinkerLines, "(?<=\n)[\r\n]+", "") ; nuke blank lines
-			tinkerLines := RegExReplace(tinkerLines, "(?<=\n)[\r\n]+", "") ; nuke blank lines
-
-			if (FileExist(AHKFile)) {
-				FileDelete %AHKFile%
-			}
-			FileAppend `; generated by InKey v. %ver%`n, %AHKFile%
-				; FileAppend %tinkerLines%, %AHKFile%
-				; FileAppend ____END PURE CODE____`n, %AHKFile%
-
-
-			FoundPos := RegExMatch(tinkerLines, "ims)^\s*\[Settings\]\s*\n(?P<Settings>.*?)^\s*(?P<Section>\[\w+\])\s*\n(?P<Left>.*)", lines)
-			if (FoundPos = 0) {
-				MsgBox 0, Configuration Error, Unable to parse Settings file section in %TinkerFile% `n %tinkerLines%
-				FileAppend %tinkerLines%, %AHKFile%
-				goto ProcessKbdErrors
-			}
-
-			; Check Tinker version for compatibility
-			FoundPos := RegExMatch(linesSettings, "im)^\s*TinkerVersion\s*=\s*([\d.]+)", vmatch) ; TODO: error check return value
-			if (vmatch1 < K_MinTinkerVersion) {
-				local err := TinkerFile " uses Tinker v " vmatch1 ". Please update keyboard to v " K_TinkerVersion
-				FileAppend MsgBox %err%, %AHKFile%
-				TrayTipQ(err)
-				goto ProcessKbdErrors
-			}
-			if (vmatch1 > K_TinkerVersion) {
-				local err := TinkerFile " requires a later version of InKey. Please update InKey to the latest version."
-				TrayTipQ(err)
-				FileAppend MsgBox %err%, %AHKFile%
-				goto ProcessKbdErrors
-			}
-
-			; TODO: Build the AHK file header better
-			FileAppend K_MinimumInKeyLibVersion = 1.912`n, %AHKFile%
-
-			FoundPos := RegExMatch(linesSettings, "im)^\s*usecontext\s*=\s*(\d)", vmatch) ; TODO: error check return value
-			FileAppend K_UseContext = %vmatch1%`n#include InKeyLib.ahki`n, %AHKFile%
-
-			; Cycle through linesLeft doing pre-processor replacements
-			local defM
-			local defL
-			local defR
-			loop {
-				if (RegExMatch(linesLeft, "O)^\s*(\[\w+\])\s*\n", defM))  {
-					linesSection := defM.Value(1)
-					linesLeft := SubStr(linesLeft, defM.Len(0) + 1)
-					continue
-				}
-				if (linesSection = "[KeystrokeRules]" || strlen(linesLeft) < 2)
-					break
-				if (linesSection = "[Defines]") {
-					if (RegExMatch(linesLeft, "O)^\s*(\w+)\s*=\s*(.*?)\s*\n", defM))  {  ; TODO: handle badly-formed defn
-						defL := defM.Value(1)
-						defR := defM.Value(2)
-						; outputdebug #define %defL% %defR%
-						linesLeft := RegExReplace(SubStr(linesLeft, defM.Len(0) + 1), "\Q〔" defM.Value(1) "〕\E", defM.Value(2)) ; TODO: escape $ as $$ in the replacement text!!!
-						continue
-					} else {
-						outputdebug bad defn: %tmp%
-						linesLeft := SubStr(linesLeft, InStr(linesLeft, "`n") + 1)
-					}
-				} else if (linesSection = "[Functions]") {
-					if (RegExMatch(linesLeft, "O)^(\w+)\s*((?:【\w+?】\s*?)+)\r?\n\s+(\S.*(?:\r?\n\s+\S.*)*)\r?\n", defM)) {
-						linesLeft := SubStr(linesLeft, defM.Len(0) + 1)
-						local fname := defM.Value(1)
-						local fparams := defM.Value(2)
-						local frules := defM.Value(3)
-						fparams := RegExReplace(fparams, "】\s*【", chr(0xfffe))
-						; local fparamsA := StrSplit(Substr(fparams, 2, strlen(fparams)-2), char(0xfffe))
-						local fparamsA := StrSplit(fparams, char(0xfffe), "【】")
-						local findFunc := "i)\Q" fname "\E"
-						StringReplace frules, frules, $, $$, 1
-						for index, element in fparamsA {
-							findFunc .= "\s*【(.*?)】"
-							frules := RegExReplace(frules, "i)〔\Q" . element . "\E〕", "$${" . index . "}")
-						}
-						linesLeft := RegExReplace(linesLeft, findFunc, frules)
-						;FileAppend `; FindFunc: %findFunc%`n`; Replace:  %frules%`n, %AHKFile%
-					} else {
-						x := substr(linesleft, 1, InStr(linesLeft, "`n"))
-						outputdebug unexpected stuff in [Functions]: %x%`n ; TODO: alert user
-						linesLeft := SubStr(linesLeft, InStr(linesLeft, "`n") + 1)
-					}
-				} else {
-					; TODO: handle unexpected/mispelled [section]
-					outputdebug unexpected/mispelled section: %linesSection%
-					break
-				}
-			}
-			LinesKeystrokeRules := HexCodes2Chars(linesLeft) ; Replace 〔hex〕 codes with chars
-
-			; ⌘if ⌘then ⌘else ⌘endif
-			while RegExMatch(LinesKeystrokeRules, "Os)⌘if[\s\r\n]*([^⌘]*?)[\s\r\n]*⌘then[\s\r\n]*([^⌘]*?)(?:[\s\r\n]*⌘else[\s\r\n]*([^⌘]*?))?[\s\r\n]*⌘endif", defM) {
-				local toFind := defM.Value(0)
-				; outputdebug % "⌘IF{" defM.Value(1) "} ⌘THEN{" defM.Value(2) "} ⌘ELSE{" defM.Value(3) "}"
-				local toRepl := defM.Value(evalExpr(defM.Value(1)) ? 2 : 3)
-				; outputdebug % "toRepl{" toRepl "}"
-				StringReplace, LinesKeystrokeRules, LinesKeystrokeRules, %toFind%, %toRepl%
-
-			}
-			LinesKeystrokeRules := RegExReplace(LinesKeystrokeRules, "(?<=\n)[\r\n]+", "") ; nuke blank lines (can result from no #else clause)
-
-			local debugfile := AHKFile ".tinker"
-			if (FileExist(debugfile)) {
-				FileDelete %debugfile%
-			}
-			FileAppend %LinesKeystrokeRules%, %debugFile%
-
-			; Escape any backtick or double-quote in a parameter string
-			LinesKeystrokeRules := RegExReplace(LinesKeystrokeRules, "([``""])", "$1$1")  ; 1st escape ALL backticks and double-quotes
-			LinesKeystrokeRules := RegExReplace(LinesKeystrokeRules, "(\n\S*)([``""]){2}", "$1$2") ; remove escape from backtick/dblquot in keystroke labels
-			; TODO: also in labels with alt, shift, etc!!!
-
-			; TODO: Handle colon key : as +`;
-			StringReplace LinesKeystrokeRules, LinesKeystrokeRules, `n:, `n+```;, 1
-
-
-
-			while (StrLen(LinesKeystrokeRules) > 1) {
-				if(RegExMatch(LinesKeystrokeRules, "O)^(?:\r?\n?)*(\S+)\s*>\s*(\S.*(\r?\n\s+.*)*\r?\n?)", match)) { ; keystroke and all its rules
-					LinesKeystrokeRules := SubStr(LinesKeystrokeRules, match.Len(0))
-					local keystroke := match.Value(1)
-					FileAppend $%keystroke%::, %AHKFile%
-					local ruleStr := RegExReplace(match.Value(2), "\r?\n\s+\|\s*", chr(0xfffe)) ; mark split points between alternate rules (sep by vert bar)
-					ruleStr := RegExReplace(ruleStr, "\r?\n\s+", " ")  ; unwrap lines
-					local rules := StrSplit(ruleStr, chr(0xfffe))
-					for index, element in rules {
-						if (index > 1)
-							FileAppend %A_Space% ||%A_Space%, %AHKFile%
-
-						; TODO: implement IfPhase, SetPhase, &, +, _
-
-						; map|loopMap|multiTapMap|multiTapSend 【 】+
-						if (RegExMatch(element, "Oi)^(map|loopMap|multiTapMap|multiTapSend)\s*((【.*?】\s*?)+)\s*$", m2)) {
-						; if (RegExMatch(element, "Oi)^(map|loopMap|multiTapMap)\s*((【.*?】\s*?)+)\s*$", m2)) {
-							local mapType := m2.Value(1)
-							local mapParams := RegExReplace(m2.Value(2), "】\s*【", chr(0x22) chr(0x2c) " " chr(0x22))
-							mapParams := RegExReplace(mapParams, "[【】]", chr(0x22))
-							FileAppend InCase(%mapType%(%mapParams%))`n, %AHKFile%
-
-						; multiTapSend 【 】
-						; } else if (RegExMatch(element, "Oi)^multiTapSend\s*【(.*?)】\s*$", m2)) {
-							; local rep := m2.Value(1)
-							; FileAppend InCase(MultiTapSend("%rep%"))`n, %AHKFile%
-
-						; (After 【 】)? Replace 【 】 with 【 】 (usingMap|usingLoopMap 【 】+)?
-						} else if (RegExMatch(element, "Oi)^(after\s*【(.*?)】\s*)?replace\s*【(.*?)】\s*with\s*【(.*?)】\s*( using(Loop)?Map\s*((【.*?】\s*)+))?\s*$", m2)) {
-							local aft =
-							if (m2.Value(1))
-								aft := "After(" chr(34) m2.Value(2) chr(34) ") "
-							local rep := m2.Value(3)
-							local wth := m2.Value(4)
-							local using =
-							if (m2.Value(5)) {
-								local mapParams := RegExReplace(m2.Value(7), "】\s*【", chr(0x22) chr(0x2c) " " chr(0x22))
-								mapParams := RegExReplace(mapParams, "[【】]", chr(0x22))
-								using := " using" m2.Value(6) "Map(" RegExReplace(mapParams, "[【】]", chr(0x22)) ")"
-							}
-							FileAppend InCase(%aft%Replace("%rep%") with("%wth%")%using%)`n, %AHKFile%
-
-						; Replace 【 】 with 【 】
-						; } else if (RegExMatch(element, "Oi)^replace\s*【(.*?)】\s*with\s*【(.*?)】\s*$", m2)) {
-							; local rep := m2.Value(1)
-							; local wth := m2.Value(2)
-							; FileAppend InCase(Replace("%rep%") with("%wth%"))`n, %AHKFile%
-
-						; After 【 】 Replace 【 】 with 【 】
-						; } else if (RegExMatch(element, "Oi)^after\s*【(.*?)】\s*replace\s*【(.*?)】\s*with\s*【(.*?)】\s*$", m2)) {
-							; local aft := m2.Value(1)
-							; local rep := m2.Value(2)
-							; local wth := m2.Value(3)
-							; FileAppend InCase(After("%aft%") Replace("%rep%") with("%wth%"))`n, %AHKFile%
-
-						; after 【 】 send 【 】
-						} else if (RegExMatch(element, "Oi)^after\s*【(.*?)】\s*send\s*【(.*?)】\s*$", m2)) {
-							local rep := m2.Value(1)
-							local wth := m2.Value(2)
-							FileAppend InCase(After("%rep%") thenSend("%wth%"))`n, %AHKFile%
-
-						; 【 】
-						} else if (RegExMatch(element, "Oi)^【(.*?)】\s*$", m2)) {
-							local rep := m2.Value(1)
-							FileAppend Send("%rep%")`n, %AHKFile%
-
-						; beep
-						} else if (RegExMatch(element, "Oi)^beep\s*$", m2)) {
-							FileAppend Beep()`n, %AHKFile%
-
-						} else {
-							FileAppend %A_Space% `; Rule not parsed: %element%, %AHKFile%
-						}
-					}
-				} else if(RegExMatch(LinesKeystrokeRules, "O)^(?:\r?\n?)*(\S+)\s*:\s*\n", match)) {
-					local keystroke := match.Value(1)
-					FileAppend $%keystroke%::`n, %AHKFile%
-					LinesKeystrokeRules := SubStr(LinesKeystrokeRules, match.Len(0))
-				} else {
-
-					FileAppend /* Unparsed:`n%LinesKeystrokeRules% */, %AHKFile%
-					break
-				}
-			}
-		} ; endif TinkerFile
-
 
 	} else {
 		; These are the settings for a non-InKey keyboard  (e.g. System or Keyman etc)
@@ -1338,7 +1084,7 @@ DoCleanup:  ; Called onExit
 			setformat IntegerFast, dec
 			if (hkl and InStr(InkeyLoadedHKLs, hkl)) {
 				; Outputdebug Unloading hkl %hkl%
-				DllCall("UnloadKeyboardLayout", Uint, hkl)
+				DllCall("UnloadKeyboardLayout","uint",hkl)
 			} else {
 				outputdebug HKL %hkl% was not unloaded (kbd = %A_Index%)
 			}
@@ -1363,7 +1109,7 @@ DoCleanup:  ; Called onExit
 			}
 		}
 	}
-	DllCall("FreeLibrary", UInt, hMSVCRT)
+	DllCall("FreeLibrary", unit, hMSVCRT)
 	ExitApp
 
 DoHelp:
@@ -1970,7 +1716,6 @@ DblTapPrevKbd:
 
 DblTapMenuKbd:
 	if (dblTap = 4) {
-		Send {Shift Down}{Shift Up}{Ctrl Down}{Ctrl Up}{Alt Down}{Alt Up}
 		GoSub ShowKbdMenu
 		dblTap =
 	} else {
@@ -2184,7 +1929,7 @@ TryGetDefaultHKL() {
 	;defhkl := defhklbuf + 0
 	;defhkl += 0
 	;SetFormat, IntegerFast, D
-	;outputdebug defhkl = %defhkl%
+	outputdebug defhkl = %defhkl%
 	return defhkl
 /*  This is a method of calculating the default HKL via the registry:
 
@@ -2293,70 +2038,6 @@ ShowAbout:
 ButtonOK:
 	Gui, Hide
 	return
-
-Char(codePt) {
-; Use this instead of AHK's Chr() function if you need to handle SMP characters too.
-	if (codePt > 0xffffffff)   ; Invalid Unicode
-		return ""
-	if (codePt & 0xffff0000) { ; SMP character. Convert to surrogate pair
-		codePt -= 0x10000
-		return Chr((0xd800 | (codePt >> 10))) . chr((0xdc00 | (codePt & 0x3ff)))
-	}
-	return chr(codePt)         ; BMP character.
-}
-
-; Convert any 〔 〕 hex codes to characters
-HexCodes2Chars(strIn) {
-	; local m1
-	; local v1
-	; local rr
-	local bail := 0
-	while (RegExMatch(strIn, "O)〔([0-9A-Fa-f]+)〕", m1)) {
-		v1 := "0x" m1.Value(1)
-		v1 += 0
-		if (v1 < 32) {
-			rr := "\x{" m1.Value(1) "}"
-		} else {
-			rr := Char(v1)
-		}
-		strIn := RegExReplace(strIn, m1.Value(0), rr)  ; TODO: For efficiency, avoid this whole reassign
-
-		bail += 1
-		if (bail > 200) {
-			ff := m1.Value(0)
-			rr := Char(v1)
-			msgbox 0, fatal, convert hex chars failed: '%ff%'->'%rr%'  ; TODO: don't fail with msgbox (it's behind splash screen)
-			break
-		}
-	}
-	return strIn
-}
-
-evalExpr(e) {
-	if (e = "" or e = "0")
-		return 0
-	if (RegExMatch(e, "^\d+$"))
-		return e + 0
-	if (RegExMatch(e, "^(.*?)\s*([=<>&|^]+)\s*(.*?)$", ov)) {
-		if (ov2 = "=")
-			return (evalExpr(ov1) = evalExpr(ov3))
-		if (ov2 = "<")
-			return (evalExpr(ov1) < evalExpr(ov3))
-		if (ov2 = ">")
-			return (evalExpr(ov1) > evalExpr(ov3))
-		if (ov2 = "<>")
-			return (evalExpr(ov1) <> evalExpr(ov3))
-		if (ov2 = "|")
-			return (evalExpr(ov1) or evalExpr(ov3))
-		if (ov2 = "&")
-			return (evalExpr(ov1) and evalExpr(ov3))
-		if (ov2 = "^")
-			return (evalExpr(ov1) ^ evalExpr(ov3))
-		outputdebug Unrecognized operator in expression: %e%
-		return 0
-	}
-	return e
-}
 
 #include Config.ahk	; Configuration GUI (GUI 3) routines
 #include Validate.ahk	; Validation and splash screen (GUI 1) routines

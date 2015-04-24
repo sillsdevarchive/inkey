@@ -1,0 +1,189 @@
+[Settings]
+TinkerVersion=1.951
+UseContext=1
+
+/*InKey Script to provide a context-sensitive keyboard layout for IPA
+
+	Keyboard:	IPA Unicode
+	Version:	3.0
+	Authors:	Benjamin of NLCI, and Dan of SAG.
+	Official Distributionː	http://inkeysoftware.com
+
+	You are free to modify this script for your own purposes.
+	Please retain the above authorship details as appropriate.
+
+HISTORY:
+2008-08-13  0.1  Created by NLCI and SAG, to mimic SIL's IPAUni12.KMN layout
+2008-09-01  1.0  Shortcuts for ligatures added
+2008-10-14  1.01 Comments in continuation sections adjusted to avoid AHK's bug.
+2008-10-28  1.02 K_MinimumInKeyLibVersion specified
+2008-11-19  1.03 Make use of default hotkeys (requires InKeyLib 0.092)
+2009-03-01  1.04 The ampersand (&) key now joins/splits these chars when typed after them: 	ʣ ʤ ʥ ʦ ʧ ʨ ʩ ʪ ʫ ɮ
+2009-11-10  1.05 This keyboard now outputs only NFD forms, in order to keep FieldWorks apps from misbehaving.
+2011-04-07  1.06 Updated to use CAPSLOCK-sensitive context
+2013-02-13  2.00 Updated to use InKey 1.900 API. (More readable)
+								Also, combining diacritic keys now only apply after \p{L}\p{M}*, so you get the key's actual character more
+								naturally in other contexts.
+2013-03-14 2.01 Updated to InKey 1.910 API.
+2015-04-20 3.0 Updated to Tinker format
+
+*/
+
+[KeystrokeRules]
+▹... The digits have the most complex usage pattern, used for level contours, stem tones, rotas, and the digits themselves.
+
+0 > after 【[〔2E5〕-〔2E9〕]】 send 【〔2E9〕】		       ▹... Continue a left stem contour
+   |  after 【[〔A712〕-〔A716〕]】 send 【〔A712〕】		▹... Continue a right stem contour
+   |  map 【# ˩】【& ꜒】【̊ ̏】			            ▹...    #   2E9,   &   A712, 30A   30F
+   |  【0】
+
+1 > replace 【##】 with 【〔F1F1〕】  				                    ▹... Begin a level pitch contour after ##
+   | after 【[〔F1F1〕-〔F1F9〕]】 send 【〔F1F1〕】		▹... Continue a level pitch contour
+   |  after 【[〔2E5〕-〔2E9〕]】 send 【〔2E8〕】		▹... Continue a left stem contour
+   |  after 【[〔A712〕-〔A716〕]】 send 【〔A713〕】		▹... Continue a right stem contour
+   |  map 【# ˨】【& ꜓】【̊ ̀】【̌ ᷈】【̄ ᷆】【́ ̂】    ▹...  # 2E8, & A713, 030A 0300, 030C 1DC8, 0304 1DC6, 0301 0302
+   |  【1】
+
+2 > replace 【##】 with 【〔F1F2〕】                                 ▹... Begin a level pitch contour after ##
+   | after 【[〔F1F1〕-〔F1F9〕]】 send 【〔F1F2〕】		▹... Continue a level pitch contour
+   |  after 【[〔2E5〕-〔2E9〕]】 send 【〔2E7〕】		▹... Continue a left stem contour
+   |  after 【[〔A712〕-〔A716〕]】 send 【〔A714〕】		▹... Continue a right stem contour
+   |  map 【# ˧】【& ꜔】【̊ ̄】【̀ ᷅】【́ ᷇】   ▹... # 02E7,  & A714,  030A 0304,  0300 1DC5,  0301 1DC7
+   |  【2】
+
+3 > replace 【##】 with 【〔F1F3〕】                                    ▹... Begin a level pitch contour after ##
+   | after 【[〔F1F1〕-〔F1F9〕]】 send 【〔F1F3〕】		▹... Continue a level pitch contour
+   | after 【[〔2E5〕-〔2E9〕]】 send 【〔2E6〕】		▹... Continue a left stem contour
+   | after 【[〔A712〕-〔A716〕]】 send 【〔A715〕】		▹... Continue a right stem contour
+   | map 【# ˦】【& ꜕】【̊ ́】【̀ ̌】【̄ ᷄】【̂ ᷉】  ▹...  # 02E6, & A715, 030A 0301, 0300 030C, 0304 1DC4, 0302 1DC9
+   | 【3】
+
+4 > replace 【##】 with 【〔F1F4〕】                                  ▹... Begin a level pitch contour after ##
+   | after 【[〔F1F1〕-〔F1F9〕]】 send 【〔F1F4〕】		▹... Continue a level pitch contour
+   | after 【[〔2E5〕-〔2E9〕]】 send 【〔2E5〕】		▹... Continue a left stem contour
+   | after 【[〔A712〕-〔A716〕]】 send 【〔A716〕】		▹... Continue a right stem contour
+   | map 【# ˥】【& ꜖】【̊ ̋】		                     ▹...  # 02E5,, & A716, 030A 030B
+   | 【4】
+
+5 > replace 【##】 with 【〔F1F5〕】                                  ▹... Begin a level pitch contour after ##
+   | after 【[〔F1F1〕-〔F1F9〕]】 send 【〔F1F5〕】		▹... Continue a level pitch contour
+   | 【5】
+
+6 > replace 【##】 with 【〔F1F6〕】                                  ▹... Begin a level pitch contour after ##
+   | after 【[〔F1F1〕-〔F1F9〕]】 send 【〔F1F6〕】		▹... Continue a level pitch contour
+   | 【6】
+
+7 > replace 【##】 with 【〔F1F7〕】                                  ▹... Begin a level pitch contour after ##
+   | after 【[〔F1F1〕-〔F1F9〕]】 send 【〔F1F7〕】		▹... Continue a level pitch contour
+   | 【7】
+
+8 > replace 【##】 with 【〔F1F8〕】                                  ▹... Begin a level pitch contour after ##
+   | after 【[〔F1F1〕-〔F1F9〕]】 send 【〔F1F8〕】		▹... Continue a level pitch contour
+   | 【8】
+
+9 > replace 【##】 with 【〔F1F9〕】                                  ▹... Begin a level pitch contour after ##
+   | after 【[〔F1F1〕-〔F1F9〕]】 send 【〔F1F9〕】		▹... Continue a level pitch contour
+   | 【9】
+
+
+▹...----------------------------------------------------------------------------------------------
+▹... The non-digits are more straightforward:
+
+▹... Key: Equals (=)   -This rota is the all-purpose "can't-remember-the-keystroke" rota.
+▹... The first alternate mimics the behavior of IPAUni12.kmn, but otherwise we are free to order alternates as seems best.
+= > map 【\ =】
+   | loopMap 【̟ +】【̪ {】【ˈ }】【̠ _】【ː :】【̃ ~】【̈ *】【̊ @】【̥ %】【̩ $】【# ‿】【. ‖】【ǃ ǂ !】
+		【? ʔ ʕ ʡ ʢ】【a ɑ ɐ æ ᴂ α ᶏ ᶐ ᴀ】【ae æ ᴂ aə】【A ᴂ】【b β ɓ ᶀ ᵬ】【B ʙ】【c ç ƈ ɕ】【d ð ɗ ɖ ȡ ᶑ ᶁ ᵭ】
+		【OE ɶ】【E ɘ ɶ œ ᴇ】【oe œ oə】【e ə ɜ ɛ ʚ œ ᶒ ᶓ ᶔ ᶕ ɘ】【f ɸ ᶂ ᵮ】【g ɣ ɡ ɠ ᶃ】【G ɢ ʛ】【h ɥ ħ ɦ ђ ɧ】
+		【H ʜ】【i ɪ ɩ ɨ ᵼ ᵻ ᶖ】【I ɨ】【j ɟ ʄ ʝ】【k ƙ ᶄ】【l ɬ ɮ ɭ ȴ ɺ ʎ ᶅ ɫ】【L ʟ ɺ】【m ɱ ᶆ ᵯ】【n ɲ ŋ ɳ ȵ ᶇ ᵰ Ŋ】
+		【N ɴ Ŋ】【O ɵ ɤ ɞ】【o ɒ ø ɔ ᶗ】【p ʘ ƥ ᶈ ᵱ】【q ʠ】【Q ʡ ʢ】【R ʀ ʁ】【r ɹ ɾ ɽ ɻ ᶉ ᵲ ᵳ】【s ʃ σ ʂ ᶊ ᵴ ᶘ ᶋ】
+		【S ᶘ】【t θ ʇ ƭ ʈ ȶ ᵵ】【T ʇ】【u ɯ ʉ ᵾ ʌ ʊ ɷ ʉ ᵾ ᶙ】【U ʉ】【v ʋ ⱱ ᶌ】【w ʍ ɰ ⱳ】【x χ ᶍ】【y ʏ ɥ ʯ】
+		【Y ʯ】【lz ɮ lʒ】【z ʒ ᶚ ʑ ʐ ᶎ ᵶ ɿ ʅ】【Z ᶚ】
+   | 【=】
+
+▹... right wedge ( > ) - A general set of alternate forms
+> > map 【\ >】
+   | loopMap 【# ꜛ ↗】【ǃ ǁ】【= 〔2192〕】【A ᴂ】【a ɐ】【b ɓ】【c ƈ】【d ɗ】【E ɶ】【e ɜ】【G ʛ】【g ɠ】【H ɧ】【h ħ】【I ᵼ】【j ʄ】【k ƙ】【L ɺ】【l ɮ】【m ɱ】【n ŋ】【N Ŋ】【O ɤ】【o ø】【p ƥ】【q ʠ】【R ʁ】【r ɾ】【s σ】【t ƭ】【u ʌ】【U ᵾ】【w ɰ】【z ʑ】
+   | 【>】
+
+▹... left wedge ( < )  - A general set of alternate forms
+< > map 【\ <】
+   | loopMap 【# ꜜ ↘】【. |】【? ʕ】【ǃ ǀ】【= 〔34F〕】【a æ】【c ɕ】【d ɖ】【e ɛ】【E œ】【g ɡ】【h ɦ】【I ᵻ】【j ʝ】【l ɭ】【L ʎ】【n ɳ】【o ɔ】【O ɞ】【Q ʢ】【r ɽ】【R ɻ】【s ʂ】【t ʈ】【u ʊ】【v ⱱ】【w ⱳ】【y ɥ】【z ʐ】  ▹...     =   034F (combining grapheme joiner)
+   | 【<】
+
+▹... vertical bar ( | ) - - A general set of alternate forms
+| > map 【\ |】
+   | loopMap 【A ᴀ】【a α】【d ȡ】【E ᴇ】【e ʚ】【h ђ】【i ɩ】【l ȴ】【n ȵ】【T ʇ】【t ȶ】【u ɷ】【Y ʯ】【y ʮ】【Z ʅ】【z ɿ】
+   | 【|】
+
+▹... Key: Circumflex ( ^ )  - For superscripting
+^ > map 【\ ^】
+   | loopMap 【0 ⁰】【1 ¹】【2 ²】【3 ³】【4 ⁴】【5 ⁵】【6 ⁶】【7 ⁷】【8 ⁸】【9 ⁹】【- ⁻】【+ ⁺】【= ⁼】【ʕ ˤ】【ʔ ˀ】【b ᵇ】【β ᵝ】【c ᶜ】【ɕ ᶝ】【d ᵈ】【ð ᶞ】【f ᶠ】【g ᵍ】【ɡ ᶢ】【ɣ ˠ】【h ʰ】【ɦ ʱ】【ɥ ᶣ】【ħ 】【j ʲ】【ʝ ᶨ】【ɟ ᶡ】【k ᵏ】【l ˡ】【ɭ ᶩ】【ʟ ᶫ】【m ᵐ】【ɱ ᶬ】【n ⁿ】【ɲ ᶮ】【ŋ ᵑ】【ɳ ᶯ】【ɴ ᶰ】【p ᵖ】【ɸ ᶲ】【r ʳ】【ɹ ʴ】【ɻ ʵ】【ʁ ʶ】【s ˢ】【ʂ ᶳ】【ʃ ᶴ】【t ᵗ】【ɰ ᶭ】【v ᵛ】【ʋ ᶹ】【w ʷ】【x ˣ】【z ᶻ】【ʑ ᶽ】【ʐ ᶼ】【ʒ ᶾ】【θ ᶿ】【ʎ 】【a ᵃ】【ɐ ᵄ】【ɑ ᵅ】【ɒ ᶛ】【æ 】【ᴂ ᵆ】【e ᵉ】【ə ᵊ】【ɛ ᵋ】【ɜ ᶟ】【ɘ 】【i ⁱ】【ɨ ᶤ】【ɪ ᶦ】【o ᵒ】【ø 】【œ 】【ɶ 】【ɵ ᶱ】【ɔ ᵓ】【u ᵘ】【ʉ ᶶ】【y ʸ】【ʏ 】【ɯ ᵚ】【ɤ 】【ɞ 】【ʌ ᶺ】【ʊ ᶷ】【( ⁽】【) ⁾】
+   | 【^】
+
+▹... Key: Tilde ( ~ )
+▹... this is a non-looping rota, to match IPAUni12.kmn functionality (probably unneccesarily closely)
+~ > map 【\ ~】【b̃ ᵬ】【d̃ ᵭ】【f̃ ᵮ】【l̃ ɫ】【m̃ ᵯ】【ñ ᵰ】【p̃ ᵱ】【r̃ ᵲ】【ɾ̃ ᵳ】【s̃ ᵴ】【t̃ ᵵ】【z̃ ᵶ】
+   | 【〔303〕】
+
+▹... Key: Ampersand ( & )  - For tying ties || for combining/splitting affricates.
+& > map 【\ &】【# ͡】【̊ ͜】【dz ʣ】【dʒ ʤ】【dʑ ʥ】【ts ʦ】【tʃ ʧ】【tɕ ʨ】【fŋ ʩ】【ls ʪ】【lz ʫ】【lʒ ɮ】
+   | 【&】
+
+▹... Key: left curly bracket ( { ) - For Dental/Apical/Laminal/Lingulabial/Fricative
+{ > map 【〔32A〕 〔33A〕 〔33B〕 〔33C〕 〔323〕】【\ {】		▹... combining_bridge_below |  combining_inverted_bridge_below |  combining_square_below |  combining_seagull_below |  combining_dot_below
+   | after 【\p{L}\p{M}*】 send 【〔32A〕】
+   | 【{】
+
+▹... Key: Right Curly bracket ( } ) - For stress / fortis-lenis.  May be word initial; Not a diacritic.
+} > map 【〔02C8〕 〔02CC〕 〔0348〕 〔1DC2〕 }】【\ }】
+   | 【〔02C8〕】
+
+▹... Key: right_square_bracket	( ] ) - By default puts own key out first.  Non-looping.
+] > map 【] ʼ ̚ ʻ】	▹... 005D |  02BC |  031A |  02BB		 right_square_bracket |  modifier_letter_apostrophe |  combining_left_angle_above |  modifier_letter_turned_comma
+   | 【]】
+
+▹... Key: left square_bracket	( [ ) - By default puts own key out first. Non-looping.
+[ > map 【[ ʽ ˞】		▹... 005B |  02BD |  02DE		 left_square_bracket |  modifier_letter_reversed_comma |  modifier_letter_rhotic_hook
+   | 【[】
+
+▹... Key: asterisk ( * )
+* > map 【\ *】【〔308〕 〔33d〕 〔306〕 〔307〕 〔310〕】		▹... combining_diaeresis |  combining_x_above |  combining_breve |  combining_dot_above |  combining_candrabindu
+   | after 【\p{L}\p{M}*】 send 【〔308〕】
+   | 【*】
+
+▹... plus sign ( + )   advanced / raised / +ATR / more rounded
++ > map 【\ +】【〔31F〕 〔31D〕 〔318〕 〔339〕】		▹...  ◌̟ ◌̝ ◌̘ ◌̹		combining_plus_sign_below |  combining_up_tack_below |  combining_left_tack_below |  combining_right_half_ring_below
+   | after 【\p{L}\p{M}*】 send 【〔31F〕】
+   | 【+】
+
+▹... underscore ( _ )	  ▹... retracted / lowered / -ATR / less rounded / open vowel
+_ > map 【\ _】【〔320〕 〔31E〕 〔319〕 〔31C〕 〔327〕】		▹...|	◌̠ ◌̞ ◌̙ ◌̜ ◌̧		 combining_minus_sign_below |  combining_down_tack_below |  combining_right_tack_below |  combining_left_half_ring_below |  combining_cedilla
+   | after 【\p{L}\p{M}*】 send 【〔320〕】
+   | 【_】
+
+▹... percent (%) for below diacritics and palatal hooks
+% > map 【b̤ ᶀ】【d̤ ᶁ】【f̤ ᶂ】【g̤ ᶃ】【k̤ ᶄ】【l̤ ᶅ】【m̤ ᶆ】【n̤ ᶇ】【p̤ ᶈ】【r̤ ᶉ】【s̤ ᶊ】【ʃ̤ ᶋ】【v̤ ᶌ】【x̤ ᶍ】【z̤ ᶎ】  ▹... dieresis to palatal hooks	(This is a non-looping rota.)
+   | map 【\ %】【〔325〕 〔32C〕 〔324〕】		▹... ◌̥ ◌̬ ◌̤		 combining_ring_below |  combining_caron_below |  combining_diaeresis_below
+   | after 【\p{L}\p{M}*】 send 【〔325〕】
+   | 【%】
+
+▹... Key: dollar sign ( $ )   ▹... syllabic / non-syllabic / creaky-voiced / retroflex hook
+$ > map 【a̰ ᶏ】【ɑ̰ ᶐ】【ɗ̰ ᶑ】【ḛ ᶒ】【ɛ̰ ᶓ】【ɜ̰ ᶔ】【ə̰ ᶕ】【ḭ ᶖ】【ɔ̰ ᶗ】【ʃ̰ ᶘ】【ṵ ᶙ】【ʒ̰ ᶚ】  ▹... tilde below  --> retroflex hooks (This is a non-looping rota.)
+   | map 【\ $】【〔329〕 〔32F〕 〔330〕】		▹...|	◌̩ ◌̯ ◌̰		 combining_vertical_line_below |  combining_inverted_breve_below |  combining_tilde_below
+   | after 【\p{L}\p{M}*】 send 【〔329〕】
+   | 【$】
+
+▹... Key: Colon ( : )
++; > loopMap 【ːː ː ˑ】
+   | map 【\ :】
+   | 【ː】	▹... modifier_letter_triangular_colon (x2) |  modifier_letter_triangular_colon |  modifier_letter_half_triangular_colon
+
+▹... Key: exclamation point
+! > after 【\】 send 【!】
+   |【〔1C3〕】   	▹... latin_letter_retroflex_click (ǃ)
+
+▹... Key: AT symbol ( @ )
+@ > map 【〔30A〕 @】【\ @】   ▹... combining_ring_above (◌̊)
+   | 【〔30A〕】
+
