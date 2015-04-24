@@ -10,13 +10,13 @@ Execution_Level=2
 Set_Version_Info=1
 Company_Name=InKeySoftware
 File_Description=InKey Keyboard Manager
-File_Version=1.9.5.3
+File_Version=1.9.5.4
 Inc_File_Version=0
 Internal_Name=inkey
 Legal_Copyright=(c) 2008-2015 InKeySoftware
 Original_Filename=InKey.ahk
 Product_Name=InKey Keyboard Manager
-Product_Version=1.9.5.3
+Product_Version=1.9.5.4
 [ICONS]
 Icon_1=%In_Dir%\inkey.ico
 
@@ -34,9 +34,9 @@ Icon_1=%In_Dir%\inkey.ico
 
 ; Main initialization
 	Outputdebug ___________________________ INKEY.AHK ___________________
-	ver = 1.953
+	ver = 1.954
 	K_ProtocolNum := 5 ; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number should be incremented in both files.
-	K_TinkerVersion := 1.953 ; Version of Tinker language
+	K_TinkerVersion := 1.954 ; Version of Tinker language
 	K_MinTinkerVersion := 1.951 ; Min required version of Tinker language
 	SetWorkingDir %A_ScriptDir%
 	onExit DoCleanup
@@ -57,11 +57,11 @@ Icon_1=%In_Dir%\inkey.ico
 	LastKbdActivationTC := 0
 	ShowKeyboardNameBalloon := 0
 	oHKLDisplayName := Object()
-	KbdFile0 := ""
-	KbdFileID0 := ""
-	KbdHKL0 := GetDefaultHKL() ; also initializes preLoadedHKLs
+	KBD_File0 := ""
+	KBD_FileID0 := ""
+	KBD_HKL0 := GetDefaultHKL() ; also initializes preLoadedHKLs
 	oKbdByHKL := Object()
-	oKbdByHKL[KbdHKL0] := 0
+	oKbdByHKL[KBD_HKL0] := 0
 	dblTap := 0
 	currSendingMode := 0
 	LastRotID := ""
@@ -70,9 +70,25 @@ Icon_1=%In_Dir%\inkey.ico
 	thisAppDoesGreedyBackspace := 0
 	VKbdHwnd := 0
 	VKbdShowing := 0
+	UnregisterUnusedKeyboards := 0
 
 	SetFormat, IntegerFast, D
-	outputdebug Default HKL=%KbdHKL0%
+	outputdebug Default HKL=%KBD_HKL0%
+
+	; Determine whether to store settings in AppData or in the working directory (which may prevent writing)
+	if (FileExist("StoreUserSettingsInAppData.txt")) {
+		StoreUserSettingsInAppData := 1
+		BaseSettingsFolder := A_AppData . "\InKeySoftware"
+		InKeyINI := BaseSettingsFolder "\InKey.ini"
+		if (not FileExist(InKeyINI)) {
+			FileCreateDir %BaseSettingsFolder%
+			FileCopy InKey.ini, %InKeyINI%
+		}
+	} else {
+		StoreUserSettingsInAppData := 0
+		BaseSettingsFolder := A_ScriptDir
+		InKeyINI := "InKey.ini"
+	}
 
 	AllowUnsafe := 0
 	if (FileExist("AllowUnsafeKeyboards.txt")) {
@@ -84,47 +100,47 @@ Icon_1=%In_Dir%\inkey.ico
 	}
 	TinkerDir = %A_AppData%\Tinker
 	FileCreateDir %TinkerDir%
-	ActivateKbd(0, KbdHKL0)
-	;~ HKLDisplayName%KbdHKL0% := GetLang(1)  ; "Default Keyboard"
-	oHKLDisplayName[KbdHKL0] := GetLang(1)  ; "Default Keyboard"
+	ActivateKbd(0, KBD_HKL0)
+	;~ HKLDisplayName%KBD_HKL0% := GetLang(1)  ; "Default Keyboard"
+	oHKLDisplayName[KBD_HKL0] := GetLang(1)  ; "Default Keyboard"
 	validate()
 	hwndLastActive := WinExist("A")
 	WinGet hwndTray, ID, ahk_class Shell_TrayWnd
 	;outputdebug hwndtray = %hwndtray%
 	; KbdToRequest := -1
 	GetRegisteredKbds()
-	Outputdebug Kbd# 0 (Default) HKL=%KbdHKL0%
+	Outputdebug Kbd# 0 (Default) HKL=%KBD_HKL0%
 	InkeyLoadedHKLs := ""
 	setupCallbacks()
-;	SendU_Init()
+	;	SendU_Init()
 	hMSVCRT := DllCall("LoadLibrary", "str", "MSVCRT.dll")
 
 	initContext()
 	Menu KbdMenu, UseErrorLevel
 
 	; Read main section of INI file
-	IniRead UnderlyingLayout, InKey.ini, InKey, UnderlyingLayout, %A_Space%
+	IniRead UnderlyingLayout, %InKeyINI%, InKey, UnderlyingLayout, %A_Space%
 	if (not UnderlyingLayout)
 		UnderlyingLayout := "0000" . A_Language
 	RegRead UnderlyingLayoutFile, HKLM, SYSTEM\CurrentControlSet\Control\Keyboard Layouts\%UnderlyingLayout%, Layout File
 	if (not UnderlyingLayoutFile)
 		UnderlyingLayoutFile := "kbdus.dll"
 
-	IniRead FollowWindowsInputLanguage, InKey.ini, InKey, FollowWindowsInputLanguage, 1
-	;IniRead AutoGrabContext, InKey.ini, InKey, AutoGrabContext, 0
+	IniRead FollowWindowsInputLanguage, %InKeyINI%, InKey, FollowWindowsInputLanguage, 1
+	;IniRead AutoGrabContext, %InKeyINI%, InKey, AutoGrabContext, 0
 	AutoGrabContext = 0
-	IniRead PortableMode, InKey.ini, InKey, PortableMode, 1
-	IniRead IsBeta, InKey.ini, InKey, Beta, 1
+	IniRead PortableMode, %InKeyINI%, InKey, PortableMode, 1
+	IniRead IsBeta, %InKeyINI%, InKey, Beta, 1
 
-	IniRead ShowKeyboardNameBalloon, InKey.ini, InKey, ShowKeyboardNameBalloon, 0
-	IniRead UseAltLangWithoutPrompting, InKey.ini, InKey, UseAltLangWithoutPrompting, 0
+	IniRead ShowKeyboardNameBalloon, %InKeyINI%, InKey, ShowKeyboardNameBalloon, 0
+	IniRead UseAltLangWithoutPrompting, %InKeyINI%, InKey, UseAltLangWithoutPrompting, 0
 	IniRead CurrentLang, Lang.ini, Language, Name
 
 	; [Un]/Register InKey to run on Windows start-up, if running from a fixed drive.
 	DriveGet, driveIsFixed, Type, %A_ScriptFullPath%
 	driveIsFixed := (driveIsFixed = "Fixed")
 	if (driveIsFixed) {
-		IniRead StartWithWindows, InKey.ini, InKey, StartWithWindows, 0
+		IniRead StartWithWindows, %InKeyINI%, InKey, StartWithWindows, 0
 		if (StartWithWindows) {
 			QuotedPath = "%A_ScriptFullPath%"
 			RegRead, pls, HKCU, Software\Microsoft\Windows\CurrentVersion\Run, InKey
@@ -134,9 +150,9 @@ Icon_1=%In_Dir%\inkey.ico
 			RegDelete HKCU, Software\Microsoft\Windows\CurrentVersion\Run, InKey
 	}
 
-	IniRead LeaveKeyboardsLoaded, InKey.ini, InKey, LeaveKeyboardsLoaded, 0
+	IniRead LeaveKeyboardsLoaded, %InKeyINI%, InKey, LeaveKeyboardsLoaded, 0
 
-	;IniRead PutMenuAtCursor, InKey.ini, InKey, PutMenuAtCursor, 0
+	;IniRead PutMenuAtCursor, %InKeyINI%, InKey, PutMenuAtCursor, 0
 	 ; if (not PutMenuAtCursor) {
 		; WinGetPos TrayX, TrayY, ww, hh, ahk_class ToolbarWindow32, Notification Area
 		; outputdebug tray: %TrayX%, %TrayY%, %ww%, %hh%
@@ -166,7 +182,7 @@ Icon_1=%In_Dir%\inkey.ico
 	OnString:=GetLang(59) ; ON
 	OffString:=GetLang(60) ; OFF
 
-	KbdFile0 := ""
+	KBD_File0 := ""
 	DispGUIs := 0
 	DispCmds := 0
 
@@ -180,21 +196,20 @@ Icon_1=%In_Dir%\inkey.ico
 		FolderList = %FolderList%%A_LoopFileName%`n
 	Sort, FolderList
 	Loop, parse, FolderList, `n
-	{	if (A_LoopField = "" or InStr(A_LoopField, ".")) ; Ignore the blank item at the end of the list, and ignore any folder containing a dot in the name.
+	{	if (A_LoopField = "" or (InStr(A_LoopField, ".") and (A_LoopField <> ".nonInkey"))) ; Ignore the blank item at the end of the list, and ignore any folder containing a dot in the name.
 			continue
 
 		CurrFolder := A_LoopField
-		if (not FileExist(CurrFolder "\Class.ini"))
-			continue
-		; For each keyboard class (i.e. folder), first read the AHK program name or TinkerFile name
-		IniRead, CurrKbdTinkerFile, %CurrFolder%\Class.ini, Class, TinkerFile, %A_Space%
-		if (CurrKbdTinkerFile)
+		CurrKbdTinkerFile := ""
+		CurrKbdCmd := ""
+		if (FileExist(CurrFolder "\" CurrFolder ".tinker")) {
+			CurrKbdTinkerFile := CurrFolder ".tinker"
 			CurrKbdCmd := CurrFolder . ".ahk"
-		else
-			IniRead, CurrKbdCmd, %CurrFolder%\Class.ini, Class, Cmd, %A_Space%
-
-		if ((not CurrKbdTinkerFile) and (not AllowUnsafe))
+		} else if (AllowUnsafe and FileExist(CurrFolder "\" CurrFolder ".ahk")) {
+			CurrKbdCmd := CurrFolder . ".ahk"
+		} else if (A_LoopField <> ".nonInkey") {
 			continue
+		}
 
 		; Loop for each *.kbd.ini file
 		KbdList =
@@ -205,39 +220,49 @@ Icon_1=%In_Dir%\inkey.ico
 		{	if (A_LoopField = "") ; Ignore the blank item at the end of the list.
 				continue
 			CurrIni = %CurrFolder%\%A_LoopField%
-			; outputdebug processing file: %CurrIni%
+			if (StoreUserSettingsInAppData) {
+				oriIni := CurrIni
+				CurrIni := BaseSettingsFolder "\" CurrIni
+				if (not FileExist(CurrIni)) {
+					FileCreateDir %BaseSettingsFolder%\%CurrFolder%
+					FileCopy %oriIni%, %CurrIni%
+				}
+			}
+			;outputdebug processing file: %CurrIni%
+
 			IniRead, ii, %CurrIni%, Keyboard, Enabled, %A_Space%
 			if (not ii)		; skip items without Enabled=1
 				continue
 			numKeyboards++  ; New keyboard to configure
-			KbdFolder%numKeyboards% := CurrFolder
-			KbdIniFile%numKeyboards% := CurrIni
-			KbdDisabled%numKeyboards% := 0
-			KbdIconNum%numKeyboards% := 0
-			KbdFileHwnd%numKeyboards% := 0
-			; KbdLayoutName%numKeyboards% := SubStr(A_LoopField, 1, InStr(A_LoopField, ".kbd.ini") - 1)
-			KbdTinkerFile%numKeyboards% := CurrKbdTinkerFile
-			IniRead, KbdLayoutName%numKeyboards%, %CurrIni%, Keyboard, LayoutName, %A_Space%
-			IniRead, KbdMenuText%numKeyboards%, %CurrIni%, Keyboard, MenuText, %A_Space%
-			IniRead, KbdHotkey%numKeyboards%, %CurrIni%, Keyboard, Hotkey, %A_Space%
-			IniRead, KbdLang%numKeyboards%, %CurrIni%, Keyboard, Lang, %A_Space%
-			IniRead, KbdAltLang%numKeyboards%, %CurrIni%, Keyboard, AltLang, %A_Space%
-			IniRead, KbdIcon%numKeyboards%, %CurrIni%, Keyboard, Icon, %A_Space%
-			IniRead, KbdParams%numKeyboards%, %CurrIni%, Keyboard, Params, %A_Space%
-			IniRead, KbdDisplayCmd%numKeyboards%, %CurrIni%, Keyboard, DisplayCmd, %A_Space%
+			KBD_Folder%numKeyboards% := CurrFolder
+			KBD_IniFile%numKeyboards% := CurrIni
+			KBD_Disabled%numKeyboards% := 0
+			KBD_IconNum%numKeyboards% := 0
+			KBD_FileHwnd%numKeyboards% := 0
+			; KBD_LayoutName%numKeyboards% := SubStr(A_LoopField, 1, InStr(A_LoopField, ".kbd.ini") - 1)
+			KBD_TinkerFile%numKeyboards% := CurrKbdTinkerFile
+			IniRead, KBD_LayoutName%numKeyboards%, %CurrIni%, Keyboard, LayoutName, %A_Space%
+			IniRead, KBD_MenuText%numKeyboards%, %CurrIni%, Keyboard, MenuText, %A_Space%
+			IniRead, KBD_Hotkey%numKeyboards%, %CurrIni%, Keyboard, Hotkey, %A_Space%
+			IniRead, KBD_Lang%numKeyboards%, %CurrIni%, Keyboard, Lang, %A_Space%
+			IniRead, KBD_AltLang%numKeyboards%, %CurrIni%, Keyboard, AltLang, %A_Space%
+			IniRead, KBD_Icon%numKeyboards%, %CurrIni%, Keyboard, Icon, %A_Space%
+			IniRead, KBD_Params%numKeyboards%, %CurrIni%, Keyboard, Params, %A_Space%
+			IniRead, KBD_DisplayCmd%numKeyboards%, %CurrIni%, Keyboard, DisplayCmd, %A_Space%
 			if (AllowUnsafe) {
-				IniRead, KbdConfigureGUI%numKeyboards%, %CurrIni%, Keyboard, ConfigureGUI, %A_Space%
+				IniRead, KBD_ConfigureGUI%numKeyboards%, %CurrIni%, Keyboard, ConfigureGUI, %A_Space%
 			} else {
-				if (not RegExMatch(KbdDisplayCmd%numKeyboards%, "i)(^http:)|(\.(pdf|png|doc|txt|htm|html|jpg)$)"))
-					KbdDisplayCmd%numKeyboards% =
-				KbdConfigureGUI%numKeyboards% =
+				if (not RegExMatch(KBD_DisplayCmd%numKeyboards%, "i)(^http:)|(\.(pdf|png|doc|txt|htm|html|jpg)$)"))
+					KBD_DisplayCmd%numKeyboards% =
+				KBD_ConfigureGUI%numKeyboards% =
 			}
 			IniRead, KbdKLID%numKeyboards%, %CurrIni%, Keyboard, KLID, %A_Space%
+			KBD_HKL%numKeyboards% = ""
 			ProcessKbd()
 		}
 	}
 	; now deal with the keyboards that needed registration or unregistration
-	if (PortableMode)
+	if (PortableMode or not UnregisterUnusedKeyboards)
 		UnusedRKCt := 0
 	if (UnusedRKCt or Kbd2RegCt) {  ; This will only be true when running in Installed mode. (PortableMode=0)
 		if (A_IsAdmin) {  ; We have the necessary permissions to do this now.
@@ -264,8 +289,8 @@ Icon_1=%In_Dir%\inkey.ico
 				Loop % Kbd2RegCt
 				{	; Do registration
 					kk := Kbd2Reg%A_Index%
-					KbdHKL%kk% := RegisterAndLoadKeyboard(kk)
-					oKbdByHKL[KbdHKL%kk%] := kk
+					KBD_HKL%kk% := RegisterAndLoadKeyboard(kk)
+					oKbdByHKL[KBD_HKL%kk%] := kk
 					SetFormat, IntegerFast, d
 				}
 			}
@@ -273,7 +298,8 @@ Icon_1=%In_Dir%\inkey.ico
 			; There are keyboards needing registered or unregistered, but user does not have Admin privileges.
 			Gui Hide
 			TitleString:=GetLang(116)  ; Install/update Keyboard registration?
-			TempString:=GetLang(117) . " " . UnusedRKCt . "`n" . GetLang(118) . " " . Kbd2RegCt . "`n`n" . GetLang(119) . "`n" . GetLang(120) . "`n" . GetLang(121) . "`n`n" . GetLang(122)
+			TempString:= UnregisterUnusedKeyboards ? (GetLang(117) . " " . UnusedRKCt . "`n") : ""
+			TempString .= GetLang(118) . " " . Kbd2RegCt . "`n`n" . GetLang(119) . "`n" . GetLang(120) . "`n" . GetLang(121) . "`n`n" . GetLang(122)
 			MsgBox 36, %TitleString%, %TempString%  ; # Keyboards to unregister: %UnusedRKCt%`n# Keyboards to register: %Kbd2RegCt%`n`nFor InKey to run in its "Installed" mode, it must first update the keyboard registry to match your settings.`nDoing so requires full administrator permissions.`nIf you do not have administrator permissions on this computer, InKey can still run in "Portable" mode.`n`nWould you like to restart InKey with full administrator permissions?
 			ifMsgBox Yes
 			{	DllCall("shell32\ShellExecuteW", uint, 0, str, "RunAs", str, A_ScriptFullPath, str, "ReloadAsAdmin", str, A_ScriptDir, int, 1)
@@ -285,8 +311,8 @@ Icon_1=%In_Dir%\inkey.ico
 			Loop % Kbd2RegCt
 			{	; Use substitute keyboards instead
 				kk := Kbd2Reg%A_Index%
-				KbdHKL%kk% := LoadSubstituteKeyboard(KbdLang%kk%, KbdLayoutName%kk%)
-				oKbdByHKL[KbdHKL%kk%] := kk
+				KBD_HKL%kk% := LoadSubstituteKeyboard(KBD_Lang%kk%, KBD_LayoutName%kk%)
+				oKbdByHKL[KBD_HKL%kk%] := kk
 			}
 		}
 	}
@@ -305,13 +331,13 @@ Icon_1=%In_Dir%\inkey.ico
 			;~ OutputDebug % "We just looked up displayname for " A_LoopField  "=>" oHKLDisplayName[A_LoopField]
 		;~ }
 	;~ }
-	IniRead RefreshLangBarOnLoad, InKey.ini, InKey, RefreshLangBarOnLoad, 2
+	IniRead RefreshLangBarOnLoad, %InKeyINI%, InKey, RefreshLangBarOnLoad, 2
 	if (InkeyLoadedHKLs) {
 		if (RefreshLangBarOnLoad = 1)
 			RefreshLangBar() ; Slow but sure
 		else if (RefreshLangBarOnLoad = 2) {	; Post WM_INPUTLANGCHANGEREQUEST to HWND_BROADCAST
 			DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, LastLoadedHKL)  ; First change it to something else
-			DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KbdHKL0)  ; Then change it back to default lang.
+			DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KBD_HKL0)  ; Then change it back to default lang.
 		}
 	}
 
@@ -329,80 +355,80 @@ Icon_1=%In_Dir%\inkey.ico
 		menu tray, add, %LangString%, ShowKbdMenu    ; Select Keyboard
 		menu tray, default, %LangString%    ; Show it in boldface
 
-		;IniRead KbdMenuText0, InKey.ini, InKey, DefaultKbdMenuText, & Default keyboard
+		;IniRead KBD_MenuText0, %InKeyINI%, InKey, DefaultKbdMenuText, & Default keyboard
 		menu KbdMenu, add
-		KbdMenuText0:=GetLang(10)
-		menu KbdMenu, add, %KbdMenuText0%, KeyboardMenuItem	; Add menu item for default keyboard
-		menu KbdMenu, check, %KbdMenuText0%
+		KBD_MenuText0:=GetLang(10)
+		menu KbdMenu, add, %KBD_MenuText0%, KeyboardMenuItem	; Add menu item for default keyboard
+		menu KbdMenu, check, %KBD_MenuText0%
 	}
 
 	; ============Set up hotkeys.
 
-	IniRead ii, InKey.ini, InKey, ResyncHotkey, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, ResyncHotkey, %A_Space%
 	; Resync Keyboards with InKey - Workaround for a bug
 	if (ii)
 		Hotkey %ii%, DoResync, UseErrorLevel
 
 	; Reload InKey
-	IniRead ii, InKey.ini, InKey, ReloadHotkey, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, ReloadHotkey, %A_Space%
 	if (ii)
 		Hotkey %ii%, DoReload, UseErrorLevel
 
 	; DefaultKbdHotkey
-	IniRead KbdHotkey0, InKey.ini, InKey, DefaultKbdHotkey, %A_Space%
-	if (KbdHotkey0)
-		Hotkey %KbdHotkey0%, OnKbdHotkey, UseErrorLevel
+	IniRead KBD_Hotkey0, %InKeyINI%, InKey, DefaultKbdHotkey, %A_Space%
+	if (KBD_Hotkey0)
+		Hotkey %KBD_Hotkey0%, OnKbdHotkey, UseErrorLevel
 
 	; DefaultKbdDoubleTap
-	IniRead ii, InKey.ini, InKey, DefaultKbdDoubleTap, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, DefaultKbdDoubleTap, %A_Space%
 	if (ii) {
 		HotKey %ii% & ~s, Nothing, UseErrorLevel   ; Make key a prefix by using it in front of "&" at least once. Use tilde so normal behavior occurs.
 		HotKey %ii%, DblTapDefKbd, UseErrorLevel
 	}
 
 	; ToggleKbdHotkey
-	IniRead ii, InKey.ini, InKey, ToggleKbdHotkey, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, ToggleKbdHotkey, %A_Space%
 	if (ii)
 		Hotkey %ii%, HotkeyToggleKbd, UseErrorLevel
 
 	; ToggleKbdDoubleTap
-	IniRead ii, InKey.ini, InKey, ToggleKbdDoubleTap, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, ToggleKbdDoubleTap, %A_Space%
 	if (ii) {
 		HotKey %ii% & ~s, Nothing, UseErrorLevel   ; Make key a prefix by using it in front of "&" at least once. Use tilde so normal behavior occurs.
 		HotKey %ii%, DblTapToggleKbd, UseErrorLevel
 	}
 
-; NextKbdHotkey
-	IniRead ii, InKey.ini, InKey, NextKbdHotkey, %A_Space%
+	; NextKbdHotkey
+	IniRead ii, %InKeyINI%, InKey, NextKbdHotkey, %A_Space%
 	if (ii)
 		Hotkey %ii%, RequestNextKbd, UseErrorLevel
 
 	; NextKbdDoubleTap
-	IniRead ii, InKey.ini, InKey, NextKbdDoubleTap, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, NextKbdDoubleTap, %A_Space%
 	if (ii) {
 		HotKey %ii% & ~s, Nothing, UseErrorLevel   ; Make key a prefix by using it in front of "&" at least once. Use tilde so normal behavior occurs.
 		HotKey %ii%, DblTapNextKbd, UseErrorLevel
 	}
 
 	; PrevKbdHotkey
-	IniRead ii, InKey.ini, InKey, PrevKbdHotkey, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, PrevKbdHotkey, %A_Space%
 	if (ii)
 		Hotkey %ii%, RequestPrevKbd, UseErrorLevel
 
 	; PrevKbdDoubleTap
-	IniRead ii, InKey.ini, InKey, PrevKbdDoubleTap, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, PrevKbdDoubleTap, %A_Space%
 	if (ii) {
 		HotKey %ii% & ~s, Nothing, UseErrorLevel   ; Make key a prefix by using it in front of "&" at least once. Use tilde so normal behavior occurs.
 		HotKey %ii%, DblTapPrevKbd, UseErrorLevel
 	}
 
 	; MenuHotkey
-	IniRead ii, InKey.ini, InKey, MenuHotkey, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, MenuHotkey, %A_Space%
 	if (ii)
 		Hotkey %ii%, ShowKbdMenu, UseErrorLevel
 
 	; MenuDoubleTap
-	IniRead ii, InKey.ini, InKey, MenuDoubleTap, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, MenuDoubleTap, %A_Space%
 	if (ii) {
 		; HotKey ~%ii% & SC200, Nothing, UseErrorLevel
 		HotKey %ii% & ~s, Nothing, UseErrorLevel   ; Make key a prefix by using it in front of "&" at least once. Use tilde so normal behavior occurs.
@@ -410,22 +436,22 @@ Icon_1=%In_Dir%\inkey.ico
 	}
 
 	; AutoGrabContextHotkey
-	IniRead ii, InKey.ini, InKey, AutoGrabContextHotkey, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, AutoGrabContextHotkey, %A_Space%
 	if (ii)
 		Hotkey %ii%, MenuAutoGrab, UseErrorLevel
 
 	; GrabContextHotkey
-	IniRead ii, InKey.ini, InKey, GrabContextHotkey, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, GrabContextHotkey, %A_Space%
 	if (ii)
 		Hotkey %ii%, GrabContext, UseErrorLevel
 
 	; ChangeSendingMode hotkey
-	IniRead ii, InKey.ini, InKey, ChangeSendingMode, %A_Space%
+	IniRead ii, %InKeyINI%, InKey, ChangeSendingMode, %A_Space%
 	if (ii)
 		Hotkey %ii%, ChangeSendingMode, UseErrorLevel
 
 	; ClearContextHotkey
-	; IniRead ii, InKey.ini, InKey, ClearContextHotkey, %A_Space%
+	; IniRead ii, %InKeyINI%, InKey, ClearContextHotkey, %A_Space%
 	; if (ii)
 		; Hotkey $%ii%, CLEARCONTEXT, UseErrorLevel
 
@@ -441,25 +467,25 @@ Icon_1=%In_Dir%\inkey.ico
 	if (RefreshLangBarOnLoad = 2 and InkeyLoadedHKLs)
 	{	; Post WM_INPUTLANGCHANGEREQUEST to HWND_BROADCAST
 	;	DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, LastLoadedHKL)  ; First change it to something else
-		DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KbdHKL0)  ; Then change it back to default lang.
-		ChangeLanguage(KbdHKL0)
+		DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KBD_HKL0)  ; Then change it back to default lang.
+		ChangeLanguage(KBD_HKL0)
 	}
 
-	IniRead PreviewAtCursor, InKey.ini, InKey, PreviewAtCursor, 1
-	IniRead rotaPeriod, InKey.ini, InKey, SpeedRotaPeriod, 1000
+	IniRead PreviewAtCursor, %InKeyINI%, InKey, PreviewAtCursor, 1
+	IniRead rotaPeriod, %InKeyINI%, InKey, SpeedRotaPeriod, 1000
 
 	;~ if (numKeyboards <> 0)
 		;~ Sleep, 2000
 	gui hide
 
-;	ChangeLanguage(KbdHKL0) ; Just to be sure
+;	ChangeLanguage(KBD_HKL0) ; Just to be sure
 	; OnMessage(0x6, "On_WM_ACTIVATE")
 	tipHwnd := CreateUTip()
 	; tipTxt
 
 	Loop % numKeyboards  {
 			kk := A_Index
-			OutputDebug % kk . " " . KbdLayoutName%kk% . " " .  KbdFileID%kk% . " " . KbdFile%kk%  . " " . KbdHKL%kk%
+			OutputDebug % kk . " " . KBD_LayoutName%kk% . " " .  KBD_FileID%kk% . " " . KBD_File%kk%  . " " . KBD_HKL%kk%
 	}
 
 	SetTimer CHECKLOCALE, 500
@@ -474,89 +500,90 @@ ProcessKbd() {
 	static ProcdKbdList := ""
 	local kk := numKeyboards
 ProcessKbdErrors:
-	if (KbdDisabled%kk%) {
-			;or ( KbdFile%kk% and not FileExist(KbdFolder%kk% . "\" . KbdFile%kk%))) {
-		; local xx := KbdMenuText%kk%
+	if (KBD_Disabled%kk%) {
+			;or ( KBD_File%kk% and not FileExist(KBD_Folder%kk% . "\" . KBD_File%kk%))) {
+		; local xx := KBD_MenuText%kk%
 		; outputdebug ignoring %fldr% %xx%
 
-		KbdFileID%kk% =
-		KbdFile%kk% =
-		KbdMenuText%kk% =
+		KBD_FileID%kk% =
+		KBD_File%kk% =
+		KBD_MenuText%kk% =
 		KbdHotkeyCode%kk% =
-		KbdLayoutName%kk% =
-		KbdLang%kk% =
-		KbdIcon%kk% =
-		KbdParams%kk% =
+		KBD_LayoutName%kk% =
+		KBD_Lang%kk% =
+		KBD_Icon%kk% =
+		KBD_Params%kk% =
 		KbdKLID%kk% =
-		KbdDisabled%kk% =
-		KbdConfigureGUI%kk% =
-		KbdRunGUI%kk% =
-		KbdDisplayCmd%kk% =
-		KbdRunCmd%kk% =
-		KbdAltLang%kk% =
+		KBD_Disabled%kk% =
+		KBD_ConfigureGUI%kk% =
+		KBD_RunGUI%kk% =
+		KBD_DisplayCmd%kk% =
+		KBD_RunCmd%kk% =
+		KBD_AltLang%kk% =
+		KBD_HKL%kk% =
 		numKeyboards--
 		return
 	}
 
-	KbdFile%kk% := CurrKbdCmd
+	KBD_File%kk% := CurrKbdCmd
 
 	; populate submenu for all enabled keyboards
-	Menu, DispConfigureSubmenu, add, % KbdMenuText%kk%, DispConfigureMenuItem
+	Menu, DispConfigureSubmenu, add, % KBD_MenuText%kk%, DispConfigureMenuItem
 
 	; populate submenu if keyboard has a layout help file
-	if (KbdDisplayCmd%kk%) {
+	if (KBD_DisplayCmd%kk%) {
 		DispCmds++
 		; If the keyboard help file exists in the keyboard's folder, prepend path.
-		if (FileExist(KbdFolder%kk% . "\" . KbdDisplayCmd%kk% ))
-			KbdDisplayCmd%kk%  := KbdFolder%kk% . "\" . KbdDisplayCmd%kk%
+		if (FileExist(KBD_Folder%kk% . "\" . KBD_DisplayCmd%kk% ))
+			KBD_DisplayCmd%kk%  := KBD_Folder%kk% . "\" . KBD_DisplayCmd%kk%
 		; otherwise hopefully the file is on the PATH
-		ii := KbdMenuText%kk%
+		ii := KBD_MenuText%kk%
 		Menu, DispCmdSubmenu, add, %ii%, DispCmdMenuItem
 	}
 
-	if (KbdLayoutName%kk%) {
+	if (KBD_LayoutName%kk%) {
 		; These are the settings for an InKey keyboard
-		local ln := KbdLayoutName%kk%
+		local ln := KBD_LayoutName%kk%
 		; Check that the language code is valid on this machine
-		if (not KbdLang%kk%) {
+		if (not KBD_Lang%kk%) {
 			Gui Hide
 			TitleString:=GetLang(123) ; Configuration Error
 			TempString:=GetLang(124) ; The language code for keyboard "%ln%" is missing.
 			MsgBox 0, %TitleString%, %TempString%
 			Gui Show
-			KbdDisabled%kk% := 1
+			KBD_Disabled%kk% := 1
 			goto ProcessKbdErrors
 		}
-		if (strlen(KbdLang%kk%) <> 4) {
+		if (strlen(KBD_Lang%kk%) <> 4) {
 			Gui Hide
 			TitleString:=GetLang(123) ; Configuration Error
 			TempString:=GetLang(125) ; The language code for keyboard "%ln%" should be a 4-hexidecimal-digit code representing the language ID.
 			MsgBox 0, %TitleString%, %TempString%
 			Gui Show
-			KbdDisabled%kk% := 1
+			KBD_Disabled%kk% := 1
 			goto ProcessKbdErrors
 		}
-		local priLang := "0x" . KbdLang%kk%
+		local priLang := "0x" . KBD_Lang%kk%
 		local sLangName
 		VarSetCapacity( sLangName, 260, 0 )
 		DllCall("GetLocaleInfo","uint",priLang & 0xFFFF,"uint", 0x1001, "str",sLangName, "uint",260)  ; LOCALE_SENGLANGUAGE=0x1001
 		if (strlen(sLangName) < 1) {
-			if (KbdAltLang%kk%) {
-				local altLang := "0x" . KbdAltLang%kk%
+			if (KBD_AltLang%kk%) {
+				local altLang := "0x" . KBD_AltLang%kk%
 				DllCall("GetLocaleInfo","uint", altLang & 0xFFFF,"uint", 0x1001, "str",sLangName, "uint",260)  ; LOCALE_SENGLANGUAGE=0x1001
 				if (sLangName) {
 					if (UseAltLangWithoutPrompting) {
-						KbdLang%kk% := KbdAltLang%kk%
+						KBD_Lang%kk% := KBD_AltLang%kk%
 						goto LangCodeOK
 					} else {
 						Gui Hide
 						TitleString:=GetLang(126) ; Use %sLangName% language for '%ln%' layout?
-						LangCode:= KbdLang%kk%
+						LangCode:= KBD_Lang%kk%
 						TempString:= GetLang(127) . " " . LangCode . " " . GetLang(128) . "`n`n" . GetLang(129) . "`n`n" . GetLang(130) . " " . sLangName . " " . GetLang(131) . " " . ln . " " . GetLang(132) ; "The language code " . %LangCode% . " is unknown on this version or service-pack of Windows.`n`nSome applications may not function properly with an unknown language.`n`nWould you like to instead use " . sLangName . " for the '" . ln "' keyboard?"
 						MsgBox 4, %TitleString%, %TempString%
 						Gui Show
 						ifmsgbox Yes
-							KbdLang%kk% := KbdAltLang%kk%
+							KBD_Lang%kk% := KBD_AltLang%kk%
 						goto LangCodeOK
 					}
 				}
@@ -564,31 +591,31 @@ ProcessKbdErrors:
 
 			Gui Hide
 			TitleString:=GetLang(133) . " " . ln ; Unknown language code for layout: %ln%
-			LangCode:= KbdLang%kk%
+			LangCode:= KBD_Lang%kk%
 			TempString:= GetLang(127) . " " . LangCode . " " . GetLang(134) . "`n" . GetLang(135) . "`n`n" . GetLang(136) ; "The language code " . %LangCode% . " is unknown on this computer, and you have not configured an alternative for this keyboard.`nSome applications may not function properly with this language.`n`nLoad it anyway?"
 			MsgBox 4, %TitleString%, %TempString%
 			Gui Show
 			ifmsgbox Yes
 				goto LangCodeOK
-			KbdDisabled%kk% := 1
+			KBD_Disabled%kk% := 1
 			goto ProcessKbdErrors
 		}
 
 LangCodeOK:
 		; Identify the keyboard file settings
-		local ff := InStr(KbdFiles, ":" . KbdFile%kk% . A_Tab)
+		local ff := InStr(KbdFiles, ":" . KBD_File%kk% . A_Tab)
 		if (ff) {
-			KbdFileID%kk% := substr(KbdFiles, ff - 4, 4) + 0
+			KBD_FileID%kk% := substr(KbdFiles, ff - 4, 4) + 0
 		} else {
 			numKbdFiles++
-			KbdFileID%kk% := numKbdFiles
-			kFileName%numKbdFiles% := KbdFile%kk%
-			KbdFiles .= "   " . KbdFileID%kk% . ":" . KbdFile%kk% . A_Tab
+			KBD_FileID%kk% := numKbdFiles
+			kFileName%numKbdFiles% := KBD_File%kk%
+			KbdFiles .= "   " . KBD_FileID%kk% . ":" . KBD_File%kk% . A_Tab
 		}
 		; first 4 parameters are K_ProtocolNum, InKeyHwnd, FileID, KbdId
-		RunCmd%kk% := GetAHKCmd(KbdFile%kk%) . (KbdTinkerFile%kk% ?  TinkerDir : KbdFolder%kk%) . "\" . KbdFile%kk% . " " . K_ProtocolNum . " " . selfHwnd . " " . KbdFileID%kk% . " " . kk . " " . KbdParams%kk%
+		RunCmd%kk% := GetAHKCmd(KBD_File%kk%) . (KBD_TinkerFile%kk% ?  TinkerDir : KBD_Folder%kk%) . "\" . KBD_File%kk% . " " . K_ProtocolNum . " " . selfHwnd . " " . KBD_FileID%kk% . " " . kk . " " . KBD_Params%kk%
 
-		klid := FindKLID(KbdLayoutName%kk%, KbdLang%kk%)  ; See if keyboard named is registered
+		klid := FindKLID(KBD_LayoutName%kk%, KBD_Lang%kk%)  ; See if keyboard named is registered
 		;outputdebug FindKLID => %klid%.
 		if (klid) {
 			; Keyboard is registered.  Ensure we haven't already used it.
@@ -596,19 +623,19 @@ LangCodeOK:
 				Gui Hide
 				MsgBox 0, Configuration Error, Each keyboard must have a unique layout name.
 				Gui Show
-				KbdDisabled%kk% := 1
+				KBD_Disabled%kk% := 1
 				goto ProcessKbdErrors
 			}
 			ProcdKbdList .= klid . " "
 			;Ensure it's loaded, and get its HKL.
-			KbdHKL%kk% := LoadKeyboardLayout(klid, 16, KbdLayoutName%kk%)
-			oKbdByHKL[KbdHKL%kk%] := kk
-			;~ Outputdebug % "Kbd# " . kk . " uses registered KLID: " . klid . ", HKL=" . KbdHKL%kk%    ;%
+			KBD_HKL%kk% := LoadKeyboardLayout(klid, 16, KBD_LayoutName%kk%)
+			oKbdByHKL[KBD_HKL%kk%] := kk
+			;~ Outputdebug % "Kbd# " . kk . " uses registered KLID: " . klid . ", HKL=" . KBD_HKL%kk%    ;%
 		} else {
 			; Keyboard is not registered.
 			if (PortableMode)  {
-				KbdHKL%kk% := LoadSubstituteKeyboard(KbdLang%kk%, KbdLayoutName%kk%) ; Use a non-registered keyboard instead.
-				oKbdByHKL[KbdHKL%kk%] := kk
+				KBD_HKL%kk% := LoadSubstituteKeyboard(KBD_Lang%kk%, KBD_LayoutName%kk%) ; Use a non-registered keyboard instead.
+				oKbdByHKL[KBD_HKL%kk%] := kk
 			} 	else  {
 				; Remember this keyboard as one we need to register (once all keyboard settings have been read).
 				Kbd2RegCt++
@@ -616,11 +643,11 @@ LangCodeOK:
 			}
 		}
 
-		if (KbdTinkerFile%kk%) {
+		if (KBD_TinkerFile%kk%) {
 
 			; Generate an AHK file from the TINKER file
-			local TinkerFile := KbdFolder%kk% . "\" . KbdTinkerFile%kk%
-			local AHKFile := TinkerDir . "\" . KbdFile%kk%
+			local TinkerFile := KBD_Folder%kk% . "\" . KBD_TinkerFile%kk%
+			local AHKFile := TinkerDir . "\" . KBD_File%kk%
 			outputdebug Generating %AHKFile% from %TinkerFile%
 			FileEncoding UTF-8
 			FileRead tinkerLines, %TinkerFile%
@@ -842,44 +869,44 @@ LangCodeOK:
 	} else {
 		; These are the settings for a non-InKey keyboard  (e.g. System or Keyman etc)
 		; Set KbdFile[], KbdKLID[] and KbdHKL[] values
-		KbdFile%kk% := ""
-		KbdFileID%kk% =
+		KBD_File%kk% := ""
+		KBD_FileID%kk% =
 		if (not KbdKLID%kk%)
 			KbdKLID%kk% = 00000409
-		KbdHKL%kk% := LoadKeyboardLayout(KbdKLID%kk%)
-		oKbdByHKL[KbdHKL%kk%] := kk
-		Outputdebug % "Kbd# " . kk . " is NON-INKEY. KLID=" . KbdKLID%kk% . ", HKL=" . KbdHKL%kk%    ;%
+		KBD_HKL%kk% := LoadKeyboardLayout(KbdKLID%kk%)
+		oKbdByHKL[KBD_HKL%kk%] := kk
+		Outputdebug % "Kbd# " . kk . " is NON-INKEY. KLID=" . KbdKLID%kk% . ", HKL=" . KBD_HKL%kk%    ;%
 	}
-	;ChangeLanguage(KbdHKL%kk%) ; Should help refresh the Lang Bar
+	;ChangeLanguage(KBD_HKL%kk%) ; Should help refresh the Lang Bar
 
-	local hkl := KbdHKL%kk%
-	;~ HKLDisplayName%hkl% := RegExReplace(KbdMenuText%kk%, "&") ; Strip the ampersand
-	oHKLDisplayName[hkl] := RegExReplace(KbdMenuText%kk%, "&") ; Strip the ampersand
+	local hkl := KBD_HKL%kk%
+	;~ HKLDisplayName%hkl% := RegExReplace(KBD_MenuText%kk%, "&") ; Strip the ampersand
+	oHKLDisplayName[hkl] := RegExReplace(KBD_MenuText%kk%, "&") ; Strip the ampersand
 
 	; Icon settings for this keyboard
-	KbdIconFile%kk% := KbdIcon%kk%
+	KbdIconFile%kk% := KBD_Icon%kk%
 	if (KbdIconFile%kk%) {
 		; If there is a second parameter (after a comma), separate that out.
 		if (RegExMatch(KbdIconFile%kk%, "(.*),\s*(.*)", val)) {
 			KbdIconFile%kk% = %val1%
-			KbdIconNum%kk% = %val2%
+			KBD_IconNum%kk% = %val2%
 		}
 
 		; If the icon file exists in the keyboard's folder, prepend path.
-		if (FileExist(KbdFolder%kk% . "\" . KbdIconFile%kk%))
-			KbdIconFile%kk% := KbdFolder%kk% . "\" . KbdIconFile%kk%
+		if (FileExist(KBD_Folder%kk% . "\" . KbdIconFile%kk%))
+			KbdIconFile%kk% := KBD_Folder%kk% . "\" . KbdIconFile%kk%
 		; otherwise hopefully the file is a system DLL
 	}
-	KbdIcon%kk% =
+	KBD_Icon%kk% =
 
-	local ii := KbdMenuText%kk%
+	local ii := KBD_MenuText%kk%
 	menu KbdMenu, add, %ii%, KeyboardMenuItem  	; Add menu item for this keyboard
 }
 
 RegisterAndLoadKeyboard(kk) {
 	global
-	local Lang := KbdLang%kk%
-	local layoutName := KbdLayoutName%kk%
+	local Lang := KBD_Lang%kk%
+	local layoutName := KBD_LayoutName%kk%
 	local hiword
 	local dummy
 	local hkl
@@ -1026,7 +1053,7 @@ ShowKbdMenu:
 		if (ActiveKbdHwnd)
 			DllCall("PostMessage", UInt, ActiveKbdHwnd, UInt, 0x8001)
 		else {
-			outputdebug Error, could not suspend kbd file: %ActiveKbdFile%
+			outputdebug Error, could not suspend kbd file: %ActivekbdFile%
 		}
 	}
 	; if (PutMenuAtCursor)
@@ -1046,7 +1073,7 @@ ShowKbdMenu:
 					VKbdShowing := 1
 				}
 			} else {
-				outputdebug Error, could not resume kbd file: %ActiveKbdFile%
+				outputdebug Error, could not resume kbd file: %ActivekbdFile%
 			}
 		}
 		; SetTitleMatchMode Regex
@@ -1109,10 +1136,10 @@ DispConfigureMenuItem:
 DispCmdMenuItem:
 	kbd := KbdByMenuText(A_ThisMenuItem)
 
-	; dd := KbdFolder%kbd%
+	; dd := KBD_Folder%kbd%
 	; if %dd%
 		; SetWorkingDir %dd%
-	RunDisplayCmd := GetAHKCmd(KbdDisplayCmd%kbd%) . KbdDisplayCmd%kbd%
+	RunDisplayCmd := GetAHKCmd(KBD_DisplayCmd%kbd%) . KBD_DisplayCmd%kbd%
 	Run %RunDisplayCmd%
 	; SetWorkingDir %A_ScriptDir%
 	return
@@ -1181,7 +1208,7 @@ RequestKbd(kbd) {
 	global
 	ActiveAtLastReq := ActiveKbd
 	OUTPUTDEBUG ***** RequestKbd(%kbd%)
-	if (kbd = 0 and ActiveHKL = KbdHKL0) {
+	if (kbd = 0 and ActiveHKL = KBD_HKL0) {
 		;outputdebug user is trying to go to default kbd when InKey thinks default is already on.
 		ActiveHKL := ChangeLanguage(GetKbdHKL(0))  ; Set OS locale
 		GoSub DoResync
@@ -1201,7 +1228,7 @@ RequestKbd(kbd) {
 			;ReinitKeyboard(kbd) - not previously commented out (versions 0.093 and before)
 
 		; else
-			; outputdebug Error, could not resume %ActiveKbdFile%
+			; outputdebug Error, could not resume %ActivekbdFile%
 
 		; switch to default keyboard
 		ActiveHKL := ChangeLanguage(GetKbdHKL(0))
@@ -1261,13 +1288,13 @@ DoResync:
 	SetTimer CHECKLOCALE, Off
 	Loop % numKbdFiles
 	{
-		fHwnd := KbdFileHwnd%A_Index%
+		fHwnd := KBD_FileHwnd%A_Index%
 		sv := 0
 		if (fHwnd) {
 			sv := DllCall("SendMessage", UInt, fHwnd, UInt, 0x8003)
 			outputdebug sent MsgClose to file # %a_index%
 		}
-		KbdFileHwnd%A_Index% = 0
+		KBD_FileHwnd%A_Index% = 0
 	}
 	; now make sure it worked
 	SetTitleMatchMode Regex
@@ -1314,7 +1341,7 @@ DoExit:
 DoCleanup:  ; Called onExit
 	; Set all top-level windows to the default HKL  (TODO: Cycle through all windows, and only do this to windows with InKey-loaded HKLs)
 	If (not LeaveKeyboardsLoaded)
-		DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KbdHKL0)  ; KbdHKL0  0x50 = WM_INPUTLANGCHANGEREQUEST
+		DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KBD_HKL0)  ; KBD_HKL0  0x50 = WM_INPUTLANGCHANGEREQUEST
 
 	SetTitleMatchMode Regex
 	DetectHiddenWindows On
@@ -1326,7 +1353,9 @@ DoCleanup:  ; Called onExit
 	}
 	DetectHiddenWindows Off  ; Must not be turned off until after PostMessage.
 
+	;outputdebug InkeyLoadedHKLs=%InkeyLoadedHKLs%`nLeaveKeyboardsLoaded=%LeaveKeyboardsLoaded%
 	if (InkeyLoadedHKLs and not LeaveKeyboardsLoaded) {
+	; if (1) {
 
 		; We unload any keyboards that InKey loaded
 		outputdebug InkeyLoadedHKLs = %InkeyLoadedHKLs%
@@ -1335,17 +1364,22 @@ DoCleanup:  ; Called onExit
 			hkl := GetKbdHKL(A_Index)
 			setformat IntegerFast, hex
 			hkl += 0
+			hklStr := substr("." . hkl, 2)  ; get a copy fixed as a string while in hex
+			;outputdebug Did InKey load this HKL? %hkl%
 			setformat IntegerFast, dec
-			if (hkl and InStr(InkeyLoadedHKLs, hkl)) {
-				; Outputdebug Unloading hkl %hkl%
+			if (hkl and InStr(InkeyLoadedHKLs, hklStr, false)) {
+			; if (1) {
+				; Outputdebug Unloading hkl %hklStr%
 				DllCall("UnloadKeyboardLayout", Uint, hkl)
 			} else {
-				outputdebug HKL %hkl% was not unloaded (kbd = %A_Index%)
+				setformat IntegerFast, hex
+				outputdebug HKL %hklStr% was not unloaded (kbd = %A_Index%)
+				setformat IntegerFast, dec
 			}
 		}
 
 		if (not InStr("Shutdown Logoff Reload Single", A_ExitReason)) {  ; No need to refresh Lang Bar if we're restarting InKey or shutting down the workstation.
-			IniRead ii, InKey.ini, InKey, RefreshLangBarOnExit, %A_Space%
+			IniRead ii, %InKeyINI%, InKey, RefreshLangBarOnExit, %A_Space%
 			if (ii)
 				RefreshLangBar()
 			else {
@@ -1353,17 +1387,18 @@ DoCleanup:  ; Called onExit
 				; Fast and invisible, but might leave "Unknown language" as an inactive option in the LangBar
 				DllCall("UnloadKeyboardLayout","uint",0x40905fe)
 				x := LoadKeyboardLayout("000005FE")
-				DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, x)  ; KbdHKL0  0x50 = WM_INPUTLANGCHANGEREQUEST
-				DllCall("UnloadKeyboardLayout","uint",KbdHKL0)
+				DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, x)  ; KBD_HKL0  0x50 = WM_INPUTLANGCHANGEREQUEST
+				DllCall("UnloadKeyboardLayout","uint",KBD_HKL0)
 				klid := "0000" . A_Language
-				KbdHKL0 := LoadKeyboardLayout(klid, 18)
-				DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KbdHKL0)  ; KbdHKL0  0x50 = WM_INPUTLANGCHANGEREQUEST
+				KBD_HKL0 := LoadKeyboardLayout(klid, 18)
+				DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KBD_HKL0)  ; KBD_HKL0  0x50 = WM_INPUTLANGCHANGEREQUEST
 				DllCall("UnloadKeyboardLayout","uint",x)
-				DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KbdHKL0)  ; KbdHKL0  0x50 = WM_INPUTLANGCHANGEREQUEST
+				DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KBD_HKL0)  ; KBD_HKL0  0x50 = WM_INPUTLANGCHANGEREQUEST
 			}
 		}
 	}
 	DllCall("FreeLibrary", UInt, hMSVCRT)
+	outputdebug Exiting InKey normally
 	ExitApp
 
 DoHelp:
@@ -1392,7 +1427,7 @@ DeactivateKbd() {
 		if (kbdHwnd)
 			sv := DllCall("SendMessage", UInt, kbdHwnd, UInt, 0x8001)
 		if (sv <> 3)
-			outputdebug ***Error: could not suspend %ActiveKbdFile%
+			outputdebug ***Error: could not suspend %ActivekbdFile%
 		LastActiveKbd := ActiveKbd
 	}
 ;	ActiveKbd = 0
@@ -1480,13 +1515,13 @@ SetActiveKbd(kbd) {
 		return
 	}
 
-	ii := KbdMenuText%ActiveKbd%
+	ii := KBD_MenuText%ActiveKbd%
 	Menu KbdMenu, UseErrorLevel
 	if (not ii)
-		outputdebug ERROR: No KbdMenuText%activekbd%
+		outputdebug ERROR: No KBD_MenuText%activekbd%
 	Menu KbdMenu, Uncheck, %ii%
 	ActiveKbd := kbd
-	ii := KbdMenuText%ActiveKbd%
+	ii := KBD_MenuText%ActiveKbd%
 	Menu KbdMenu, Check, %ii%
 }
 
@@ -1494,11 +1529,11 @@ SetActiveKbd(kbd) {
 ActivateKbd(kbd, hkl) {
 	global
 
-	if (not KbdFile%kbd%) {  ; If new locale does not map to an InKey keyboard...
-		if (ActiveKbd > 0 and KbdFile%ActiveKbd%) 	; If there was already an active InKey keyboard,
+	if (not KBD_File%kbd%) {  ; If new locale does not map to an InKey keyboard...
+		if (ActiveKbd > 0 and KBD_File%ActiveKbd%) 	; If there was already an active InKey keyboard,
 			DeactivateKbd()		;  deactivate it.
 		; if (KbdIconFile%kbd%)
-			; Menu Tray, Icon, KbdIconFile%kbd%, KbdIconNum%kbd%
+			; Menu Tray, Icon, KbdIconFile%kbd%, KBD_IconNum%kbd%
 		; else if (kbd = 0)
 			; Menu, Tray, Icon, Shell32.dll, 76
 		; else
@@ -1526,14 +1561,14 @@ ActivateKbd(kbd, hkl) {
 	}
 
 	if (RunFresh) {
-		kbdid := KbdFileID%kbd%
-		; NewKbdParams := selfHwnd . " " . KbdFileID%kbd% . " " . kbd . " " . GetKbdParams(kbd)
+		kbdid := KBD_FileID%kbd%
+		; NewKbdParams := selfHwnd . " " . KBD_FileID%kbd% . " " . kbd . " " . GetKbdParams(kbd)
 		;;first 3 parameters are InKeyHwnd, FileID, KbdId
 		; if (SubStr(NewKbdFile, -3) = ".ahk")
 			; RunCmd := "AutoHotKey.exe "
 		; else
 			; RunCmd =
-		; RunCmd .= KbdFolder%kbd% . "\" . NewKbdFile . " " . NewKbdParams
+		; RunCmd .= KBD_Folder%kbd% . "\" . NewKbdFile . " " . NewKbdParams
 		RunCmd := RunCmd%kbd%
 	DllCall("QueryPerformanceCounter", "Int64 *", CounterBefore)
 		Run %RunCmd%,  ,  UseErrorLevel, OutputVarPID
@@ -1544,7 +1579,7 @@ ActivateKbd(kbd, hkl) {
 			requestkbd(0)
 			return
 		}
-		KbdFileHwnd%kbdid% = 0
+		KBD_FileHwnd%kbdid% = 0
 		outputdebug Launched %RunCmd% => %OutputVarPID%
 		DetectHiddenWindows On
 		if (OutputVarPID) {
@@ -1559,14 +1594,14 @@ ActivateKbd(kbd, hkl) {
 					TempString:= GetLang(148) . " " . NewKbdFile . ".`n`n" . GetLang(149) ; There seems to be a problem with launching "%NewKbdFile%".`n`nWould you like switch to the default keyboard?
 					MsgBox 52, %TitleString%, %TempString%
 					IfMsgBox Yes
-					{	DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KbdHKL0)  ; Change all windows to default lang.
-						ActivateKbd(0, KbdHKL0)
+					{	DllCall("PostMessage", "UInt", 0xffff, UInt, 0x50, UInt, 1, UInt, KBD_HKL0)  ; Change all windows to default lang.
+						ActivateKbd(0, KBD_HKL0)
 						return
 					}
 				} else {
-					KbdFileHwnd%kbdid% := WinExist("ahk_pid " . OutputVarPID)
-					OutputDebug % "KbdFileHwnd" . kbdid . "=" . KbdFileHwnd%kbdid%
-					;DllCall("SendMessage", "UInt", KbdFileHwnd%kbdid%, UInt, 0x8100)
+					KBD_FileHwnd%kbdid% := WinExist("ahk_pid " . OutputVarPID)
+					OutputDebug % "KbdFileHwnd" . kbdid . "=" . KBD_FileHwnd%kbdid%
+					;DllCall("SendMessage", "UInt", KBD_FileHwnd%kbdid%, UInt, 0x8100)
 				}
 				; WinGetTitle tt
 				; wingettext tx
@@ -1616,10 +1651,10 @@ GetKbdHwnd(n) {
 	global
 	if (n = 0)
 		return ""
-	local kbdid := KbdFileID%n%
-	if (not KbdFileHwnd%kbdid%)
+	local kbdid := KBD_FileID%n%
+	if (not KBD_FileHwnd%kbdid%)
 		return 0
-	local kbdHwnd := WinExist("ahk_id " . KbdFileHwnd%kbdid%) ; TODO Faster: DllCall IsWindow
+	local kbdHwnd := WinExist("ahk_id " . KBD_FileHwnd%kbdid%) ; TODO Faster: DllCall IsWindow
 	if (kbdHwnd)
 		return kbdHwnd
 
@@ -1665,9 +1700,9 @@ KbdByMenuText(mtxt) {
 	global
 	;outputdebug KbdByMenuText(%mtxt%)
 	Loop %numKeyboards%
-	{	kk := KbdMenuText%A_Index%
-		;outputdebug kbdbymenutext trying KbdMenuText%A_Index% => %kk%
-		if (KbdMenuText%A_Index% = mtxt)
+	{	kk := KBD_MenuText%A_Index%
+		;outputdebug kbdbymenutext trying KBD_MenuText%A_Index% => %kk%
+		if (KBD_MenuText%A_Index% = mtxt)
 			return %A_Index%
 	}
 	;outputdebug KbdByMenuText: no match
@@ -1678,9 +1713,9 @@ KbdByLayoutName(mtxt) {
 	global
 	;outputdebug KbdByLayoutName(%mtxt%)
 	Loop %numKeyboards%
-	{	kk := KbdLayoutName%A_Index%
-		;outputdebug kbdbyLayoutName trying KbdLayoutName%A_Index% => %kk%
-		if (KbdLayoutName%A_Index% = mtxt)
+	{	kk := KBD_LayoutName%A_Index%
+		;outputdebug kbdbyLayoutName trying KBD_LayoutName%A_Index% => %kk%
+		if (KBD_LayoutName%A_Index% = mtxt)
 			return %A_Index%
 	}
 	;outputdebug KbdByLayoutName: no match
@@ -1700,15 +1735,15 @@ KbdByHotkey(hk) {
 ;===============================================++++==============================
 
 GetKbdHKL(n) {
-	return KbdHKL%n%
+	return KBD_HKL%n%
 }
 
 GetKbdFile(n) {
-	return KbdFile%n%
+	return KBD_File%n%
 }
 
 GetKbdHotkey(n) {
-	return KbdHotkey%n%
+	return KBD_Hotkey%n%
 }
 
 GetKbdIconFile(n) {
@@ -1716,11 +1751,11 @@ GetKbdIconFile(n) {
 }
 
 GetKbdIconNum(n) {
-	return KbdIconNum%n%
+	return KBD_IconNum%n%
 }
 
 GetKbdParams(n) {
-	return KbdParams%n%
+	return KBD_Params%n%
 }
 
 /*

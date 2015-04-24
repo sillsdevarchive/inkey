@@ -94,7 +94,8 @@ DoValidationChecks(byref md5) {
 	Gui, Font, norm,
 
 	global NoSplash
-	IniRead NoSplash, InKey.ini, InKey, NoSplash, 0
+	global InKeyINI
+	IniRead NoSplash, %InKeyINI%, InKey, NoSplash, 0
 	If (Not NoSplash)
 	{
 		Gui, Show, NoActivate ; NoActivate avoids deactivating the currently active window.

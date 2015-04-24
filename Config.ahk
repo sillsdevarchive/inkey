@@ -45,9 +45,9 @@ DoConfigure:
 
 	; TAB #2:  INKEY OPTIONS
 	Gui, 3:Tab, 2
-	IniRead, PortableMode, InKey.ini, InKey, PortableMode   ; Setting might be 0, but variable was temporarily 1, so re-read setting
-	IniRead, RefreshLangBarOnExit, InKey.ini, InKey, RefreshLangBarOnExit
-	;~ IniRead, NoSplash, InKey.ini, InKey, NoSplash	; Read in Validate.ahk, but value sometimes gets lost ; Wasn't global there.
+	IniRead, PortableMode, %InKeyINI%, InKey, PortableMode   ; Setting might be 0, but variable was temporarily 1, so re-read setting
+	IniRead, RefreshLangBarOnExit, %InKeyINI%, InKey, RefreshLangBarOnExit
+	;~ IniRead, NoSplash, %InKeyINI%, InKey, NoSplash	; Read in Validate.ahk, but value sometimes gets lost ; Wasn't global there.
 	; store current values, to compare with user's new selections
 	if (not driveIsFixed)
 		StartWithWindows = 0
@@ -158,91 +158,91 @@ DoConfigure:
 	Gui, 3:Add, Text, xs+10 yp+18 h20, %TempString%  ; Type the hotkey combination in the box.
 	TempString:=GetLang(41)
 	Gui, 3:Add, Text, xs+10 yp+18 h20, %TempString%  ; Clear box to disable hotkey.
-	IniRead, DefaultKbdHotkey, InKey.ini, InKey, DefaultKbdHotkey
+	IniRead, DefaultKbdHotkey, %InKeyINI%, InKey, DefaultKbdHotkey
 	OldDefaultKbdHotkey := DefaultKbdHotkey
 	TempString:=GetLang(42)
 	Gui, 3:Add, Text, x36 yp+28 w220 Section, %TempString%  ; Change to default keyboard:
 	Gui, 3:Add, Edit, x270 yp w80 vDefaultKbdHotkey, %DefaultKbdHotkey%
 
-	IniRead, DefaultKbdDoubleTap, InKey.ini, InKey, DefaultKbdDoubleTap
+	IniRead, DefaultKbdDoubleTap, %InKeyINI%, InKey, DefaultKbdDoubleTap
 	OldDefaultKbdDoubleTap := DefaultKbdDoubleTap
 	TempString:=GetLang(43)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Change to default keyboard with double-tap:
 	Gui, 3:Add, Edit, x270 yp w80 vDefaultKbdDoubleTap, %DefaultKbdDoubleTap%
 
-	IniRead, NextKbdHotkey, InKey.ini, InKey, NextKbdHotkey
+	IniRead, NextKbdHotkey, %InKeyINI%, InKey, NextKbdHotkey
 	OldNextKbdHotkey := NextKbdHotkey
 	TempString:=GetLang(44)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Change to next keyboard:
 	Gui, 3:Add, Edit, x270 yp w80 vNextKbdHotkey, %NextKbdHotkey%
 
-	IniRead, NextKbdDoubleTap, InKey.ini, InKey, NextKbdDoubleTap
+	IniRead, NextKbdDoubleTap, %InKeyINI%, InKey, NextKbdDoubleTap
 	OldNextKbdDoubleTap := NextKbdDoubleTap
 	TempString:=GetLang(45)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Change to next keyboard with double-tap:
 	Gui, 3:Add, Edit, x270 yp w80 vNextKbdDoubleTap, %NextKbdDoubleTap%
 
-	IniRead, PrevKbdHotkey, InKey.ini, InKey, PrevKbdHotkey
+	IniRead, PrevKbdHotkey, %InKeyINI%, InKey, PrevKbdHotkey
 	OldPrevKbdHotkey := PrevKbdHotkey
 	TempString:=GetLang(46)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Change to previous keyboard:
 	Gui, 3:Add, Edit, x270 yp w80 vPrevKbdHotkey, %PrevKbdHotkey%
 
-	IniRead, PrevKbdDoubleTap, InKey.ini, InKey, PrevKbdDoubleTap
+	IniRead, PrevKbdDoubleTap, %InKeyINI%, InKey, PrevKbdDoubleTap
 	OldPrevKbdDoubleTap := PrevKbdDoubleTap
 	TempString:=GetLang(47)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Change to previous keyboard with double-tap:
 	Gui, 3:Add, Edit, x270 yp w80 vPrevKbdDoubleTap, %PrevKbdDoubleTap%
 
-	IniRead, ToggleKbdHotkey, InKey.ini, InKey, ToggleKbdHotkey
+	IniRead, ToggleKbdHotkey, %InKeyINI%, InKey, ToggleKbdHotkey
 	OldToggleKbdHotkey := ToggleKbdHotkey
 	TempString:=GetLang(151)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Toggle keyboard:
 	Gui, 3:Add, Edit, x270 yp w80 vToggleKbdHotkey, %ToggleKbdHotkey%
 
-	IniRead, ToggleKbdDoubleTap, InKey.ini, InKey, ToggleKbdDoubleTap
+	IniRead, ToggleKbdDoubleTap, %InKeyINI%, InKey, ToggleKbdDoubleTap
 	OldToggleKbdDoubleTap := ToggleKbdDoubleTap
 	TempString:=GetLang(152)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Toggle keyboard with double-tap:
 	Gui, 3:Add, Edit, x270 yp w80 vToggleKbdDoubleTap, %ToggleKbdDoubleTap%
 
-	IniRead, MenuHotkey, InKey.ini, InKey, MenuHotkey
+	IniRead, MenuHotkey, %InKeyINI%, InKey, MenuHotkey
 	OldMenuHotkey := MenuHotkey
 	TempString:=GetLang(48)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Keyboard menu pop-up:
 	Gui, 3:Add, Edit, x270 yp w80 vMenuHotkey, %MenuHotkey%
 
-	IniRead, MenuDoubleTap, InKey.ini, InKey, MenuDoubleTap
+	IniRead, MenuDoubleTap, %InKeyINI%, InKey, MenuDoubleTap
 	OldMenuDoubleTap := MenuDoubleTap
 	TempString:=GetLang(49)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Keyboard menu pop-up with double-tap:
 	Gui, 3:Add, Edit, x270 yp w80 vMenuDoubleTap, %MenuDoubleTap%
 
-	IniRead, ChangeSendingMode, InKey.ini, InKey, ChangeSendingMode
+	IniRead, ChangeSendingMode, %InKeyINI%, InKey, ChangeSendingMode
 	OldChangeSendingMode := ChangeSendingMode
 	TempString:=GetLang(50)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Change sending mode:
 	Gui, 3:Add, Edit, x270 yp w80 vChangeSendingMode, %ChangeSendingMode%
 
-	IniRead, ResyncHotkey, InKey.ini, InKey, ResyncHotkey
+	IniRead, ResyncHotkey, %InKeyINI%, InKey, ResyncHotkey
 	OldResyncHotkey := ResyncHotkey
 	TempString:=GetLang(51)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Resync InKey:
 	Gui, 3:Add, Edit, x270 yp w80 vResyncHotkey, %ResyncHotkey%
 
-	IniRead, ReloadHotkey, InKey.ini, InKey, ReloadHotkey
+	IniRead, ReloadHotkey, %InKeyINI%, InKey, ReloadHotkey
 	OldReloadHotkey := ReloadHotkey
 	TempString:=GetLang(52)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Reload InKey:
 	Gui, 3:Add, Edit, x270 yp w80 vReloadHotkey, %ReloadHotkey%
 
-	IniRead, GrabContextHotkey, InKey.ini, InKey, GrabContextHotkey
+	IniRead, GrabContextHotkey, %InKeyINI%, InKey, GrabContextHotkey
 	OldGrabContextHotkey := GrabContextHotkey
 	TempString:=GetLang(53)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Grab context:
 	Gui, 3:Add, Edit, x270 yp w80 vGrabContextHotkey, %GrabContextHotkey%
 
-	IniRead, AutoGrabContextHotkey, InKey.ini, InKey, AutoGrabContextHotkey
+	IniRead, AutoGrabContextHotkey, %InKeyINI%, InKey, AutoGrabContextHotkey
 	OldAutoGrabContextHotkey := AutoGrabContextHotkey
 	TempString:=GetLang(54)
 	Gui, 3:Add, Text, xs w220, %TempString%  ; Toggle Auto Grab context:
@@ -284,6 +284,7 @@ RestoreDefaults:
 	Return
 
 FillKbdListAll() {
+	global AllowUnsafe
 	ImageListID := IL_Create(10)  ; Create an ImageList to hold 10 small icons.
 	LV_SetImageList(ImageListID)  ; Assign the above ImageList to the current ListView.
 	tFolderList =
@@ -292,25 +293,35 @@ FillKbdListAll() {
 		tFolderList = %tFolderList%%A_LoopFileName%`n
 	Sort, tFolderList
 	Loop, parse, tFolderList, `n
-	{	if (A_LoopField = "" or InStr(A_LoopField, ".")) ; Ignore the blank item at the end of the list, and ignore any folder containing a dot in the name.
+	{	if (A_LoopField = "" or (InStr(A_LoopField, ".") and (A_LoopField <> ".nonInkey"))) ; Ignore the blank item at the end of the list, and ignore any folder containing a dot in the name.
 			continue
 
 		tmpCurrFolder := A_LoopField
-		; For each keyboard class (i.e. folder), first read the keyboard program name
-		IniRead, tmpCurrKbdCmd, %A_LoopField%\Class.ini, Class, Cmd, %A_Space%
-		if (tmpCurrFolder <> "_Non-InKey" and not tmpCurrKbdCmd)
+		tmpCurrKbdTinkerFile := ""
+		tmpCurrKbdCmd := ""
+		if (FileExist(tmpCurrFolder "\" tmpCurrFolder ".tinker")) {
+			tmpCurrKbdTinkerFile := tmpCurrFolder ".tinker"
+			tmpCurrKbdCmd := tmpCurrFolder . ".ahk"
+		} else if (AllowUnsafe and FileExist(tmpCurrFolder "\" tmpCurrFolder ".ahk")) {
+			tmpCurrKbdCmd := tmpCurrFolder . ".ahk"
+		} else if (A_LoopField <> ".nonInkey") {
 			continue
-;	outputdebug processing folder: %A_LoopField%.  tmpCurrKbdCmd=%tmpCurrKbdCmd%
+		}
 
 		; Loop for each *.kbd.ini file
 		tKbdList =
 		Loop, %A_LoopField%\*.kbd.ini
 			tKbdList = %tKbdList%%A_LoopFileName%`n
 		Sort, tKbdList
+		global StoreUserSettingsInAppData, BaseSettingsFolder
 		Loop, parse, tKbdList, `n
 		{	if (A_LoopField = "") ; Ignore the blank item at the end of the list.
 				continue
 			tmpCurrIni = %tmpCurrFolder%\%A_LoopField%
+			if (StoreUserSettingsInAppData) {
+				tmpCurrIni := BaseSettingsFolder "\" tmpCurrIni
+			}
+
 			idx1++
 ;		outputdebug processing file: %tmpCurrIni%
 			IniRead, enabled, %tmpCurrIni%, Keyboard, Enabled, %A_Space%
@@ -319,9 +330,9 @@ FillKbdListAll() {
 			IniRead, KbdIcon, %tmpCurrIni%, Keyboard, Icon, %A_Space%
 			KbdIcon = %tmpCurrFolder%\%KbdIcon%
 			ii1 := IL_Add(ImageListID, KbdIcon)  ; Omits the DLL's path so that it works on Windows 9x too.
-;~ outputdebug	kbdicon=%kbdicon%	ii1=%ii1% iconIdx=%iconIdx%	LV_Add(%chk%%iconIdx%, "", KbdLayoutName, tmpCurrIni)
+;~ outputdebug	kbdicon=%Kbdicon%	ii1=%ii1% iconIdx=%iconIdx%	LV_Add(%chk%%iconIdx%, "", KbdLayoutName, tmpCurrIni)
 			iconIdx := (ii1) ? " Icon" . ii1 : ""
-			LV_Add(chk . iconIdx, "", KbdLayoutName, tmpCurrIni)
+			LV_Add(chk . iconIdx, "", KbdLayoutName, tmpCurrFolder "\" A_LoopField)
 		}
 	}
 	LV_ModifyCol()  ; Auto-size each column to fit its contents.
@@ -362,6 +373,10 @@ ConfigureHighlightedKeyboard:
 
 	LV_GetText(TempKeyboardName, RowNumber, 2)
 	LV_GetText(FileInfo, RowNumber, 3)
+	global StoreUserSettingsInAppData, BaseSettingsFolder
+	if (StoreUserSettingsInAppData) {
+		FileInfo := BaseSettingsFolder "\" FileInfo
+	}
 
 	; check to see if keyboard is in the list of active keyboards
 	tempkbd := KbdByLayoutName(TempKeyboardName)
@@ -373,17 +388,17 @@ ConfigureHighlightedKeyboard:
 		{
 			If A_Index=1
 			{
-				KbdFolder%tempkbd% = %A_LoopField%
+				KBD_Folder%tempkbd% = %A_LoopField%
 			}
 		}
-		KbdIniFile%tempkbd% = %FileInfo%
-		IniRead, KbdLayoutName%tempkbd%, %FileInfo%, Keyboard, LayoutName, %A_Space%
-		IniRead, KbdMenuText%tempkbd%, %FileInfo%, Keyboard, MenuText, %A_Space%
-		IniRead, KbdHotkey%tempkbd%, %FileInfo%, Keyboard, Hotkey, %A_Space%
-		IniRead, KbdLang%tempkbd%, %FileInfo%, Keyboard, Lang, %A_Space%
-		IniRead, KbdAltLang%tempkbd%, %FileInfo%, Keyboard, AltLang, %A_Space%
-		IniRead, KbdIcon%tempkbd%, %FileInfo%, Keyboard, Icon, %A_Space%
-		KbdIconFile%tempkbd% := KbdIcon%tempkbd%
+		KBD_IniFile%tempkbd% = %FileInfo%
+		IniRead, KBD_LayoutName%tempkbd%, %FileInfo%, Keyboard, LayoutName, %A_Space%
+		IniRead, KBD_MenuText%tempkbd%, %FileInfo%, Keyboard, MenuText, %A_Space%
+		IniRead, KBD_Hotkey%tempkbd%, %FileInfo%, Keyboard, Hotkey, %A_Space%
+		IniRead, KBD_Lang%tempkbd%, %FileInfo%, Keyboard, Lang, %A_Space%
+		IniRead, KBD_AltLang%tempkbd%, %FileInfo%, Keyboard, AltLang, %A_Space%
+		IniRead, KBD_Icon%tempkbd%, %FileInfo%, Keyboard, Icon, %A_Space%
+		KbdIconFile%tempkbd% := KBD_Icon%tempkbd%
 		if (KbdIconFile%tempkbd%) {
 			; If there is a second parameter (after a comma), separate that out.
 			if (RegExMatch(KbdIconFile%tempkbd%, "(.*),\s*(.*)", val)) {
@@ -392,27 +407,27 @@ ConfigureHighlightedKeyboard:
 			}
 
 			; If the icon file exists in the keyboard's folder, prepend path.
-			if (FileExist(KbdFolder%tempkbd% . "\" . KbdIconFile%tempkbd%))
-				KbdIconFile%tempkbd% := KbdFolder%tempkbd% . "\" . KbdIconFile%tempkbd%
+			if (FileExist(KBD_Folder%tempkbd% . "\" . KbdIconFile%tempkbd%))
+				KbdIconFile%tempkbd% := KBD_Folder%tempkbd% . "\" . KbdIconFile%tempkbd%
 			; otherwise hopefully the file is a system DLL
 		}
-		IniRead, KbdParams%tempkbd%, %FileInfo%, Keyboard, Params, %A_Space%
-		IniRead, KbdConfigureGUI%tempkbd%, %FileInfo%, Keyboard, ConfigureGUI, %A_Space%
-		IniRead, KbdDisplayCmd%tempkbd%, %FileInfo%, Keyboard, DisplayCmd, %A_Space%
-		temptext := "*" . KbdDisplayCmd%tempkbd% . "*"
-		If ((KbdDisplayCmd%tempkbd% = "") or (KbdDisplayCmd%tempkbd% = " "))
+		IniRead, KBD_Params%tempkbd%, %FileInfo%, Keyboard, Params, %A_Space%
+		IniRead, KBD_ConfigureGUI%tempkbd%, %FileInfo%, Keyboard, ConfigureGUI, %A_Space%
+		IniRead, KBD_DisplayCmd%tempkbd%, %FileInfo%, Keyboard, DisplayCmd, %A_Space%
+		temptext := "*" . KBD_DisplayCmd%tempkbd% . "*"
+		If ((KBD_DisplayCmd%tempkbd% = "") or (KBD_DisplayCmd%tempkbd% = " "))
 		{
 			; do nothing
 		}
 		else
 		{
-			KbdDisplayCmd%tempkbd%  := KbdFolder%tempkbd% . "\" . KbdDisplayCmd%tempkbd%
+			KBD_DisplayCmd%tempkbd%  := KBD_Folder%tempkbd% . "\" . KBD_DisplayCmd%tempkbd%
 		}
 
 		IniRead, KbdKLID%tempkbd%, %FileInfo%, Keyboard, KLID, %A_Space%
 	}
 
-	dd := KbdFolder%tempkbd%
+	dd := KBD_Folder%tempkbd%
 	SetWorkingDir %dd%
 	ConfigureKeyboard(tempkbd)
 	SetWorkingDir %A_ScriptDir%
@@ -444,7 +459,7 @@ InstallMore:
 	return
 
 SaveTab1Changes() {
-	global needsRestart
+	global needsRestart, StoreUserSettingsInAppData, BaseSettingsFolder
 	Loop % LV_GetCount()
 	{
 		RowNumberL := A_Index
@@ -452,6 +467,9 @@ SaveTab1Changes() {
 		SendMessage, 4140, RowNumberL - 1, 0xF000, SysListView321  ; 4140 is LVM_GETITEMSTATE.  0xF000 is LVIS_STATEIMAGEMASK.
 		IsChecked := (ErrorLevel >> 12) - 1  ; This sets IsChecked to true if RowNumberL is checked or false otherwise.
 		LV_GetText(tmpCurrIni, RowNumberL, 3)
+		if (StoreUserSettingsInAppData) {
+			tmpCurrIni := BaseSettingsFolder "\" tmpCurrIni
+		}
 		IniRead, enabled, %tmpCurrIni%, Keyboard, Enabled, 0
 		if (enabled <> IsChecked) {
 			IniWrite, %IsChecked%, %tmpCurrIni%, Keyboard, Enabled
@@ -470,18 +488,18 @@ outputdebug SaveTab2Changes
 	{	; write new values to ini file
 outputdebug options changed... iniwrite
 		if (driveIsFixed)
-			IniWrite, %StartWithWindows%, InKey.ini, InKey, StartWithWindows
-		IniWrite, %PortableMode%, InKey.ini, InKey, PortableMode
-		IniWrite, %NoSplash%, InKey.ini, InKey, NoSplash
-		IniWrite, %FollowWindowsInputLanguage%, InKey.ini, InKey, FollowWindowsInputLanguage
-		IniWrite, %LeaveKeyboardsLoaded%, InKey.ini, InKey, LeaveKeyboardsLoaded
-		IniWrite, %RefreshLangBarOnExit%, InKey.ini, InKey, RefreshLangBarOnExit
-		IniWrite, %RefreshLangBarOnLoad%, InKey.ini, InKey, RefreshLangBarOnLoad
-		IniWrite, %UnderlyingLayout%, InKey.ini, InKey, UnderlyingLayout
-		IniWrite, %ShowKeyboardNameBalloon%, InKey.ini, InKey, ShowKeyboardNameBalloon
-		IniWrite, %PreviewAtCursor%, InKey.ini, InKey, PreviewAtCursor
-		IniWrite, %rotaPeriod%, InKey.ini, InKey, SpeedRotaPeriod
-		IniWrite, %UseAltLangWithoutPrompting%, InKey.ini, InKey, UseAltLangWithoutPrompting
+			IniWrite, %StartWithWindows%, %InKeyINI%, InKey, StartWithWindows
+		IniWrite, %PortableMode%, %InKeyINI%, InKey, PortableMode
+		IniWrite, %NoSplash%, %InKeyINI%, InKey, NoSplash
+		IniWrite, %FollowWindowsInputLanguage%, %InKeyINI%, InKey, FollowWindowsInputLanguage
+		IniWrite, %LeaveKeyboardsLoaded%, %InKeyINI%, InKey, LeaveKeyboardsLoaded
+		IniWrite, %RefreshLangBarOnExit%, %InKeyINI%, InKey, RefreshLangBarOnExit
+		IniWrite, %RefreshLangBarOnLoad%, %InKeyINI%, InKey, RefreshLangBarOnLoad
+		IniWrite, %UnderlyingLayout%, %InKeyINI%, InKey, UnderlyingLayout
+		IniWrite, %ShowKeyboardNameBalloon%, %InKeyINI%, InKey, ShowKeyboardNameBalloon
+		IniWrite, %PreviewAtCursor%, %InKeyINI%, InKey, PreviewAtCursor
+		IniWrite, %rotaPeriod%, %InKeyINI%, InKey, SpeedRotaPeriod
+		IniWrite, %UseAltLangWithoutPrompting%, %InKeyINI%, InKey, UseAltLangWithoutPrompting
 
 		; actually make the changes requested
 		If (driveIsFixed and (OldStartWithWindows != StartWithWindows))
@@ -514,7 +532,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldDefaultKbdHotkey%, OnKbdHotkey, UseErrorLevel Off
 			Hotkey, %DefaultKbdHotkey%, OnKbdHotkey, UseErrorLevel On
-			IniWrite, %DefaultKbdHotkey%, InKey.ini, InKey, DefaultKbdHotkey
+			IniWrite, %DefaultKbdHotkey%, %InKeyINI%, InKey, DefaultKbdHotkey
 		}
 	}
 	else
@@ -522,7 +540,7 @@ SaveTab3Changes() {
 		If DefaultKbdHotkey <> OldDefaultKbdHotkey
 		{
 			Hotkey, %OldDefaultKbdHotkey%, OnKbdHotkey, UseErrorLevel Off
-			IniWrite, %DefaultKbdHotkey%, InKey.ini, InKey, DefaultKbdHotkey
+			IniWrite, %DefaultKbdHotkey%, %InKeyINI%, InKey, DefaultKbdHotkey
 		}
 	}
 	if DefaultKbdDoubleTap<>
@@ -531,7 +549,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldDefaultKbdDoubleTap%, DblTapDefKbd, UseErrorLevel Off
 			Hotkey, %DefaultKbdDoubleTap%, DblTapDefKbd, UseErrorLevel On
-			IniWrite, %DefaultKbdDoubleTap%, InKey.ini, InKey, DefaultKbdDoubleTap
+			IniWrite, %DefaultKbdDoubleTap%, %InKeyINI%, InKey, DefaultKbdDoubleTap
 		}
 	}
 	else
@@ -539,7 +557,7 @@ SaveTab3Changes() {
 		If DefaultKbdDoubleTap <> OldDefaultKbdDoubleTap
 		{
 			Hotkey, %OldDefaultKbdDoubleTap%, DblTapDefKbd, UseErrorLevel Off
-			IniWrite, %DefaultKbdDoubleTap%, InKey.ini, InKey, DefaultKbdDoubleTap
+			IniWrite, %DefaultKbdDoubleTap%, %InKeyINI%, InKey, DefaultKbdDoubleTap
 		}
 	}
 	if NextKbdHotkey<>
@@ -548,7 +566,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldNextKbdHotkey%, RequestNextKbd, UseErrorLevel Off
 			Hotkey, %NextKbdHotkey%, RequestNextKbd, UseErrorLevel On
-			IniWrite, %NextKbdHotkey%, InKey.ini, InKey, NextKbdHotkey
+			IniWrite, %NextKbdHotkey%, %InKeyINI%, InKey, NextKbdHotkey
 		}
 	}
 	else
@@ -556,7 +574,7 @@ SaveTab3Changes() {
 		If NextKbdHotkey <> OldNextKbdHotkey
 		{
 			Hotkey, %OldNextKbdHotkey%, RequestNextKbd, UseErrorLevel Off
-			IniWrite, %NextKbdHotkey%, InKey.ini, InKey, NextKbdHotkey
+			IniWrite, %NextKbdHotkey%, %InKeyINI%, InKey, NextKbdHotkey
 		}
 	}
 	if NextKbdHotkey<>
@@ -565,7 +583,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldNextKbdHotkey%, RequestNextKbd, UseErrorLevel Off
 			Hotkey, %NextKbdHotkey%, RequestNextKbd, UseErrorLevel On
-			IniWrite, %NextKbdHotkey%, InKey.ini, InKey, NextKbdHotkey
+			IniWrite, %NextKbdHotkey%, %InKeyINI%, InKey, NextKbdHotkey
 		}
 	}
 	else
@@ -573,7 +591,7 @@ SaveTab3Changes() {
 		If NextKbdHotkey <> OldNextKbdHotkey
 		{
 			Hotkey, %OldNextKbdHotkey%, RequestNextKbd, UseErrorLevel Off
-			IniWrite, %NextKbdHotkey%, InKey.ini, InKey, NextKbdHotkey
+			IniWrite, %NextKbdHotkey%, %InKeyINI%, InKey, NextKbdHotkey
 		}
 	}
 	if NextKbdDoubleTap<>
@@ -582,7 +600,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldNextKbdDoubleTap%, DblTapNextKbd, UseErrorLevel Off
 			Hotkey, %NextKbdDoubleTap%, DblTapNextKbd, UseErrorLevel On
-			IniWrite, %NextKbdDoubleTap%, InKey.ini, InKey, NextKbdDoubleTap
+			IniWrite, %NextKbdDoubleTap%, %InKeyINI%, InKey, NextKbdDoubleTap
 		}
 	}
 	else
@@ -590,7 +608,7 @@ SaveTab3Changes() {
 		If NextKbdDoubleTap <> OldNextKbdDoubleTap
 		{
 			Hotkey, %OldNextKbdDoubleTap%, DblTapNextKbd, UseErrorLevel Off
-			IniWrite, %NextKbdDoubleTap%, InKey.ini, InKey, NextKbdDoubleTap
+			IniWrite, %NextKbdDoubleTap%, %InKeyINI%, InKey, NextKbdDoubleTap
 		}
 	}
 	if PrevKbdHotkey<>
@@ -599,7 +617,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldPrevKbdHotkey%, RequestPrevKbd, UseErrorLevel Off
 			Hotkey, %PrevKbdHotkey%, RequestPrevKbd, UseErrorLevel On
-			IniWrite, %PrevKbdHotkey%, InKey.ini, InKey, PrevKbdHotkey
+			IniWrite, %PrevKbdHotkey%, %InKeyINI%, InKey, PrevKbdHotkey
 		}
 	}
 	else
@@ -607,7 +625,7 @@ SaveTab3Changes() {
 		If PrevKbdHotkey <> OldPrevKbdHotkey
 		{
 			Hotkey, %OldPrevKbdHotkey%, RequestPrevKbd, UseErrorLevel Off
-			IniWrite, %PrevKbdHotkey%, InKey.ini, InKey, PrevKbdHotkey
+			IniWrite, %PrevKbdHotkey%, %InKeyINI%, InKey, PrevKbdHotkey
 		}
 	}
 	if PrevKbdDoubleTap<>
@@ -616,7 +634,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldPrevKbdDoubleTap%, DblTapPrevKbd, UseErrorLevel Off
 			Hotkey, %PrevKbdDoubleTap%, DblTapPrevKbd, UseErrorLevel On
-			IniWrite, %PrevKbdDoubleTap%, InKey.ini, InKey, PrevKbdDoubleTap
+			IniWrite, %PrevKbdDoubleTap%, %InKeyINI%, InKey, PrevKbdDoubleTap
 		}
 	}
 	else
@@ -624,7 +642,7 @@ SaveTab3Changes() {
 		If PrevKbdDoubleTap <> OldPrevKbdDoubleTap
 		{
 			Hotkey, %OldPrevKbdDoubleTap%, DblTapPrevKbd, UseErrorLevel Off
-			IniWrite, %PrevKbdDoubleTap%, InKey.ini, InKey, PrevKbdDoubleTap
+			IniWrite, %PrevKbdDoubleTap%, %InKeyINI%, InKey, PrevKbdDoubleTap
 		}
 	}
 	if ToggleKbdHotkey<>
@@ -633,7 +651,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldToggleKbdHotkey%, RequestToggleKbd, UseErrorLevel Off
 			Hotkey, %ToggleKbdHotkey%, RequestToggleKbd, UseErrorLevel On
-			IniWrite, %ToggleKbdHotkey%, InKey.ini, InKey, ToggleKbdHotkey
+			IniWrite, %ToggleKbdHotkey%, %InKeyINI%, InKey, ToggleKbdHotkey
 		}
 	}
 	else
@@ -641,7 +659,7 @@ SaveTab3Changes() {
 		If ToggleKbdHotkey <> OldToggleKbdHotkey
 		{
 			Hotkey, %OldToggleKbdHotkey%, RequestToggleKbd, UseErrorLevel Off
-			IniWrite, %ToggleKbdHotkey%, InKey.ini, InKey, ToggleKbdHotkey
+			IniWrite, %ToggleKbdHotkey%, %InKeyINI%, InKey, ToggleKbdHotkey
 		}
 	}
 	if ToggleKbdDoubleTap<>
@@ -650,7 +668,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldToggleKbdDoubleTap%, DblTapToggleKbd, UseErrorLevel Off
 			Hotkey, %ToggleKbdDoubleTap%, DblTapToggleKbd, UseErrorLevel On
-			IniWrite, %ToggleKbdDoubleTap%, InKey.ini, InKey, ToggleKbdDoubleTap
+			IniWrite, %ToggleKbdDoubleTap%, %InKeyINI%, InKey, ToggleKbdDoubleTap
 		}
 	}
 	else
@@ -658,7 +676,7 @@ SaveTab3Changes() {
 		If ToggleKbdDoubleTap <> OldToggleKbdDoubleTap
 		{
 			Hotkey, %OldToggleKbdDoubleTap%, DblTapToggleKbd, UseErrorLevel Off
-			IniWrite, %ToggleKbdDoubleTap%, InKey.ini, InKey, ToggleKbdDoubleTap
+			IniWrite, %ToggleKbdDoubleTap%, %InKeyINI%, InKey, ToggleKbdDoubleTap
 		}
 	}
 	if MenuHotkey<>
@@ -667,7 +685,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldMenuHotkey%, ShowKbdMenu, UseErrorLevel Off
 			Hotkey, %MenuHotkey%, ShowKbdMenu, UseErrorLevel On
-			IniWrite, %MenuHotkey%, InKey.ini, InKey, MenuHotkey
+			IniWrite, %MenuHotkey%, %InKeyINI%, InKey, MenuHotkey
 		}
 	}
 	else
@@ -675,7 +693,7 @@ SaveTab3Changes() {
 		If MenuHotkey <> OldMenuHotkey
 		{
 			Hotkey, %OldMenuHotkey%, ShowKbdMenu, UseErrorLevel Off
-			IniWrite, %MenuHotkey%, InKey.ini, InKey, MenuHotkey
+			IniWrite, %MenuHotkey%, %InKeyINI%, InKey, MenuHotkey
 		}
 	}
 
@@ -685,7 +703,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldMenuDoubleTap%, DblTapMenuKbd, UseErrorLevel Off
 			Hotkey, %MenuDoubleTap%, DblTapMenuKbd, UseErrorLevel On
-			IniWrite, %MenuDoubleTap%, InKey.ini, InKey, MenuDoubleTap
+			IniWrite, %MenuDoubleTap%, %InKeyINI%, InKey, MenuDoubleTap
 		}
 	}
 	else
@@ -693,7 +711,7 @@ SaveTab3Changes() {
 		If MenuDoubleTap <> OldMenuDoubleTap
 		{
 			Hotkey, %OldMenuDoubleTap%, DblTapMenuKbd, UseErrorLevel Off
-			IniWrite, %MenuDoubleTap%, InKey.ini, InKey, MenuDoubleTap
+			IniWrite, %MenuDoubleTap%, %InKeyINI%, InKey, MenuDoubleTap
 		}
 	}
 
@@ -703,7 +721,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldChangeSendingMode%, ChangeSendingMode, UseErrorLevel Off
 			Hotkey, %ChangeSendingMode%, ChangeSendingMode, UseErrorLevel On
-			IniWrite, %ChangeSendingMode%, InKey.ini, InKey, ChangeSendingMode
+			IniWrite, %ChangeSendingMode%, %InKeyINI%, InKey, ChangeSendingMode
 		}
 	}
 	else
@@ -711,7 +729,7 @@ SaveTab3Changes() {
 		If ChangeSendingMode <> OldChangeSendingMode
 		{
 			Hotkey, %OldChangeSendingMode%, ChangeSendingMode, UseErrorLevel Off
-			IniWrite, %ChangeSendingMode%, InKey.ini, InKey, ChangeSendingMode
+			IniWrite, %ChangeSendingMode%, %InKeyINI%, InKey, ChangeSendingMode
 		}
 	}
 
@@ -721,7 +739,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldResyncHotkey%, DoResync, UseErrorLevel Off
 			Hotkey, %ResyncHotkey%, DoResync, UseErrorLevel On
-			IniWrite, %ResyncHotkey%, InKey.ini, InKey, ResyncHotkey
+			IniWrite, %ResyncHotkey%, %InKeyINI%, InKey, ResyncHotkey
 		}
 	}
 	else
@@ -729,7 +747,7 @@ SaveTab3Changes() {
 		If ResyncHotkey <> OldResyncHotkey
 		{
 			Hotkey, %OldResyncHotkey%, DoResync, UseErrorLevel Off
-			IniWrite, %ResyncHotkey%, InKey.ini, InKey, ResyncHotkey
+			IniWrite, %ResyncHotkey%, %InKeyINI%, InKey, ResyncHotkey
 		}
 	}
 	if ReloadHotkey<>
@@ -738,7 +756,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldReloadHotkey%, DoReload, UseErrorLevel Off
 			Hotkey, %ReloadHotkey%, DoReload, UseErrorLevel On
-			IniWrite, %ReloadHotkey%, InKey.ini, InKey, ReloadHotkey
+			IniWrite, %ReloadHotkey%, %InKeyINI%, InKey, ReloadHotkey
 		}
 	}
 	else
@@ -746,7 +764,7 @@ SaveTab3Changes() {
 		If ReloadHotkey <> OldReloadHotkey
 		{
 			Hotkey, %OldReloadHotkey%, DoReload, UseErrorLevel Off
-			IniWrite, %ReloadHotkey%, InKey.ini, InKey, ReloadHotkey
+			IniWrite, %ReloadHotkey%, %InKeyINI%, InKey, ReloadHotkey
 		}
 	}
 	if GrabContextHotkey<>
@@ -755,7 +773,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldGrabContextHotkey%, GrabContext, UseErrorLevel Off
 			Hotkey, %GrabContextHotkey%, GrabContext, UseErrorLevel On
-			IniWrite, %GrabContextHotkey%, InKey.ini, InKey, GrabContextHotkey
+			IniWrite, %GrabContextHotkey%, %InKeyINI%, InKey, GrabContextHotkey
 		}
 	}
 	else
@@ -763,7 +781,7 @@ SaveTab3Changes() {
 		If GrabContextHotkey <> OldGrabContextHotkey
 		{
 			Hotkey, %OldGrabContextHotkey%, GrabContext, UseErrorLevel Off
-			IniWrite, %GrabContextHotkey%, InKey.ini, InKey, GrabContextHotkey
+			IniWrite, %GrabContextHotkey%, %InKeyINI%, InKey, GrabContextHotkey
 		}
 	}
 	if AutoGrabContextHotkey<>
@@ -772,7 +790,7 @@ SaveTab3Changes() {
 		{
 			Hotkey, %OldAutoGrabContextHotkey%, MenuAutoGrab, UseErrorLevel Off
 			Hotkey, %AutoGrabContextHotkey%, MenuAutoGrab, UseErrorLevel On
-			IniWrite, %AutoGrabContextHotkey%, InKey.ini, InKey, AutoGrabContextHotkey
+			IniWrite, %AutoGrabContextHotkey%, %InKeyINI%, InKey, AutoGrabContextHotkey
 		}
 	}
 	else
@@ -780,7 +798,7 @@ SaveTab3Changes() {
 		If AutoGrabContextHotkey <> OldAutoGrabContextHotkey
 		{
 			Hotkey, %OldAutoGrabContextHotkey%, MenuAutoGrab, UseErrorLevel Off
-			IniWrite, %AutoGrabContextHotkey%, InKey.ini, InKey, AutoGrabContextHotkey
+			IniWrite, %AutoGrabContextHotkey%, %InKeyINI%, InKey, AutoGrabContextHotkey
 		}
 	}
 }

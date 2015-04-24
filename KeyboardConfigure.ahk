@@ -26,22 +26,22 @@ ConfigureKeyboard(kbd)
 
 	tmpString:=GetLang(76)
 	Gui, 5:Add, Text, x10 y5 w80 h40, %tmpString%  ; Layout Name:
-	Gui, 5:Add, Edit, x100 y8 w150 h20 vLayoutNameGUI, % KbdLayoutName%kbd%
+	Gui, 5:Add, Edit, x100 y8 w150 h20 vLayoutNameGUI, % KBD_LayoutName%kbd%
 	tmpString:=GetLang(77)
 	Gui, 5:Add, Text, x10 y45 w80 h40, %tmpString%  ; Menu Text:
-	Gui, 5:Add, Edit, x100 y48 w150 h20 vMenuText, % KbdMenuText%kbd%
+	Gui, 5:Add, Edit, x100 y48 w150 h20 vMenuText, % KBD_MenuText%kbd%
 	tmpString:="(&& " . GetLang(78) . ")"
 	Gui, 5:Add, Text, x270 y45 w160 h40, %tmpString%  ; (&& precedes shortcut key)
 	tmpString:=GetLang(79)
 	Gui, 5:Add, Text, x10 y85 w80 h40, %tmpString%  ; Hotkey:
-	Gui, 5:Add, Edit, x100 y88 w150 h20 vHotkey, % KbdHotkey%kbd%
+	Gui, 5:Add, Edit, x100 y88 w150 h20 vHotkey, % KBD_Hotkey%kbd%
 	Gui, 5:Add, Text, x270 y85 w160 h20, ^=CTRL, #=WIN, +=SHIFT
 	Gui, 5:Add, Text, x320 y98 h20, !=ALT
 	tmpString:=GetLang(80)
 	Gui, 5:Add, Text, x10 y125 w80 h40, %tmpString%  ; Locale:
 
 	; need to read the locale in case it is not supported by the current Windows version
-	IniRead, IniKbdLang, % KbdIniFile%kbd%, Keyboard, Lang, %A_Space%
+	IniRead, IniKbdLang, % KBD_IniFile%kbd%, Keyboard, Lang, %A_Space%
 
 	; Convert language code to language name
 	tmpLangName1:=ConvertCodeToName(IniKbdLang)
@@ -53,9 +53,9 @@ ConfigureKeyboard(kbd)
 	global AltLangGUI
 	global ChangeAltLocaleButton
 	global AltLangName
-	If KbdAltLang%kbd% <>
+	If KBD_AltLang%kbd% <>
 	{
-		AltLangName:=ConvertCodeToName(KbdAltLang%kbd%)
+		AltLangName:=ConvertCodeToName(KBD_AltLang%kbd%)
 		tmpString:=GetLang(82)
 		Gui, 5:Add, Text, x10 y165 w80 h40, %tmpString%  ; Alt. Locale:
 		Gui, 5:Add, Edit, x100 y168 w150 h20 ReadOnly vAltLangGUI, %AltLangName%
@@ -85,13 +85,13 @@ ConfigureKeyboard(kbd)
 	tmpString:=GetLang(81)
 	Gui, 5:Add, Button, x270 y208 w140 h20 g5ChangeIconButton, %tmpString%  ; Change...
 
-	keybdname :=% KbdLayoutName%kbd%
-	If KbdConfigureGUI%kbd%<>
+	keybdname :=% KBD_LayoutName%kbd%
+	If KBD_ConfigureGUI%kbd%<>
 	{
 		global ConfigGUI
 		;Gui, 5:Add, Text, x10 yp+50 w80 h40, Special settings GUI:
-		;OldGUIFile:=% KbdConfigureGUI%kbd%
-		;GUIFile := % KbdConfigureGUI%kbd%
+		;OldGUIFile:=% KBD_ConfigureGUI%kbd%
+		;GUIFile := % KBD_ConfigureGUI%kbd%
 		;StringGetPos, position, GUIFile, \, R
 		;StringRight, GUIFile, GUIFile, StrLen(GUIFile) - position -1
 		;Gui, 5:Add, Edit, x100 yp w150 h20 ReadOnly vConfigGUI, %GUIFile%
@@ -107,7 +107,7 @@ ConfigureKeyboard(kbd)
 		Gui, 5:Add, Button, x10 y250 w400 h25 g5ButtonRun, %buttontext%
 	}
 
-	LayoutFile := % KbdDisplayCmd%kbd%
+	LayoutFile := % KBD_DisplayCmd%kbd%
 	If ((LayoutFile = "") or (LayoutFile = " "))
 	{
 		; do nothing
@@ -122,7 +122,7 @@ ConfigureKeyboard(kbd)
 		;Gui, 5:Add, Button, x270 y188 w140 h20, View...
 
 		buttontext:=GetLang(84) . " " . keybdname . " " . GetLang(85) . "..." ; View %keybdname% keyboard layout...
-		If KbdConfigureGUI%kbd%<>
+		If KBD_ConfigureGUI%kbd%<>
 		{
 			Gui, 5:Add, Button, x10 y+15 w400 h25 g5ButtonView, %buttontext%
 		}
@@ -214,7 +214,7 @@ GuiControl, 5:, AltLangGUI, %NewAltLocale%
 return
 
 5ChangeIconButton:
-OldDirectory:=A_WorkingDir . "\" . KbdFolder%currentconfigurekbd%
+OldDirectory:=A_WorkingDir . "\" . KBD_Folder%currentconfigurekbd%
 TempString:=GetLang(93)  ; Select an icon file...
 FileSelectFile, NewIconFile, 3, %OldDirectory%, %TempString%, Icon files (*.ico)
 If NewIconFile<>
@@ -227,13 +227,13 @@ If NewIconFile<>
 return
 
 5ButtonView:
-RunDisplayCmd := GetAHKCmd(KbdDisplayCmd%currentconfigurekbd%) . KbdDisplayCmd%currentconfigurekbd%
+RunDisplayCmd := GetAHKCmd(KBD_DisplayCmd%currentconfigurekbd%) . KBD_DisplayCmd%currentconfigurekbd%
 Run %RunDisplayCmd%
 return
 
 5ButtonRun:
 Gui, 5:+Disabled
-RunGUIFilename:= GetAHKCmd(KbdConfigureGUI%currentconfigurekbd%) . KbdFolder%currentconfigurekbd% . "\" . KbdConfigureGUI%currentconfigurekbd%
+RunGUIFilename:= GetAHKCmd(KBD_ConfigureGUI%currentconfigurekbd%) . KBD_Folder%currentconfigurekbd% . "\" . KBD_ConfigureGUI%currentconfigurekbd%
 RunWait %RunGUIFilename%
 Gui, 5:-Disabled
 Gui, 5:Show
@@ -251,45 +251,45 @@ GuiControlGet, CheckEnabled, 5:Enabled, AltLangGUI
 Gui, 5:Destroy
 
 ; write out standard .kbd.ini entries
-IniWrite, %LayoutNameGUI%, % KbdIniFile%currentconfigurekbd%, Keyboard, LayoutName
-IniWrite, %MenuText%, % KbdIniFile%currentconfigurekbd%, Keyboard, MenuText
-IniWrite, %Hotkey%, % KbdIniFile%currentconfigurekbd%, Keyboard, Hotkey
+IniWrite, %LayoutNameGUI%, % KBD_IniFile%currentconfigurekbd%, Keyboard, LayoutName
+IniWrite, %MenuText%, % KBD_IniFile%currentconfigurekbd%, Keyboard, MenuText
+IniWrite, %Hotkey%, % KBD_IniFile%currentconfigurekbd%, Keyboard, Hotkey
 NewLang:=ConvertNameToCode(LangNameGUI)
-IniWrite, %NewLang%, % KbdIniFile%currentconfigurekbd%, Keyboard, Lang
+IniWrite, %NewLang%, % KBD_IniFile%currentconfigurekbd%, Keyboard, Lang
 If (CheckEnabled)
 {
 	AltLang:=ConvertNameToCode(AltLangGUI)
-	IniWrite, %AltLang%, % KbdIniFile%currentconfigurekbd%, Keyboard, AltLang
+	IniWrite, %AltLang%, % KBD_IniFile%currentconfigurekbd%, Keyboard, AltLang
 }
 else
-	IniDelete, % KbdIniFile%currentconfigurekbd%, Keyboard, AltLang
+	IniDelete, % KBD_IniFile%currentconfigurekbd%, Keyboard, AltLang
 
 ; need to copy files to keyboard folder, and change path info for filenames
-FileCopy, %IconGUI%, % KbdFolder%currentconfigurekbd%, 1
+FileCopy, %IconGUI%, % KBD_Folder%currentconfigurekbd%, 1
 StringGetPos, tmpPos, IconGUI, \, R
 if Errorlevel=0
 	StringRight, IconGUIshort, IconGUI, StrLen(IconGUI) - tmpPos -1
 else
 	IconGUIShort:=IconGUI
-IniWrite, %IconGUIShort%, % KbdIniFile%currentconfigurekbd%, Keyboard, Icon
+IniWrite, %IconGUIShort%, % KBD_IniFile%currentconfigurekbd%, Keyboard, Icon
 
-;FileCopy, %DisplayCmd%, % KbdFolder%kbd%, 1
+;FileCopy, %DisplayCmd%, % KBD_Folder%kbd%, 1
 ;StringGetPos, position, DisplayCmd, \, R
 ;if Errorlevel=0
 ;	StringRight, DisplayCmdShort, DisplayCmd, StrLen(DisplayCmd) - position -1
 ;else
 ;	DisplayCmdShort:=DisplayCmd
-;IniWrite, %DisplayCmdShort%, % KbdIniFile%kbd%, Keyboard, DisplayCmd
+;IniWrite, %DisplayCmdShort%, % KBD_IniFile%kbd%, Keyboard, DisplayCmd
 
-;If KbdConfigureGUI%kbd%<>
+;If KBD_ConfigureGUI%kbd%<>
 ;{
-;	FileCopy, %ConfigGUI%, % KbdFolder%kbd%, 1
+;	FileCopy, %ConfigGUI%, % KBD_Folder%kbd%, 1
 ;	StringGetPos, position, ConfigGUI, \, R
 ;	if Errorlevel=0
 ;		StringRight, ConfigGUIShort, ConfigGUI, StrLen(ConfigGUI) - position -1
 ;	else
 ;		ConfigGUIShort:=ConfigGUI
-;	IniWrite, %ConfigGUIShort%, % KbdIniFile%kbd%, Keyboard, ConfigureGUI
+;	IniWrite, %ConfigGUIShort%, % KBD_IniFile%kbd%, Keyboard, ConfigureGUI
 ;}
 
 ; only need to do a reload if the keyboard being configured is currently enabled

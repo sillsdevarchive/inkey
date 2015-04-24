@@ -373,8 +373,6 @@ Receive_WM_COPYDATA(wParam, lParam)
 {	; This function can receive string data from a keyboard.
 	; Any processing done in response must return quickly. If necessary, set a timer to kick off a longer process.
 	global rotaPeriod
-	local grp
-	local grp1
 	dwSize := NumGet(lParam+0, A_PtrSize, "UInt")  ;  address of CopyDataStruct's cbData member.
 	StringAddress := NumGet(lParam + A_PtrSize+4, "UPtr")  ; address of CopyDataStruct's lpData member.
 	if (dwSize = 0)
@@ -441,20 +439,20 @@ Receive_WM_COPYDATA(wParam, lParam)
 		}
 
 		;~ ; Handle string passed as a InContextSend command (0x9015)
-		;~ if (dwNum = 0x9015 and RegExMatch(StringData,"^(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)", grp)) {
-			;~ outputdebug received InContextSend message: %grp1%, %grp2%, %grp3%, %grp4%, %grp5%
-			;~ return InContextSend(grp1, grp2, grp3, grp4, grp5)
+		;~ if (dwNum = 0x9015 and RegExMatch(StringData,"^(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)", ov_)) {
+			;~ outputdebug received InContextSend message: %ov_1%, %ov_2%, %ov_3%, %ov_4%, %ov_5%
+			;~ return InContextSend(ov_1, ov_2, ov_3, ov_4, ov_5)
 		;~ }
 
 		;~ ; Handle string passed as a InContextReplace command (0x9016)
-		;~ if (dwNum = 0x9016 and RegExMatch(StringData,"^(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)", grp)) {
-			;~ outputdebug received InContextSend message: %grp1%, %grp2%, %grp3%, %grp4%, %grp5%, %grp6%
-			;~ return InContextReplace(grp1, grp2, grp3, grp4, grp5, grp6)
+		;~ if (dwNum = 0x9016 and RegExMatch(StringData,"^(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)", ov_)) {
+			;~ outputdebug received InContextSend message: %ov_1%, %ov_2%, %ov_3%, %ov_4%, %ov_5%, %ov_6%
+			;~ return InContextReplace(ov_1, ov_2, ov_3, ov_4, ov_5, ov_6)
 		;~ }
 
 		; Handle string passed as a RegisterRota command (0x9004)
-		if (dwNum = 0x9004 and RegExMatch(StringData,"^(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)", grp)) {
-			RegisterRota(grp1, grp2, grp3, grp4, grp5)  ; id, rotaSets, defTxt, style, uFlags
+		if (dwNum = 0x9004 and RegExMatch(StringData,"^(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)\x{1c}(.*)", ov_)) {
+			RegisterRota(ov_1, ov_2, ov_3, ov_4, ov_5)  ; id, rotaSets, defTxt, style, uFlags
 			return 3
 		}
 
@@ -474,8 +472,8 @@ Receive_WM_COPYDATA(wParam, lParam)
 
 		; Handle string passed as a FatalError command (0x9006)
 		if (dwNum = 0x9006) {
-			global KbdHKL0
-			ChangeLanguage(KbdHKL0)
+			global KBD_HKL0
+			ChangeLanguage(KBD_HKL0)
 			RequestKbd(0)
 			interpolate(StringData)
 			MsgBox %StringData%
@@ -926,7 +924,7 @@ InContextReplace(ByRef AfterRegEx, ByRef FindRegEx, ByRef ReplaceTxt, ByRef Else
 
 InContextReplaceUsingMap(ByRef AfterRegEx, ByRef FindRegEx, ByRef ReplaceTxt, ByRef Map, ByRef ElseTxt="", uSendFlags=0, uElseFlags=0) {
 	global
-	local context, c2, match, foundPos, repCt, delTxt, addTxt, alts, altFind
+	local context, c2, match, foundPos, repCt, delTxt, addTxt, alts, altFind, grp
 	interpolate(ReplaceTxt)
 	interpolate(ElseTxt)
 	alts := "(?P<MAP>"
