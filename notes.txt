@@ -1,0 +1,4 @@
+installed: keyboard folder is present under InKey folder
+registered: a KLID exists for the keyboard in HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layouts\
+loaded: Windows has an HKL for the keyboard. lang appears in the lang bar.
+active: kbd is actively applying keyboard change rules

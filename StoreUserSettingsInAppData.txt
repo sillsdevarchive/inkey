@@ -1,0 +1,1 @@
+If a file named "StoreUserSettingsInAppData.txt" exists in the InKey program folder, it will cause InKey to look in/below %appdata%\InkeySoftware for user-configurable settings instead of in/below the InKey program folder.
