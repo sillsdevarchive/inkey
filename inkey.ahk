@@ -203,7 +203,7 @@ Icon_1=%In_Dir%\inkey.ico
 		CurrKbdTinkerFile := ""
 		CurrKbdCmd := ""
 		if (FileExist(CurrFolder "\" CurrFolder ".tinker")) {
-			CurrKbdTinkerFile := CurrFolder ".tinker"
+			CurrKbdTinkerFile := CurrFolder "\" CurrFolder ".tinker"
 			CurrKbdCmd := CurrFolder . ".ahk"
 		} else if (AllowUnsafe and FileExist(CurrFolder "\" CurrFolder ".ahk")) {
 			CurrKbdCmd := CurrFolder . ".ahk"
@@ -220,6 +220,7 @@ Icon_1=%In_Dir%\inkey.ico
 		{	if (A_LoopField = "") ; Ignore the blank item at the end of the list.
 				continue
 			CurrIni = %CurrFolder%\%A_LoopField%
+			CurrKbdIni := A_LoopField
 			if (StoreUserSettingsInAppData) {
 				oriIni := CurrIni
 				CurrIni := BaseSettingsFolder "\" CurrIni
@@ -234,6 +235,8 @@ Icon_1=%In_Dir%\inkey.ico
 			if (not ii)		; skip items without Enabled=1
 				continue
 			numKeyboards++  ; New keyboard to configure
+			KBD_File%numKeyboards% := (CurrKbdTinkerFile ? CurrFolder "." CurrKbdIni ".ahk" : CurrKbdCmd)
+			KBD_AhkFile%numKeyboards% := (CurrKbdTinkerFile ? TinkerDir "\" CurrFolder "." CurrKbdIni ".ahk" : CurrFolder "\" CurrKbdCmd)
 			KBD_Folder%numKeyboards% := CurrFolder
 			KBD_IniFile%numKeyboards% := CurrIni
 			KBD_Disabled%numKeyboards% := 0
@@ -488,8 +491,7 @@ Icon_1=%In_Dir%\inkey.ico
 	Loop % numKeyboards  {
 		kk := A_Index
 		if (KBD_TinkerFile%kk%) {
-			CurrAHK := TinkerDir . "\" . KBD_File%kk%
-			if ((not FileExist(CurrAHK)) or FileIsOlderThan(CurrAHK, KBD_Folder%kk% . "\" . KBD_TinkerFile%kk%) or FileIsOlderThan(CurrAHK, A_ScriptFullPath)) {
+			if ((not FileExist(KBD_AhkFile%kk%)) or FileIsOlderThan(KBD_AhkFile%kk%, KBD_TinkerFile%kk%) or FileIsOlderThan(KBD_AhkFile%kk%, A_ScriptFullPath)) {
 				ProcessTinkerFile(kk)
 			}
 		}
@@ -524,6 +526,7 @@ ProcessKbdErrors:
 
 		KBD_FileID%kk% =
 		KBD_File%kk% =
+		KBD_AhkFile%kk% =
 		KBD_MenuText%kk% =
 		KbdHotkeyCode%kk% =
 		KBD_LayoutName%kk% =
@@ -541,8 +544,6 @@ ProcessKbdErrors:
 		numKeyboards--
 		return
 	}
-
-	KBD_File%kk% := CurrKbdCmd
 
 	; populate submenu for all enabled keyboards
 	Menu, DispConfigureSubmenu, add, % KBD_MenuText%kk%, DispConfigureMenuItem
@@ -630,7 +631,7 @@ LangCodeOK:
 			KbdFiles .= "   " . KBD_FileID%kk% . ":" . KBD_File%kk% . A_Tab
 		}
 		; first 4 parameters are K_ProtocolNum, InKeyHwnd, FileID, KbdId
-		RunCmd%kk% := GetAHKCmd(KBD_File%kk%) . (KBD_TinkerFile%kk% ?  TinkerDir : KBD_Folder%kk%) . "\" . KBD_File%kk% . " " . K_ProtocolNum . " " . selfHwnd . " " . KBD_FileID%kk% . " " . kk . " " . KBD_Params%kk%
+		RunCmd%kk% := GetAHKCmd(KBD_File%kk%) . KBD_AhkFile%kk% . " " . K_ProtocolNum . " " . selfHwnd . " " . KBD_FileID%kk% . " " . kk . " " . KBD_Params%kk%
 
 		klid := FindKLID(KBD_LayoutName%kk%, KBD_Lang%kk%)  ; See if keyboard named is registered
 		;outputdebug FindKLID => %klid%.
@@ -801,8 +802,8 @@ GetNextPreload() {  ; Retrieve the last preload number
 }
 
 GetAHKCmd(filename) {
-	if (SubStr(filename, -3) <> ".ahk")
-		return ""	; Not an AHK file.  Must be an EXE.  We'll just run the file as specified.
+	; if (SubStr(filename, -3) <> ".ahk")
+		; return ""	; Not an AHK file.  Must be an EXE.  We'll just run the file as specified.
 	return GetAHK() . " "
 }
 
@@ -832,8 +833,8 @@ GetAHK() {
 
 ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	global
-	local TinkerFile := KBD_Folder%kk% . "\" . KBD_TinkerFile%kk%
-	local AHKFile := TinkerDir . "\" . KBD_File%kk%
+	local TinkerFile := KBD_TinkerFile%kk%
+	local AHKFile := KBD_AhkFile%kk%
 	outputdebug Generating %AHKFile% from %TinkerFile%
 	FileEncoding UTF-8
 	FileRead tinkerLines, %TinkerFile%
@@ -1539,6 +1540,7 @@ ActivateKbd(kbd, hkl) {
 		ActiveKbdHwnd := 0
 		return
 	}
+
 	; Otherwise, there is a different keyboard we should switch to.
 	local NewKbdFile := GetKbdFile(kbd)
 

@@ -300,7 +300,7 @@ FillKbdListAll() {
 		tmpCurrKbdTinkerFile := ""
 		tmpCurrKbdCmd := ""
 		if (FileExist(tmpCurrFolder "\" tmpCurrFolder ".tinker")) {
-			tmpCurrKbdTinkerFile := tmpCurrFolder ".tinker"
+			tmpCurrKbdTinkerFile := tmpCurrFolder "\" tmpCurrFolder ".tinker"
 			tmpCurrKbdCmd := tmpCurrFolder . ".ahk"
 		} else if (AllowUnsafe and FileExist(tmpCurrFolder "\" tmpCurrFolder ".ahk")) {
 			tmpCurrKbdCmd := tmpCurrFolder . ".ahk"

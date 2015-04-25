@@ -1,110 +1,93 @@
-[Settings]
-TinkerVersion=1.953
-UseContext=1
-
 ► /* Tinker Script to provide a keyboard layout that [rather slavishly]
-	follows the layout (and quirks) of the DevRomU.KMN Keyman layout,
-	with a few enhancements.
+	# follows the layout (and quirks) of the DevRomU.KMN Keyman layout,
+	# with a few enhancements.
 
-	This script is primarily for users who are already accustomed to the DevRom layout.
-	(It does not take advantage of newer keying techniques made feasible by InKey.)
+	# This script is primarily for users who are already accustomed to the DevRom layout.
+	# (It does not take advantage of newer keying techniques made feasible by InKey.)
 
- PARAMETERS:  (User-selected options for a keyboard.)
-   SwapSHA=1	Swap SHA (z) and SSA (S) keys from original DevRom layout
-   ScriptDigit=1 	Use Devanagari digits rather than Western digits by default.
-   SwapHalfH=1	Swap x and shift+x behavior after h, for languages that
-			prefer ह्‌ to ह्‍
-   UseLLA=1		For languages that don't need LLA (ळ), shift+L can give a
-			shortcut for lo-R (e.g in क्र) otherwise obtained by typing  ▹... r
-   smartQuotes=1	Use Smart (double) quotes by default.  (Press " again to toggle this.)
-   ApostropheForTone=1	Use the apostrophe key (') for a tone mark (’)
-   OnlyDeadKeyForVowels=1  Only generate Independent form of vowel after 'q' deadkey
+ # PARAMETERS:  (User-selected options for a keyboard.)
+   # SwapSHA=1	Swap SHA (z) and SSA (S) keys from original DevRom layout
+   # ScriptDigit=1 	Use Devanagari digits rather than Western digits by default.
+   # SwapHalfH=1	Swap x and shift+x behavior after h, for languages that
+			# prefer ह्‌ to ह्‍
+   # UseLLA=1		For languages that don't need LLA (ळ), shift+L can give a
+			# shortcut for lo-R (e.g in क्र) otherwise obtained by typing  ▹... r
+   # smartQuotes=1	Use Smart (double) quotes by default.  (Press " again to toggle this.)
+   # ApostropheForTone=1	Use the apostrophe key (') for a tone mark (’)
+   # OnlyDeadKeyForVowels=1  Only generate Independent form of vowel after 'q' deadkey
 
-Other differences from DevRomU.KMN:
-- Typing the q key to obtain an independent vowel is now mostly optional, as the vowel will
-  automatically be independent unless typed after a consonant or nukta (़).  In cases in which
-  you need an independent vowel after a consonant (e.g. गए), type the q (e.g. gqe) , or use an
-  InKey context-clearing key (such as Ins or End) instead of q.
-- The state of the CapsLock key will toggle between script and roman digits.
-- A digit will always follow the script of an immediately preceding digit.
-(e.g Press Right-Alt to get the first digit, then no need to hold it after that.)
-- Due to a tweak for Kangri, DevRom.KMN had no way to produce ह्‍ ( 93C, 200D),
-   which other lgs. presumably need.  Here you can type the shift+x to get the opposite
-   form.  (Default is specified with the SwapHalfH parameter.)
-- Visarga (ः) can alternatively be obtained by typing :::
-- Candra E and O can be obtained by typing candra (Ctrl+Alt+5) after
-  E/Ekar and O/Okar (phonology-centric), in addition to after AA/Aakar (shape-centric).
-- Given InKey's convenient language-switching shortcuts, DevRomU's use of
-  shift+q to activate roman text is unneccesary, so not implemented here.
- -We even implemented DevRomU.KMN's "flying reph" behavior, fixing the bug that kept it from
-  working on cases of nukta without vowel (e.g. र्ल़), and keeping it from spitting out latin R
-  in cases where the context didn't match any of the options, instead preparing the reph to go on the
-  next consonant to be typed.
- -For some reason, DevRomU.KMN intentially does not allow you to type an @.
-  We have left this "feature" unimplemented.
-  -You can type n;y to get NYA and g;y to get GYA.  (nxy/nY and gxy/gY will still get the "half-char-plus-YA" forms)
-  -Any characters that previously required Ctrl+Alt key combinations can now be obtained by easier methods.
+# Other differences from DevRomU.KMN:
+# - Typing the q key to obtain an independent vowel is now mostly optional, as the vowel will
+  # automatically be independent unless typed after a consonant or nukta (़).  In cases in which
+  # you need an independent vowel after a consonant (e.g. गए), type the q (e.g. gqe) , or use an
+  # InKey context-clearing key (such as Ins or End) instead of q.
+# - The state of the CapsLock key will toggle between script and roman digits.
+# - A digit will always follow the script of an immediately preceding digit.
+# (e.g Press Right-Alt to get the first digit, then no need to hold it after that.)
+# - Due to a tweak for Kangri, DevRom.KMN had no way to produce ह्‍ ( 93C, 200D),
+   # which other lgs. presumably need.  Here you can type the shift+x to get the opposite
+   # form.  (Default is specified with the SwapHalfH parameter.)
+# - Visarga (ः) can alternatively be obtained by typing :::
+# - Candra E and O can be obtained by typing candra (Ctrl+Alt+5) after
+  # E/Ekar and O/Okar (phonology-centric), in addition to after AA/Aakar (shape-centric).
+# - Given InKey's convenient language-switching shortcuts, DevRomU's use of
+  # shift+q to activate roman text is unneccesary, so not implemented here.
+ # -We even implemented DevRomU.KMN's "flying reph" behavior, fixing the bug that kept it from
+  # working on cases of nukta without vowel (e.g. र्ल़), and keeping it from spitting out latin R
+  # in cases where the context didn't match any of the options, instead preparing the reph to go on the
+  # next consonant to be typed.
+ # -For some reason, DevRomU.KMN intentially does not allow you to type an @.
+  # We have left this "feature" unimplemented.
+  # -You can type n;y to get NYA and g;y to get GYA.  (nxy/nY and gxy/gY will still get the "half-char-plus-YA" forms)
+  # -Any characters that previously required Ctrl+Alt key combinations can now be obtained by easier methods.
 
-	Keyboard:		DevRom Unicode
-	Version:			0.5
-	Date Modified:		2015-04-20
-	History:			Created by SAG
-
-
-Comments in this file that identify the unicode characters were automatically generated.
-
-HISTORY:
-
-[Options]
----
-- checkbox:
-  name: SwapSHA
-  label: Swap SHA (z) and SSA (S) keys
-  default: 0
-- checkbox:
-  name: ScriptDigit
-  label: Use Devanagari digits rather than Western digits by default
-  default: 0
-- checkbox:
-  name: SwapHalfH
-  label: Swap x and shift+x behavior after h
-  default: 0
-- checkbox:
-  name: UseLLA
-  label: Use LLA. (For languages that don't need LLA, shift+L can give a shortcut for lo-R)
-  default: 1
-- checkbox:
-  name: SmartQuotes
-  label: Use Smart quotes by default
-  default: 0
-- checkbox:
-  name: ApostropheForTone
-  label: Use apostrophe key for tone marker
-  default: 0
-- checkbox:
-  name: UseSmartVowels
-  label: Only generate independent form of vowel after 'q' deadkey
-  default: 0
----
-
-
+	# Keyboard:		DevRom Unicode
+	# Version:			0.5
+	# Date Modified:		2015-04-20
+	# History:			Created by SAG
 
 */ ◄
 
-[Defines]
-reConsN = [क-हक़-य़]〔93c〕?
+---  ▹ Begin header section
+Settings:
+  TinkerVersion: 1.953
+  UseContext: 1  ▹ 1 means include uncaptured keystrokes in the context, not CAPS-sensitive.
 
-▹... [Options]
-SwapSHA = 1 ▹... whether to swap SHA (z) and SSA (S) keys
-ScriptDigit = 0 ▹... whether to use script digits by default (and CapsLock for Roman digits)
-SwapHalfH = 0 ▹... for Kangri, the default 'x' behavior for post-h is non-joining
-UseLLA = 1 ▹... for languages that don't need LLA (ळ), shift+L can give a shortcut for lo-R (e.g in क्र) normally obtained by typing  ▹... r
-SmartQuotes = 1
-ApostropheForTone = 0
-UseSmartVowels = 1
+Options:
+  - checkbox:
+	name: SwapSHA
+	label: Swap SHA (z) and SSA (S) keys
+	default: 0
+  - checkbox:
+	name: ScriptDigit
+	label: Use Devanagari digits rather than Western digits by default
+	default: 0
+  - checkbox:
+	name: SwapHalfH
+	label: Swap x and shift+x behavior after h
+	default: 0
+  - checkbox:
+	name: UseLLA
+	label: Use LLA. (For languages that don't need LLA, shift+L can give a shortcut for lo-R)
+	default: 1
+  - checkbox:
+	name: SmartQuotes
+	label: Use Smart quotes by default
+	default: 0
+  - checkbox:
+	name: ApostropheForTone
+	label: Use apostrophe key for tone marker
+	default: 0
+  - checkbox:
+	name: UseSmartVowels
+	label: Only generate independent form of vowel after 'q' deadkey
+	default: 0
 
-[Functions]
-SendVowel 【syl】【dep】
+...  ▹ End of header
+
+⌘define reConsN [क-हक़-य़]〔93c〕?
+
+⌘function SendVowel 【syl】【dep】
 	⌘if 〔UseSmartVowels〕 ⌘then
 		after 【〔1〕】 send 【〔syl〕】
 		| after 【〔reConsN〕】 send 【〔dep〕】
@@ -114,12 +97,10 @@ SendVowel 【syl】【dep】
 		| 【〔dep〕】
 	⌘endif
 
-DoDigit 【western】【dev】【reverse】
+⌘function DoDigit 【western】【dev】【reverse】
 	after 【[0-9]】 send 【〔western〕】
 	| after 【[०-९]】 send 【〔dev〕】
 	| ⌘if 〔ScriptDigit〕 ^ 〔reverse〕 ⌘then 【〔dev〕】 ⌘else 【〔western〕】 ⌘endif ▹... It also used to toggle additionally on the CAPS state. Can we do that in Tinker??
-
-[KeystrokeRules]
 
 ▹... Key: Shift +R   - The flying reph typed in written (not phonetic) order.
 ▹... You can get a flying reph in phonetic order by typing r ▹... before the syllable.
