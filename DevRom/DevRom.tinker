@@ -55,6 +55,39 @@ Comments in this file that identify the unicode characters were automatically ge
 
 HISTORY:
 
+[Options]
+---
+- checkbox:
+  name: SwapSHA
+  label: Swap SHA (z) and SSA (S) keys
+  default: 0
+- checkbox:
+  name: ScriptDigit
+  label: Use Devanagari digits rather than Western digits by default
+  default: 0
+- checkbox:
+  name: SwapHalfH
+  label: Swap x and shift+x behavior after h
+  default: 0
+- checkbox:
+  name: UseLLA
+  label: Use LLA. (For languages that don't need LLA, shift+L can give a shortcut for lo-R)
+  default: 1
+- checkbox:
+  name: SmartQuotes
+  label: Use Smart quotes by default
+  default: 0
+- checkbox:
+  name: ApostropheForTone
+  label: Use apostrophe key for tone marker
+  default: 0
+- checkbox:
+  name: UseSmartVowels
+  label: Only generate independent form of vowel after 'q' deadkey
+  default: 0
+---
+
+
 
 */ ◄
 
