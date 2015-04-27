@@ -924,7 +924,7 @@ InContextReplace(ByRef AfterRegEx, ByRef FindRegEx, ByRef ReplaceTxt, ByRef Else
 
 InContextReplaceUsingMap(ByRef AfterRegEx, ByRef FindRegEx, ByRef ReplaceTxt, ByRef Map, ByRef ElseTxt="", uSendFlags=0, uElseFlags=0) {
 	global
-	local context, c2, match, foundPos, repCt, delTxt, addTxt, alts, altFind, grp
+	local context, c2, match, foundPos, repCt, delTxt, addTxt, alts, altFind, grp, grp1
 	interpolate(ReplaceTxt)
 	interpolate(ElseTxt)
 	alts := "(?P<MAP>"
@@ -978,7 +978,7 @@ InContextReplaceUsingMap(ByRef AfterRegEx, ByRef FindRegEx, ByRef ReplaceTxt, By
 	;~ OutputDebug %A_LineNumber%: RegExMatch(mapTo, "%needle%", grp)  => %fp%, grp1 = %grp1%
 	altRepCh := grp1
 	;~ altRepCh := mapTo[altFound]
-	;~ OutputDebug %A_Linenumber%: foundPos = %foundPos%, LBLen = %LBLen%, altFound=%altFound%, altRepCh=%altRepCh%, fp=%fp%
+	;OutputDebug %A_Linenumber%: foundPos = %foundPos%, LBLen = %LBLen%, altFound=%altFound%, altRepCh=%altRepCh%, fp=%fp%
 	foundPos += LBLen
 
 	if (foundPos) {

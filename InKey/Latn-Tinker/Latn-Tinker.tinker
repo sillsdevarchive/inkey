@@ -1,8 +1,10 @@
-[Settings]
-TinkerVersion=1.953
-UseContext=2
+---  ▹ Begin header section
+Settings:
+  TinkerVersion: 1.955
+  UseContext: 2  ▹ 2 means include uncaptured keystrokes in the context,  CAPS-sensitive.
 
-[KeystrokeRules]
+...  ▹ End of header
+
 
 ▹... Alt-Minus demonstrates a pig-latinizing function.
 !- > replace 【\b([bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]+)(\p{L}+)】 with 【$2$1ay】

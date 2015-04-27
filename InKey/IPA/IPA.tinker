@@ -1,8 +1,4 @@
-[Settings]
-TinkerVersion=1.951
-UseContext=1
-
-/*InKey Script to provide a context-sensitive keyboard layout for IPA
+► /* Tinker Script to provide a context-sensitive keyboard layout for IPA
 
 	Keyboard:	IPA Unicode
 	Version:	3.0
@@ -27,9 +23,15 @@ HISTORY:
 2013-03-14 2.01 Updated to InKey 1.910 API.
 2015-04-20 3.0 Updated to Tinker format
 
-*/
+*/ ◄
+---  ▹ Begin header section
+Settings:
+  TinkerVersion: 1.955
+  UseContext: 2  ▹ 2 means include uncaptured keystrokes in the context,  CAPS-sensitive.
 
-[KeystrokeRules]
+...  ▹ End of header
+
+
 ▹... The digits have the most complex usage pattern, used for level contours, stem tones, rotas, and the digits themselves.
 
 0 > after 【[〔2E5〕-〔2E9〕]】 send 【〔2E9〕】		       ▹... Continue a left stem contour

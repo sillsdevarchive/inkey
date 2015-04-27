@@ -2,3 +2,15 @@ installed: keyboard folder is present under InKey folder
 registered: a KLID exists for the keyboard in HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layouts\
 loaded: Windows has an HKL for the keyboard. lang appears in the lang bar.
 active: kbd is actively applying keyboard change rules
+
+
+AHK file for tinker kbd should be named: TinkerFolder "\" KbdFolder "." IniStem ".ahk"
+
+- substitute {options} with value from user settings
+- hex codes to chars
+- if then else
+-loop thru from beginning, scanning for:
+  -defines
+  -functions
+  -keystroke extra key  +y :
+  -keystroke handler    +x >

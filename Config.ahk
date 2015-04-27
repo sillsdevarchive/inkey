@@ -324,7 +324,7 @@ FillKbdListAll() {
 
 			idx1++
 ;		outputdebug processing file: %tmpCurrIni%
-			IniRead, enabled, %tmpCurrIni%, Keyboard, Enabled, %A_Space%
+			IniRead, enabled, %tmpCurrIni%, Keyboard, Enabled, 1
 			chk := (enabled) ? "check " : ""
 			IniRead, KbdLayoutName, %tmpCurrIni%, Keyboard, LayoutName, %A_Space%
 			IniRead, KbdIcon, %tmpCurrIni%, Keyboard, Icon, %A_Space%
@@ -413,7 +413,9 @@ ConfigureHighlightedKeyboard:
 		}
 		IniRead, KBD_Params%tempkbd%, %FileInfo%, Keyboard, Params, %A_Space%
 		IniRead, KBD_ConfigureGUI%tempkbd%, %FileInfo%, Keyboard, ConfigureGUI, %A_Space%
-		IniRead, KBD_DisplayCmd%tempkbd%, %FileInfo%, Keyboard, DisplayCmd, %A_Space%
+		IniRead, KBD_DisplayCmd%tempkbd%, %FileInfo%, Keyboard, LayoutHelp, %A_Space%
+		if (not KBD_DisplayCmd%tempkbd%)
+			IniRead, KBD_DisplayCmd%tempkbd%, %FileInfo%, Keyboard, DisplayCmd, %A_Space%
 		temptext := "*" . KBD_DisplayCmd%tempkbd% . "*"
 		If ((KBD_DisplayCmd%tempkbd% = "") or (KBD_DisplayCmd%tempkbd% = " "))
 		{
@@ -465,14 +467,14 @@ SaveTab1Changes() {
 		RowNumberL := A_Index
 		Gui +LastFound
 		SendMessage, 4140, RowNumberL - 1, 0xF000, SysListView321  ; 4140 is LVM_GETITEMSTATE.  0xF000 is LVIS_STATEIMAGEMASK.
-		IsChecked := (ErrorLevel >> 12) - 1  ; This sets IsChecked to true if RowNumberL is checked or false otherwise.
+		BoxIsChecked := (ErrorLevel >> 12) - 1  ; This sets BoxIsChecked to true if RowNumberL is checked or false otherwise.
 		LV_GetText(tmpCurrIni, RowNumberL, 3)
 		if (StoreUserSettingsInAppData) {
 			tmpCurrIni := BaseSettingsFolder "\" tmpCurrIni
 		}
-		IniRead, enabled, %tmpCurrIni%, Keyboard, Enabled, 0
-		if (enabled <> IsChecked) {
-			IniWrite, %IsChecked%, %tmpCurrIni%, Keyboard, Enabled
+		IniRead, enabled, %tmpCurrIni%, Keyboard, Enabled, 1
+		if (enabled <> BoxIsChecked) {
+			IniWrite, %BoxIsChecked%, %tmpCurrIni%, Keyboard, Enabled
 			needsRestart := 1
 		}
 	}

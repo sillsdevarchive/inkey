@@ -7,8 +7,8 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{4D237339-E37B-4606-9E9D-68478AD8C943}
 AppName=InKey
-AppVerName=InKey 1.9.53
-VersionInfoVersion=1.9.53
+AppVerName=InKey 1.9.55
+VersionInfoVersion=1.9.55
 AppPublisher=InKey Software
 AppPublisherURL=http://www.inkeysoftware.com/
 AppSupportURL=http://www.inkeysoftware.com/

@@ -1,30 +1,35 @@
 ► /*
-  Mozhi Keyboard for InKey
-  Version 0.800
+	Mozhi Keyboard in Tinker Format
+	Version 0.850
+
+	History:
+	2015-04-26 Initial version in Tinker 1.955 format
 
 */ ◄
 
-[Settings]
-TinkerVersion=1.952
-UseContext=1
 
-[Defines]
-Chillu2Base = 【ൻ ന】【ൺ ണ】【ർ ര】【ൽ ല】【ൾ ള】【ൿ ക】
-AnyLetterExceptSA = [അ-ഷഹ]
-AnyRegularLetterOrVowelSign = [അ-ഹഺാ-ൌൗൠ-ൣ]
-ZWNJ = 〔200C〕
+---  ▹ Begin header section
+Settings:
+  TinkerVersion: 1.955
+  UseContext: 1  ▹ 1 means include uncaptured keystrokes in the context, not CAPS-sensitive.
 
-[Functions]
-DoDigit 【western】【mal】
+...  ▹ End of header
+
+define Chillu2Base 【ൻ ന】【ൺ ണ】【ർ ര】【ൽ ല】【ൾ ള】【ൿ ക】
+define AnyLetterExceptSA [അ-ഷഹ]
+define AnyRegularLetterOrVowelSign [അ-ഹഺാ-ൌൗൠ-ൣ]
+define ZWNJ 〔200C〕
+
+function DoDigit 【western】【mal】
  map 【\ 〔mal〕】
 	| after 【[൦-൯]】 send 【〔mal〕】
 	| 【〔western〕】
 
-DoChilluFixAndSend 【a】【b】
- after 【[ൺ-ൿ]】 replace 【〔ZWNJ〕】 with 【〔a〕】 ▹...No need for a ZWNJ between Chillu and Full letters. Keymagic Rule: $chills[*] + U200C + $cDirectSmallKeys[*] => $1 + $cDirectSmallValues[$3] + '്'
-	| 【〔b〕】
+function DoChilluFixAndSend 【form1】【form2】
+ after 【[ൺ-ൿ]】 replace 【〔ZWNJ〕】 with 【〔form1〕】 ▹... No need for a ZWNJ between Chillu and Full letters. Keymagic Rule: $chills[*] + U200C + $cDirectSmallKeys[*] => $1 + $cDirectSmallValues[$3] + '്'
+	| 【〔form2〕】
 
-[KeystrokeRules]
+▹ ______Keystroke_Handlers_____________________________
 
 _	> after 【〔ZWNJ〕】 send 【】 ▹...To prevent repeated typing of ZWNJs.
 	| 【〔ZWNJ〕】

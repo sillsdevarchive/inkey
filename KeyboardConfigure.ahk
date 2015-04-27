@@ -86,16 +86,13 @@ ConfigureKeyboard(kbd)
 	Gui, 5:Add, Button, x270 y208 w140 h20 g5ChangeIconButton, %tmpString%  ; Change...
 
 	keybdname :=% KBD_LayoutName%kbd%
-	If KBD_ConfigureGUI%kbd%<>
+	; global KBD_AhkFile%kbd%
+	global currOptionsFile, configKbdBtnTxt
+	currOptionsFile := KBD_CacheStem%kbd% . ".options"
+	outputdebug currOptionsFile = %currOptionsFile%
+	If (KBD_ConfigureGUI%kbd% or FileExist(currOptionsFile))
 	{
 		global ConfigGUI
-		;Gui, 5:Add, Text, x10 yp+50 w80 h40, Special settings GUI:
-		;OldGUIFile:=% KBD_ConfigureGUI%kbd%
-		;GUIFile := % KBD_ConfigureGUI%kbd%
-		;StringGetPos, position, GUIFile, \, R
-		;StringRight, GUIFile, GUIFile, StrLen(GUIFile) - position -1
-		;Gui, 5:Add, Edit, x100 yp w150 h20 ReadOnly vConfigGUI, %GUIFile%
-		;Gui, 5:Add, Button, x270 yp w140 h20, Run...
 
 		tmpString:=GetLang(87)
 		StringLeft, TempChar, tmpString, 1
@@ -103,8 +100,9 @@ ConfigureKeyboard(kbd)
 		{
 			tmpString:=" " . tmpString
 		}
-		buttontext:=GetLang(86) . " " . keybdname . tmpString . "..."  ; Configure %keybdname%-specific settings...
-		Gui, 5:Add, Button, x10 y250 w400 h25 g5ButtonRun, %buttontext%
+		configKbdBtnTxt:=GetLang(86) . " " . keybdname . tmpString . "..."  ; Configure %keybdname%-specific settings...
+		;outputdebug configKbdBtnTxt = %configKbdBtnTxt%
+		Gui, 5:Add, Button, x10 y250 w400 h25 g5ButtonRun, %configKbdBtnTxt%
 	}
 
 	LayoutFile := % KBD_DisplayCmd%kbd%
@@ -122,7 +120,7 @@ ConfigureKeyboard(kbd)
 		;Gui, 5:Add, Button, x270 y188 w140 h20, View...
 
 		buttontext:=GetLang(84) . " " . keybdname . " " . GetLang(85) . "..." ; View %keybdname% keyboard layout...
-		If KBD_ConfigureGUI%kbd%<>
+		If (KBD_ConfigureGUI%kbd% or FileExist(currOptionsFile))
 		{
 			Gui, 5:Add, Button, x10 y+15 w400 h25 g5ButtonView, %buttontext%
 		}
@@ -233,8 +231,12 @@ return
 
 5ButtonRun:
 Gui, 5:+Disabled
-RunGUIFilename:= GetAHKCmd(KBD_ConfigureGUI%currentconfigurekbd%) . KBD_Folder%currentconfigurekbd% . "\" . KBD_ConfigureGUI%currentconfigurekbd%
-RunWait %RunGUIFilename%
+if (FileExist(currOptionsFile)) {
+	Gosub DoKbdOptions
+} else {
+	RunGUIFilename:= GetAHKCmd(KBD_ConfigureGUI%currentconfigurekbd%) . KBD_Folder%currentconfigurekbd% . "\" . KBD_ConfigureGUI%currentconfigurekbd%
+	RunWait %RunGUIFilename%
+}
 Gui, 5:-Disabled
 Gui, 5:Show
 return
@@ -300,4 +302,71 @@ if (currentconfigurekbd <= numKeyboards)
 currentconfigurekbd=-1
 return
 
-#include LangConversions.ahk
+DoKbdOptions:
+	FileRead options, % currOptionsFile
+	numOpts := 0
+
+	while (StrLen(options) > 1) {
+		if (RegExMatch(options, "Oi)^( +)- (checkbox):\s*\r?\n((?:\1\s+.*\r?\n)+)", match)) {
+			; outputdebug % "option matched: " match.value(0)
+			options := substr(options, match.Len(0)+1)
+			fldCtrl := match.Value(2)
+			subFlds := match.Value(3)
+			fldName := ""
+			fldLabel := ""
+			if (RegExMatch(subFlds, "Oi) name:\s+(.*?)\r?\n", match)) {
+				fldName := match.Value(1)
+			}
+			fldDef := 0
+			if (RegExMatch(subFlds, "Oi) default:\s+(.*?)\r?\n", match)) {
+				fldDef := match.Value(1)
+			}
+			if (RegExMatch(subFlds, "Oi) label:\s+(.*?)\r?\n", match)) {
+				fldLabel := match.Value(1)
+			}
+			numOpts += 1
+			OPT_Name%numOpts% := fldName
+			OPT_Label%numOpts% := fldLabel
+			OPT_Ctrl%numOpts% := fldCtrl
+			; outputdebug % "read from ini:" KBD_IniFile%currentconfigurekbd%
+			IniRead OPT_Val%numOpts%, % KBD_IniFile%currentconfigurekbd%, Options, %fldName%, %fldDef%		; TODO: maybe fldDef may need chars escaped or like %A_Space%???
+			; outputdebug % "init: " OPT_Name%numOpts% "=" OPT_Val%numOpts%
+			continue
+		}
+
+		MsgBox WARNING: Options not parsed:`n%options%
+	}
+	Gui, 8:+Owner1
+	Gui 5:+Disabled
+	oo := 1
+	while (oo <= numOpts) {
+		if (OPT_Ctrl%oo% = "checkbox") {
+			isChecked := "Checked" . (OPT_Val%oo% ? 1 : 0)
+			Gui, 8:Add, Checkbox, %isChecked% vOPT_Val%oo%, % OPT_Label%oo%
+		}
+		oo += 1
+	}
+	TempString:=GetLang(12)
+	Gui, 8:Add, Button, g8ButtonOK, %TempString%  ; OK
+	TempString:=GetLang(13)
+	Gui, 8:Add, Button, x+10 g8ButtonCancel, %TempString%  ; Cancel
+	Gui, 8:Show, Center, %configKbdBtnTxt%
+return
+
+
+8ButtonCancel:
+8GuiClose:
+	Gui, 5:-Disabled  ; Re-enable the main window (must be done prior to the next step).
+	Gui, 8:Destroy
+return
+
+8ButtonOK:
+	Gui, 5:-Disabled  ; Re-enable the main window (must be done prior to the next step).
+	Gui, 8:Submit
+	oo := 1
+	while (oo <= numOpts) {
+		IniWrite % OPT_Val%oo%, % KBD_IniFile%currentconfigurekbd%, Options, % OPT_Name%oo%
+		oo += 1
+	}
+	Gui, 8:Destroy
+return

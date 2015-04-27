@@ -1,0 +1,233 @@
+► /*
+	Mozhi Keyboard in Tinker Format
+	Version 0.850
+
+	History:
+	2015-04-26 Initial version in Tinker 1.955 format
+
+*/ ◄
+
+
+---  ▹ Begin header section
+Settings:
+  TinkerVersion: 1.955
+  UseContext: 1  ▹ 1 means include uncaptured keystrokes in the context, not CAPS-sensitive.
+
+...  ▹ End of header
+
+define Chillu2Base 【ൻ ന】【ൺ ണ】【ർ ര】【ൽ ല】【ൾ ള】【ൿ ക】
+define AnyLetterExceptSA [അ-ഷഹ]
+define AnyRegularLetterOrVowelSign [അ-ഹഺാ-ൌൗൠ-ൣ]
+define ZWNJ 〔200C〕
+
+function DoDigit 【western】【mal】
+ map 【\ 〔mal〕】
+	| after 【[൦-൯]】 send 【〔mal〕】
+	| 【〔western〕】
+
+function DoChilluFixAndSend 【form1】【form2】
+ after 【[ൺ-ൿ]】 replace 【〔ZWNJ〕】 with 【〔form1〕】 ▹... No need for a ZWNJ between Chillu and Full letters. Keymagic Rule: $chills[*] + U200C + $cDirectSmallKeys[*] => $1 + $cDirectSmallValues[$3] + '്'
+	| 【〔form2〕】
+
+▹ ______Keystroke_Handlers_____________________________
+
+_	> after 【〔ZWNJ〕】 send 【】 ▹...To prevent repeated typing of ZWNJs.
+	| 【〔ZWNJ〕】
+
+~	> map 【ൻ ന്】【ൺ ണ്】【ർ ര്】【ൽ ല്】【ൾ ള്】【ൿ ക്】【ഋ റ്】
+	| after 【〔AnyRegularLetterOrVowelSign〕】 send 【്】
+	| DoChilluFixAndSend 【്】【്】
+
+-	> map 【\\ −】
+	| 【-】
+
+*	> map 【\\ ×】
+	| 【*】
+
+/	> map 【\\ ÷】【/ ഽ //】
+	| 【/】
+
+\	> map 【ൻ\ ന്‍】【ൺ\ ണ്‍】【ർ\ ര്‍】【ൽ\ ല്‍】【ൾ\ ള്‍】【ൿ\ ക്‍】【റ്റ്\ ഺ】 ▹... switch between Atomic and Sequence Chillu Characters
+	| map 【ന്‍\ ൻ】【ണ്‍\ ൺ】【ര്‍\ ർ】【ല്‍\ ൽ】【ള്‍\ ൾ】【ക്‍\ ൿ】【ഺ\ റ്റ്】
+	| map 【മ്\ ം】【ആ\ ാ】【ഇ\ ി】【ഈ\ ീ】【ഉ\ ു】【ഊ\ ൂ】【ഋ\ ൃ】【ൠ\ ൄ】【ഌ\ ൢ】【ൡ\ ൣ】【എ\ െ】【ഏ\ േ】【ഐ\ ൈ】【ഒ\ ൊ】【ഓ\ ോ】【ഔ\ ൗ】【ൗ\ ൌ】   ▹...directly key vowel signs
+	| map 【ൻ\ ൹】【10\ ൰】【100\ ൱】【1000\ ൲】【1/4\ ൳】【1/2\ ൴】【3/4\ ൵】
+	| map 【---\ —】【--\ –】【-\ −】  ▹...Dashes
+	| 【\】
+
+^	> map 【ൻ ൹】【10 ൰】【100 ൱】【1000 ൲】【1/4 ൳】【1/2 ൴】【3/4 ൵】
+	| 【^】
+
+▹... _____________________________________________________________
+
+a	> map 〔Chillu2Base〕【ം മ】【ഋ റ】【ൃ ്ര】
+	| replace 【്】 with 【】
+	| after 【[ക-ഹ]】 send 【ാ】
+	| after 【ാ】 send 【〔200D〕ാ】 ▹... attempts to allow multiple occurrences, but may render badly
+	| map 【അ ആ ആ‍ാ】【@ ാ】
+	| DoChilluFixAndSend 【അ】【അ】
+
++a	> map 【് ാ】【ഋ റാ】【ൃ ്രാ】【@ ാ】
+	| replace 【$F】 with 【$Rാ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+	| after 【ാ】 send 【〔200D〕ാ】 ▹... attempts to allow multiple occurrences, but may render badly
+	| DoChilluFixAndSend 【ആ】【ആ】
+
+e	> replace 【$F】 with 【$Rെ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+	| map 【് െ ീ】【എ ഈ】【ൃ ്രെ】【@ െ】
+	| DoChilluFixAndSend 【എ】【എ】
+
+i	> replace 【$F】 with 【$Rി】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+	| after 【[ക-ഹൺ-ൿ]】 send 【ൈ】
+	| map 【് ി ീ ീീ】【ഇ ഈ】【അ ഐ】【ൃ ്രി】【@ ി】【ാ ൈ】
+	| DoChilluFixAndSend 【ഇ】【ഇ】
+
+o	> replace 【$F】 with 【$Rൊ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+	| map 【് ൊ ൂ ൂൂ】【ഒ ഊ】【@ ൊ】【ൃ ്രൊ】【ഊ ഊഊ】
+	| DoChilluFixAndSend 【ഒ】【ഒ】
+
+u	> replace 【$F】 with 【$Rു】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+	| after 【[ക-ഹൺ-ൿ]】 send 【ൗ】 ▹... KMN uses 0d4c instead
+	| map 【് ു ൂ ൂൂ】【ഉ ഊ】【അ ഔ】【ഒ ഔ】【@ ു】【ൃ ്രു】【ാ ൗ ൗൗ】
+	| DoChilluFixAndSend 【ഉ】【ഉ】
+
++e	> replace 【$F】 with 【$Rേ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+	| map 【് േ േേ】【ൃ ്രേ】【@ േ】
+	| DoChilluFixAndSend 【ഏ】【ഏ】
+
++i	> replace 【$F】 with 【$Rീ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+	| map 【് ീ ീീ】【ൃ ്രീ】【@ ീ】
+	| DoChilluFixAndSend 【ഈ】【ഈ】
+
++o	> replace 【$F】 with 【$Rോ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+	| map 【് ോ ോോ】【ൃ ്രോ】【@ ോ】
+	| DoChilluFixAndSend 【ഓ】【ഓ】
+
++u	> replace 【$F】 with 【$Rൂ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+	| map 【് ൂ ൂൂ】【ൃ ്രൂ】【@ ൂ】
+	| DoChilluFixAndSend 【ഊ】【ഊ】
+
++r	> replace 【$F】 with 【$Rൃ】 usingMap 〔Chillu2Base〕【ം മ】
+	| map 【് ൃ ൄ ൄൄ】【@ ൃ】【ഋ ൠ】
+	| DoChilluFixAndSend 【ഋ】【ഋ】
+
+l	> after 【〔AnyLetterExceptSA〕】 replace 【ം】 with 【മ്ല്】
+	| map 【ൽ ല്ല്】【@ ൢ】【ൿ ക്ല്】【ൾ ഌ ൡ】 ▹... "് ൢ ൣ",
+	| replace 【$F】 with 【$Rൢ】 usingMap 【ൻ ന】【ൺ ണ】【ർ ര】【ൽ ല】【ൾ ള】
+	| DoChilluFixAndSend 【ല്】【ൽ】
+
++l	> after 【〔AnyLetterExceptSA〕】 replace 【ം】 with 【മ്ല്】
+	| map 【ൾ ള്ള്】【ൻ ന്ല്】【ൽ ല്ല്】【ൿ ക്ല്】
+	| DoChilluFixAndSend 【ല്】【ൾ】
+
+b	> DoChilluFixAndSend 【ബ്】【ബ്】
+
+c	> map 【ൿ ക്ക്】
+	| DoChilluFixAndSend 【ക്】【ൿ】
+
+d	> map 【ൻ ന്ദ്】
+	| DoChilluFixAndSend 【ദ്】【ദ്】
+
+f	> DoChilluFixAndSend 【ഫ്】【ഫ്】
+
+g	> map 【ൻ ങ്】【ന്ന് ങ്ങ്】【ന് ങ്】
+	| DoChilluFixAndSend 【ഗ്】【ഗ്】
+
+h	> map 【ൻൿ ഞ്ച്】【ന്റ് ന്ത്】【ൿ ച്】【ക്ക് ച്ച്】【ക് ഖ്】【ഗ് ഘ്】【ച് ഛ്】【ജ് ഝ്】【ട്ട് ത്ത്】【ട് ഠ്】【ഡ് ഢ്】【റ്റ് ത് ഥ്】【ദ് ധ്】【പ് ഫ്】【ബ് ഭ്】【സ് ഷ്】【ശ് ഴ്】
+	| DoChilluFixAndSend 【ഹ്】【ഹ്】
+
+j	> map 【ൻ ഞ്】【ന്ന് ഞ്ഞ്】【ന് ഞ്】
+	| DoChilluFixAndSend 【ജ്】【ജ്】
+
+k	> map 【ൻ ങ്ക്】【ന് ങ്ക്】【ൿ ക്ക്】
+	| DoChilluFixAndSend 【ക്】【ക്】
+
+m	> after 【〔AnyRegularLetterOrVowelSign〕】 send 【ം】
+	| map 【ം മ്മ്】【ൺ ണ്മ്】【ൻ ന്മ്】
+	| DoChilluFixAndSend 【മ്】【മ്】
+
+n	> after 【〔AnyLetterExceptSA〕】 replace 【ം】 with 【മ്ന്】
+	| replace 【ൻ】 with 【ന്ന്】
+	| DoChilluFixAndSend 【ന്】【ൻ】
+
+p	> map 【ം മ്പ്】【ൽ ല്പ്】【ല്പ് ൽപ്പ്】
+	| DoChilluFixAndSend 【പ്】【പ്】
+
+q	> 【ക്ക്】
+
+r	> after 【〔AnyLetterExceptSA〕】 replace 【ം】 with 【മ്ര്】
+	| after 【ൻ】 replace 【〔ZWNJ〕】 with 【ര്】
+	| after 【ർ】 replace 【〔ZWNJ〕】 with 【റ്】
+	| map 【ൻ ന്ര്】【ർ റ്】
+	| DoChilluFixAndSend 【ർ】【ർ】 ▹... what is the best replacement char here???
+
+s	> DoChilluFixAndSend 【സ്】【സ്】
+
+t	> map 【റ്റ് ട്ട്】【ൻ ന്റ്】【ന് ന്റ്】
+	| DoChilluFixAndSend 【റ്റ്】【റ്റ്】
+
+v :
+w	> map 【ൺ ണ്വ്】【ൻ ന്വ്】【ൽ ല്വ്】【ൿ ക്വ്】
+	| DoChilluFixAndSend 【വ്】【വ്】
+
+x	> DoChilluFixAndSend 【ക്ഷ്】【ക്ഷ്】
+
+y	> after 【[അ-ഷഹാ-ൌൗൢൣ]】 replace 【ം】 with 【മ്യ്】 ▹... after cons (except SA) or vowel signs
+	| replace 【$F】 with 【$R്യ്】 usingMap 〔Chillu2Base〕
+	| DoChilluFixAndSend 【യ്】【യ്】
+
+z	> DoChilluFixAndSend 【ശ്】【ശ്】
+
++b	> DoChilluFixAndSend 【ബ്ബ്】【ബ്ബ്】
+
++c	> DoChilluFixAndSend 【ച്ച്】【ച്ച്】
+
++d	> map 【ൺ ണ്ഡ്】
+	| after 【ൺ】 replace 【〔ZWNJ〕】 with 【ഡ്】
+	| DoChilluFixAndSend 【ഡ്】【ഡ്】
+
++f	> DoChilluFixAndSend 【ഫ്】【ഫ്】
+
++g	> map 【ൺ ങ്ങ്】
+	| DoChilluFixAndSend 【ഗ്ഗ്】【ഗ്ഗ്】
+
++h	> map 【ട് ത്ത്】
+	| 【ഃ】
+
++j	> map 【ൺ ഞ്ഞ്】
+	| DoChilluFixAndSend 【ജ്ജ്】【ജ്ജ്】
+
++k	> DoChilluFixAndSend 【ക്ക്】【ക്ക്】
+
++m	> DoChilluFixAndSend 【മ്മ്】【മ്മ്】
+
++n	> after 【ൺ】 replace 【〔ZWNJ〕】 with 【ണ്】
+	| replace 【ൺ】 with 【ണ്ണ്】
+	| DoChilluFixAndSend 【ൺ】【ൺ】
+
++p	> DoChilluFixAndSend 【പ്പ്】【പ്പ്】
+
++q	> DoChilluFixAndSend 【ക്യു】【ക്യ്】
+
++s	> DoChilluFixAndSend 【ശ്】【ശ്】
+
++t	> map 【ൺ ണ്ട്】
+	| DoChilluFixAndSend 【ട്】【ട്】
+
++w :
++v	> DoChilluFixAndSend 【വ്വ്】【വ്വ്】
+
++x	> DoChilluFixAndSend 【ക്ഷ്】【ക്ഷ്】
+
++y	> DoChilluFixAndSend 【യ്യ്】【യ്യ്】
+
++z	> DoChilluFixAndSend 【ശ്ശ്】【ശ്ശ്】
+
+0	> DoDigit 【0】【൦】
+1	> DoDigit 【1】【൧】
+2	> DoDigit 【2】【൨】
+3	> DoDigit 【3】【൩】
+4	> DoDigit 【4】【൪】
+5	> DoDigit 【5】【൫】
+6	> DoDigit 【6】【൬】
+7	> DoDigit 【7】【൭】
+8	> DoDigit 【8】【൮】
+9	> DoDigit 【9】【൯】
