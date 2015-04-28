@@ -34,10 +34,10 @@ Icon_1=%In_Dir%\inkey.ico
 
 ; Main initialization
 	Outputdebug ___________________________ INKEY.AHK ___________________
-	ver = 1.955
+	ver = 1.956
 	K_ProtocolNum := 5 ; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number should be incremented in both files.
 	K_TinkerVersion := ver ; Version of Tinker language
-	K_MinTinkerVersion := 1.955 ; Min required version of Tinker language
+	K_MinTinkerVersion := 1.956 ; Min required version of Tinker language
 	SetWorkingDir %A_ScriptDir%
 	onExit DoCleanup
 	;~ SetTitleMatchMode 3
@@ -259,10 +259,10 @@ Icon_1=%In_Dir%\inkey.ico
 			IniRead, KBD_Icon%numKeyboards%, %CurrIni%, Keyboard, Icon, %A_Space%
 			IniRead, KBD_Params%numKeyboards%, %CurrIni%, Keyboard, Params, %A_Space%
 			IniRead, KBD_DisplayCmd%numKeyboards%, %CurrIni%, Keyboard, LayoutHelp, %A_Space%
-			outputdebug % "z. layouthelp = " KBD_DisplayCmd%numKeyboards%
+			; outputdebug % "z. layouthelp = " KBD_DisplayCmd%numKeyboards%
 			if (KBD_DisplayCmd%numKeyboards% = "")
 				IniRead, KBD_DisplayCmd%numKeyboards%, %CurrIni%, Keyboard, DisplayCmd, %A_Space%  ; Old name for LayoutHelp
-			outputdebug % "a. layouthelp = " KBD_DisplayCmd%numKeyboards%
+			; outputdebug % "a. layouthelp = " KBD_DisplayCmd%numKeyboards%
 			if ((RegExMatch(KBD_DisplayCmd%numKeyboards%, "i)\.(pdf|png|doc|docx|txt|htm|html|jpg)$")
 					or (RegExMatch(KBD_DisplayCmd%numKeyboards%, "i)\.ahk$") and AllowUnsafe))
 				  and FileExist(KBD_Folder%numKeyboards% . "\" . KBD_DisplayCmd%numKeyboards% )) {
@@ -270,7 +270,7 @@ Icon_1=%In_Dir%\inkey.ico
 			} else {
 				KBD_DisplayCmd%numKeyboards% =
 			}
-			outputdebug % "b. layouthelp = " KBD_DisplayCmd%numKeyboards%
+			; outputdebug % "b. layouthelp = " KBD_DisplayCmd%numKeyboards%
 			if (AllowUnsafe) {
 				IniRead, KBD_ConfigureGUI%numKeyboards%, %CurrIni%, Keyboard, ConfigureGUI, %A_Space%
 			} else {
@@ -510,8 +510,14 @@ Icon_1=%In_Dir%\inkey.ico
 		if (KBD_TinkerFile%kk%) {
 			if ((not FileExist(KBD_AhkFile%kk%)) or FileIsOlderThan(KBD_AhkFile%kk%, KBD_TinkerFile%kk%) or FileIsOlderThan(KBD_AhkFile%kk%, A_ScriptFullPath) or FileIsOlderThan(KBD_AhkFile%kk%, KBD_IniFile%kk%)) {
 				err := ProcessTinkerFile(kk)
-				if (err)
+				if (err) {
+					Gui Hide
 					MsgBox %err%
+				}
+				if (tinkWarnings) {
+					Gui hide
+					MsgBox 0, Warning, % "See warnings in " KBD_AhkFile%kk%
+				}
 			}
 		}
 	}
@@ -850,18 +856,40 @@ GetAHK() {
 
 ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	global
+	tinkWarnings := 0
 	local TinkerFile := KBD_TinkerFile%kk%
 	local AHKFile := KBD_AhkFile%kk%
 	outputdebug Generating %AHKFile% from %TinkerFile%
 	FileEncoding UTF-8
-	FileRead tinkerLines, %TinkerFile%  ; TODO: use *t option here, then remove \r from all regexes below; use *t on files written, too.
+	FileRead tinkerLines, %TinkerFile%
 	if (ErrorLevel) {
 		return ("Unable to read file: " TinkerFile)
 	}
 
 	; Remove all comments and trailing whitespace from the file
-	tinkerLines := RegExReplace(tinkerLines, "ms)(►.*?◄)|(\s*▹.*?$)|([ \t]*$)", "")
+	local fpos
+	while (fpos := RegExMatch(tinkerLines, "(【[^【】]*)//([^【】]*】)")) { ; First preserve all // that are inside 【 param braces 】
+		tinkerLines := RegExReplace(tinkerLines, "(【[^【】]*)//([^【】]*】)", "$1" chr(0xfffe) "$2", 0, -1, fpos)
+	}
+	tinkerLines := RegExReplace(tinkerLines, "\s*//.*", "") ; nuke comments
+	StringReplace tinkerLines, tinkerLines, % chr(0xfffe), //, 1
+	tinkerLines := RegExReplace(tinkerLines, "m)\s+$", "") ; nuke trailing whitespace
+
+	; tinkerLines := RegExReplace(tinkerLines, "ms)(►.*?◄)|(\s*▹.*?$)|([ \t]*$)", "")
+	; tinkerLines := RegExReplace(tinkerLines, "m)(\s*//.*?$)|([ \t]*$)", "")
+	; tinkerLines := RegExReplace(tinkerLines, "m)(\s*//.*?$)|([ \t]*$)", "")
+	; outputdebug % "a. tinkerlines len = " . StrLen(tinkerlines)
+	; tinkerLines := RegExReplace(tinkerLines, "m)(^\s*//.*?)|((?<=(】|⌘\w+))\s*//.*?)", "")
+	; tinkerLines := RegExReplace(tinkerLines, "m)(^\s*//.*)", "")
+	; outputdebug % "b. tinkerlines len = " . StrLen(tinkerlines)
+	; tinkerLines := RegExReplace(tinkerLines, "(?<=(】|⌘\w+))\s*//.*", "")
+	;tinkerLines := RegExReplace(tinkerLines, "(⌘(then|else|endif))\s*//.*", "$1")
+	; outputdebug % "b2. tinkerlines len = " . StrLen(tinkerlines)
+	; tinkerLines := RegExReplace(tinkerLines, "(?<=】)\s*//.*", "")
+	; tinkerLines := RegExReplace(tinkerLines, "(?<=】)\s*//.*", "")
+	; outputdebug % "c. tinkerlines len = " . StrLen(tinkerlines)
 	tinkerLines := RegExReplace(tinkerLines, "(?<=\n)[\r\n]+", "") ; nuke blank lines
+	; outputdebug % "d. tinkerlines len = " . StrLen(tinkerlines)
 
 	if (FileExist(AHKFile)) {
 		FileDelete %AHKFile%
@@ -870,13 +898,15 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 
 	local useContext := 1
 	local options := ""
-	if (RegExMatch(tinkerLines, "Oi)---\r?\nSettings:\s*\r?\n((?:[ ]+.*\r?\n)+)(?:Options:\s*\r?\n((?:[ ]+.*\r?\n)+))?\.\.\.\r?\n", match)) {
-		tinkerLines := SubStr(tinkerLines, match.Len(0) + 1)
+
+	fpos := RegExMatch(tinkerLines, "Oi)---(?:\s+//.*)?\r?\nSettings:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+)(?:Options:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+))?\.\.\.(?:\s+//.*)?\r?\n", match)
+	if (fpos) {
+		tinkerLines := SubStr(tinkerLines, match.Len(0) + fpos)
 		local settings := match.Value(1)
 		options := match.Value(2)
 
 		; Check Tinker version for compatibility
-		if (RegExMatch(settings, "Om)^\s*TinkerVersion:\s+(.*)$", match)) {
+		if (RegExMatch(settings, "Om)^\s*TinkerVersion:\s+([0-9\.]*)$", match)) {
 			if (match.Value(1) < K_MinTinkerVersion) {
 				local err := TinkerFile " uses Tinker v. " match.Value(1) ". Please update keyboard to at least v. " K_MinTinkerVersion
 				FileAppend `; %err%`n, %AHKFile%
@@ -892,7 +922,7 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 		}
 
 		; Get UseContext setting
-		if (RegExMatch(settings, "Om)^\s*UseContext:\s+(.*)$", match)) {
+		if (RegExMatch(settings, "Om)^\s*UseContext:\s+(\d*)$", match)) {
 			useContext := match.Value(1)
 		} else {
 			outputdebug % "No UseContext value matched in """ settings """"
@@ -903,7 +933,9 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 		if (fp) {
 			tinkerLines := SubStr(tinkerLines, fp+1)
 			FileAppend `; WARNING: Error in parsing header section`n, %AHKFile%
+			tinkWarnings += 1
 		} else {
+			FileAppend `; ERROR: Unable to locate '...' marking end of header in:%tinkerLines%`n, %AHKFile%
 			return ("Unable to locate '...' marking end of header in " TinkerFile)
 		}
 	}
@@ -920,7 +952,7 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 		FileAppend %options%, %optionsFile%
 
 		while (StrLen(options) > 1) {
-			if (RegExMatch(options, "Oi)^( +)- (checkbox):\s*\r?\n((?:\1\s+.*\r?\n)+)", match)) {
+			if (RegExMatch(options, "Oi)^( +)- (checkbox|hotkey):\s*\r?\n((?:\1\s+.*\r?\n)+)", match)) {
 				options := substr(options, match.Len(0)+1)
 				; local ctrltype := match.Value(2)
 				local subFlds := match.Value(3)
@@ -931,7 +963,7 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 					FileAppend /* WARNING: Option not parsed:`n%subFlds% */, %AHKFile%
 					continue
 				}
-				fldDef := 0
+				fldDef := ""
 				if (RegExMatch(subFlds, "Oi) default:\s+(.*?)\r?\n", match)) {
 					fldDef := match.Value(1)
 				}
@@ -944,9 +976,8 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 				; defines .= "define " fldName " " fldVal "`n"
 				continue
 			}
-
+			tinkWarnings += 1
 			FileAppend /* WARNING: Options not parsed:`n%options% */, %AHKFile%
-			TrayTipQ("See warnings in " AHKFile)
 			break
 		}
 		; tinkerLines := defines . tinkerLines
@@ -1135,6 +1166,8 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 					FileAppend Beep()`n, %AHKFile%
 
 				} else {
+					outputdebug Rule not parsed: %element%
+					tinkWarnings += 1
 					FileAppend %A_Space% `; Rule not parsed: %element%, %AHKFile%
 				}
 			} ; end for ... rules
@@ -1159,9 +1192,8 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 		local fp := InStr(tinkerLines, "`n")
 		local unparsedLine := SubStr(tinkerLines, 1, fp)
 		tinkerLines := SubStr(tinkerLines, fp+1)
-		; TODO: Alert user that there was unparsed content
+		tinkWarnings += 1
 		FileAppend `; Unparsed: %unparsedLine%, %AHKFile%
-		TrayTipQ("Unparsed content in Tinker file")
 	}
 }
 

@@ -1,0 +1,22 @@
+	// Devanagari Winscript Keyboard in Tinker Format
+	// Version 0.850
+
+	// History:
+	// 2015-04-27 Initial version in Tinker 1.955 format
+
+
+---  // Begin header section
+Settings:
+  TinkerVersion: 1.956
+  UseContext: 1  // 1 means include uncaptured keystrokes in the context, not CAPS-sensitive.
+Options:
+  - hotkey:
+	name: LTR_SHORT_E
+	label: ऎ
+  - hotkey:
+	name: LTR_E
+	label: ए
+...  // End of header
+
+⌘if 〔LTR_SHORT_E〕 ⌘then 〔LTR_SHORT_E〕 > 【ऎ】 ⌘endif
+⌘if 〔LTR_E〕 ⌘then 〔LTR_E〕 > 【ए】 ⌘endif

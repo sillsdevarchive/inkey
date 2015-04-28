@@ -1,19 +1,16 @@
-► /*
-	Mozhi Keyboard in Tinker Format
-	Version 0.850
+	// Mozhi Keyboard in Tinker Format
+	// Version 0.850
 
-	History:
-	2015-04-26 Initial version in Tinker 1.955 format
-
-*/ ◄
+	// History:
+	// 2015-04-26 Initial version in Tinker 1.956 format
 
 
----  ▹ Begin header section
+---  // Begin header section
 Settings:
-  TinkerVersion: 1.955
-  UseContext: 1  ▹ 1 means include uncaptured keystrokes in the context, not CAPS-sensitive.
+  TinkerVersion: 1.956
+  UseContext: 1  // 1 means include uncaptured keystrokes in the context, not CAPS-sensitive.
 
-...  ▹ End of header
+...  // End of header
 
 define Chillu2Base 【ൻ ന】【ൺ ണ】【ർ ര】【ൽ ല】【ൾ ള】【ൿ ക】
 define AnyLetterExceptSA [അ-ഷഹ]
@@ -26,12 +23,12 @@ function DoDigit 【western】【mal】
 	| 【〔western〕】
 
 function DoChilluFixAndSend 【form1】【form2】
- after 【[ൺ-ൿ]】 replace 【〔ZWNJ〕】 with 【〔form1〕】 ▹... No need for a ZWNJ between Chillu and Full letters. Keymagic Rule: $chills[*] + U200C + $cDirectSmallKeys[*] => $1 + $cDirectSmallValues[$3] + '്'
+ after 【[ൺ-ൿ]】 replace 【〔ZWNJ〕】 with 【〔form1〕】 //  No need for a ZWNJ between Chillu and Full letters. Keymagic Rule: $chills[*] + U200C + $cDirectSmallKeys[*] => $1 + $cDirectSmallValues[$3] + '്'
 	| 【〔form2〕】
 
-▹ ______Keystroke_Handlers_____________________________
+// ______Keystroke_Handlers_____________________________
 
-_	> after 【〔ZWNJ〕】 send 【】 ▹...To prevent repeated typing of ZWNJs.
+_	> after 【〔ZWNJ〕】 send 【】 // To prevent repeated typing of ZWNJs.
 	| 【〔ZWNJ〕】
 
 ~	> map 【ൻ ന്】【ൺ ണ്】【ർ ര്】【ൽ ല്】【ൾ ള്】【ൿ ക്】【ഋ റ്】
@@ -47,28 +44,28 @@ _	> after 【〔ZWNJ〕】 send 【】 ▹...To prevent repeated typing of ZWNJs
 /	> map 【\\ ÷】【/ ഽ //】
 	| 【/】
 
-\	> map 【ൻ\ ന്‍】【ൺ\ ണ്‍】【ർ\ ര്‍】【ൽ\ ല്‍】【ൾ\ ള്‍】【ൿ\ ക്‍】【റ്റ്\ ഺ】 ▹... switch between Atomic and Sequence Chillu Characters
+\	> map 【ൻ\ ന്‍】【ൺ\ ണ്‍】【ർ\ ര്‍】【ൽ\ ല്‍】【ൾ\ ള്‍】【ൿ\ ക്‍】【റ്റ്\ ഺ】 //  switch between Atomic and Sequence Chillu Characters
 	| map 【ന്‍\ ൻ】【ണ്‍\ ൺ】【ര്‍\ ർ】【ല്‍\ ൽ】【ള്‍\ ൾ】【ക്‍\ ൿ】【ഺ\ റ്റ്】
-	| map 【മ്\ ം】【ആ\ ാ】【ഇ\ ി】【ഈ\ ീ】【ഉ\ ു】【ഊ\ ൂ】【ഋ\ ൃ】【ൠ\ ൄ】【ഌ\ ൢ】【ൡ\ ൣ】【എ\ െ】【ഏ\ േ】【ഐ\ ൈ】【ഒ\ ൊ】【ഓ\ ോ】【ഔ\ ൗ】【ൗ\ ൌ】   ▹...directly key vowel signs
+	| map 【മ്\ ം】【ആ\ ാ】【ഇ\ ി】【ഈ\ ീ】【ഉ\ ു】【ഊ\ ൂ】【ഋ\ ൃ】【ൠ\ ൄ】【ഌ\ ൢ】【ൡ\ ൣ】【എ\ െ】【ഏ\ േ】【ഐ\ ൈ】【ഒ\ ൊ】【ഓ\ ോ】【ഔ\ ൗ】【ൗ\ ൌ】   // directly key vowel signs
 	| map 【ൻ\ ൹】【10\ ൰】【100\ ൱】【1000\ ൲】【1/4\ ൳】【1/2\ ൴】【3/4\ ൵】
-	| map 【---\ —】【--\ –】【-\ −】  ▹...Dashes
+	| map 【---\ —】【--\ –】【-\ −】  // Dashes
 	| 【\】
 
 ^	> map 【ൻ ൹】【10 ൰】【100 ൱】【1000 ൲】【1/4 ൳】【1/2 ൴】【3/4 ൵】
 	| 【^】
 
-▹... _____________________________________________________________
+//  _____________________________________________________________
 
 a	> map 〔Chillu2Base〕【ം മ】【ഋ റ】【ൃ ്ര】
 	| replace 【്】 with 【】
 	| after 【[ക-ഹ]】 send 【ാ】
-	| after 【ാ】 send 【〔200D〕ാ】 ▹... attempts to allow multiple occurrences, but may render badly
+	| after 【ാ】 send 【〔200D〕ാ】 //  attempts to allow multiple occurrences, but may render badly
 	| map 【അ ആ ആ‍ാ】【@ ാ】
 	| DoChilluFixAndSend 【അ】【അ】
 
 +a	> map 【് ാ】【ഋ റാ】【ൃ ്രാ】【@ ാ】
 	| replace 【$F】 with 【$Rാ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
-	| after 【ാ】 send 【〔200D〕ാ】 ▹... attempts to allow multiple occurrences, but may render badly
+	| after 【ാ】 send 【〔200D〕ാ】 //  attempts to allow multiple occurrences, but may render badly
 	| DoChilluFixAndSend 【ആ】【ആ】
 
 e	> replace 【$F】 with 【$Rെ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
@@ -85,7 +82,7 @@ o	> replace 【$F】 with 【$Rൊ】 usingMap 〔Chillu2Base〕【ം മ】【
 	| DoChilluFixAndSend 【ഒ】【ഒ】
 
 u	> replace 【$F】 with 【$Rു】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
-	| after 【[ക-ഹൺ-ൿ]】 send 【ൗ】 ▹... KMN uses 0d4c instead
+	| after 【[ക-ഹൺ-ൿ]】 send 【ൗ】 //  KMN uses 0d4c instead
 	| map 【് ു ൂ ൂൂ】【ഉ ഊ】【അ ഔ】【ഒ ഔ】【@ ു】【ൃ ്രു】【ാ ൗ ൗൗ】
 	| DoChilluFixAndSend 【ഉ】【ഉ】
 
@@ -110,7 +107,7 @@ u	> replace 【$F】 with 【$Rു】 usingMap 〔Chillu2Base〕【ം മ】【
 	| DoChilluFixAndSend 【ഋ】【ഋ】
 
 l	> after 【〔AnyLetterExceptSA〕】 replace 【ം】 with 【മ്ല്】
-	| map 【ൽ ല്ല്】【@ ൢ】【ൿ ക്ല്】【ൾ ഌ ൡ】 ▹... "് ൢ ൣ",
+	| map 【ൽ ല്ല്】【@ ൢ】【ൿ ക്ല്】【ൾ ഌ ൡ】 //  "് ൢ ൣ",
 	| replace 【$F】 with 【$Rൢ】 usingMap 【ൻ ന】【ൺ ണ】【ർ ര】【ൽ ല】【ൾ ള】
 	| DoChilluFixAndSend 【ല്】【ൽ】
 
@@ -157,7 +154,7 @@ r	> after 【〔AnyLetterExceptSA〕】 replace 【ം】 with 【മ്ര്�
 	| after 【ൻ】 replace 【〔ZWNJ〕】 with 【ര്】
 	| after 【ർ】 replace 【〔ZWNJ〕】 with 【റ്】
 	| map 【ൻ ന്ര്】【ർ റ്】
-	| DoChilluFixAndSend 【ർ】【ർ】 ▹... what is the best replacement char here???
+	| DoChilluFixAndSend 【ർ】【ർ】 //  what is the best replacement char here???
 
 s	> DoChilluFixAndSend 【സ്】【സ്】
 
@@ -170,7 +167,7 @@ w	> map 【ൺ ണ്വ്】【ൻ ന്വ്】【ൽ ല്വ്】【ൿ
 
 x	> DoChilluFixAndSend 【ക്ഷ്】【ക്ഷ്】
 
-y	> after 【[അ-ഷഹാ-ൌൗൢൣ]】 replace 【ം】 with 【മ്യ്】 ▹... after cons (except SA) or vowel signs
+y	> after 【[അ-ഷഹാ-ൌൗൢൣ]】 replace 【ം】 with 【മ്യ്】 //  after cons (except SA) or vowel signs
 	| replace 【$F】 with 【$R്യ്】 usingMap 〔Chillu2Base〕
 	| DoChilluFixAndSend 【യ്】【യ്】
 

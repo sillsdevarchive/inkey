@@ -1,21 +1,21 @@
----  ▹ Begin header section
+---  // Begin header section
 Settings:
-  TinkerVersion: 1.955
-  UseContext: 2  ▹ 2 means include uncaptured keystrokes in the context,  CAPS-sensitive.
+  TinkerVersion: 1.956
+  UseContext: 2  // 2 means include uncaptured keystrokes in the context,  CAPS-sensitive.
 
-...  ▹ End of header
+...  // End of header
 
 
-▹... Alt-Minus demonstrates a pig-latinizing function.
+//... Alt-Minus demonstrates a pig-latinizing function.
 !- > replace 【\b([bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]+)(\p{L}+)】 with 【$2$1ay】
   | after 【\b[aeiouAEIOU]\p{L}*】 send 【way】
   | beep
 
 
-▹..._____________________________
-▹... Other general-purpose auto-corrections
+//..._____________________________
+//... Other general-purpose auto-corrections
 
-▹... Dash key: double-tap for n-dash, triple-tap for m-dash. If more than that, just go back to all dashes.
+//... Dash key: double-tap for n-dash, triple-tap for m-dash. If more than that, just go back to all dashes.
 - > after 【----】 send 【-】
   | multiTapSend 【- – — ----】
 
@@ -27,8 +27,3 @@ Settings:
 
 # > multiTapSend 【# ⌘】
 
-▹...< > multiTapSend 【< 〈】
-
-▹...> > multiTapSend 【> 〉】
-
-/ > multiTapSend 【/ 〔25b9〕 〔25ba〕〔25c4〕】
