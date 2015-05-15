@@ -45,3 +45,8 @@ $n::Send("ŋ")
 $=::InCase(Replace("(\b[^aeiou ]+)(\S+)") with("$2$1ay"))
 	or InCase(After("\b[aeiou]\S+") thenSend("way"))
 	or Beep()
+
+$k::
+Send("k")
+InCase(Replace("kk") with("X"))
+return

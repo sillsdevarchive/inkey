@@ -129,7 +129,7 @@ ConfigureKeyboard(kbd)
 			Gui, 5:Add, Button, x10 y250 w400 h25 g5ButtonView, %buttontext%
 		}
 	}
-
+	Gui, 5:Add, Button, x10 y+15 w400 h25 g5ButtonOpenIni, Open user configuration file ; TODO: add to lang file, and get translations
 	tmpString:=GetLang(12)
 	Gui, 5:Add, Button, x130 yp+50 w80 h25 g5ButtonOK, %tmpString%  ; OK
 	tmpString:=GetLang(13)
@@ -229,6 +229,11 @@ RunDisplayCmd := GetAHKCmd(KBD_DisplayCmd%currentconfigurekbd%) . KBD_DisplayCmd
 Run %RunDisplayCmd%
 return
 
+5ButtonOpenIni:
+RunDisplayCmd := "notepad """ KBD_IniFile%currentconfigurekbd% """"
+Run %RunDisplayCmd%
+return
+
 5ButtonRun:
 Gui, 5:+Disabled
 if (FileExist(currOptionsFile)) {
@@ -307,10 +312,12 @@ DoKbdOptions:
 	numOpts := 0
 
 	while (StrLen(options) > 1) {
-		if (RegExMatch(options, "Oi)^( +)- (checkbox):\s*\r?\n((?:\1\s+.*\r?\n)+)", match)) {
+		if (RegExMatch(options, "Oi)^( +)- (checkbox|keystroke):\s*\r?\n((?:\1\s+.*\r?\n)+)", match)) {
 			; outputdebug % "option matched: " match.value(0)
 			options := substr(options, match.Len(0)+1)
 			fldCtrl := match.Value(2)
+			if (fldCtrl = "keystroke")
+				continue
 			subFlds := match.Value(3)
 			fldName := ""
 			fldLabel := ""
@@ -335,6 +342,7 @@ DoKbdOptions:
 		}
 
 		MsgBox WARNING: Options not parsed:`n%options%
+		break
 	}
 	Gui, 8:+Owner1
 	Gui 5:+Disabled

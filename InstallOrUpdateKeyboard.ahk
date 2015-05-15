@@ -36,6 +36,7 @@ installorupdatefromzip(ZipPathFile) {
 	length := StrLen(ZipPathFile)
 	StringRight, NewFolder, ZipPathFile, % length-pos-1 ; get foldername%
 
+	/*
 	IfExist, %NewFolder%
 	{
 		; keyboard already installed, so need to check whether there are custom user settings
@@ -193,7 +194,7 @@ installorupdatefromzip(ZipPathFile) {
 					}
 				}
 			else
-				{
+				{	; ini files differ, but OK to overwrite
 					; just copy everything to keyboard folder
 					KeyboardDir := A_Temp . "\Unzip\" . NewFolder
 					DestinationDir := A_ScriptDir . "\" . NewFolder
@@ -212,7 +213,7 @@ installorupdatefromzip(ZipPathFile) {
 				}
 		}
 		else
-		{
+		{	; ini files exist, but are same as new ones
 			; just copy everything to keyboard folder
 			KeyboardDir := A_Temp . "\Unzip\" . NewFolder
 			DestinationDir := A_ScriptDir . "\" . NewFolder
@@ -231,7 +232,7 @@ installorupdatefromzip(ZipPathFile) {
 		}
 	}
 	else
-	{
+	{	; New installation. Keyboard not previously installed.
 		; copy new folder from temp to InKey folder
 		KeyboardDir := A_Temp . "\Unzip\" . NewFolder
 		DestinationDir := A_ScriptDir . "\" . NewFolder
@@ -248,12 +249,30 @@ installorupdatefromzip(ZipPathFile) {
 			return errorcheck
 		}
 	}
+	*/
+
+	KeyboardDir := A_Temp . "\Unzip\" . NewFolder
+	DestinationDir := A_ScriptDir . "\" . NewFolder
+	FileCopyDir, %KeyboardDir%, %DestinationDir%, 1
+	If ErrorLevel
+	{
+		TempString:=GetLang(104)
+		MsgBox %TempString% ; There was a problem with copying files to the InKey folder!
+		; delete temp folder
+		SetWorkingDir, %A_Temp%
+		FileRemoveDir, Unzip, 1
+		SetWorkingDir, %A_ScriptDir%
+		errorcheck = 5
+		return errorcheck
+	}
+
 
 	; delete temp folder
 	SetWorkingDir, %A_Temp%
 	FileRemoveDir, Unzip, 1
 	SetWorkingDir, %A_ScriptDir%
 
+	/*
 	if updatingkeyboard = false
 	{
 		; enable newly installed keyboard
@@ -271,5 +290,7 @@ installorupdatefromzip(ZipPathFile) {
 			IniWrite, %oldsetting%, %NewFolder%\%A_LoopFileName%, Keyboard, Enabled
 		}
 	}
+	*/
+
 	return errorcheck
 }

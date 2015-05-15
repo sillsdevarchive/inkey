@@ -1,27 +1,12 @@
-/*
- * * * Compile_AHK SETTINGS BEGIN * * *
-
-[AHK2EXE]
-Exe_File=%In_Dir%\InKey\InKey.exe
-Alt_Bin=C:\Program Files (x86)\AutoHotkey\Compiler\AutoHotkeySC.bin
-No_UPX=1
-Execution_Level=2
-[VERSION]
-Set_Version_Info=1
-Company_Name=InKeySoftware
-File_Description=InKey Keyboard Manager
-File_Version=1.9.5.5
-Inc_File_Version=0
-Internal_Name=inkey
-Legal_Copyright=(c) 2008-2015 InKeySoftware
-Original_Filename=InKey.ahk
-Product_Name=InKey Keyboard Manager
-Product_Version=1.9.5.5
-[ICONS]
-Icon_1=%In_Dir%\inkey.ico
-
-* * * Compile_AHK SETTINGS END * * *
-*/
+			   ; 2nd and 3rd segments of version number MUST be single-digit. See versionNum()
+			   ; Update both the following lines at the same time:
+			   ver = 2.0.0.1
+;@Ahk2Exe-SetVersion 2.0.0.1
+;@Ahk2Exe-SetName InKey
+;@Ahk2Exe-SetDescription InKey Keyboard Manager
+;@Ahk2Exe-SetCopyright Copyright (c) 2018-2015`, InKey Software
+;@Ahk2Exe-SetCompanyName InKey Software
+;@Ahk2Exe-SetMainIcon InKey.ico
 
 #NoEnv
 #SingleInstance force
@@ -31,13 +16,40 @@ Icon_1=%In_Dir%\inkey.ico
 ; - SetPhase, IsPhase
 ; SetMode(), IsMode for more persistent settings. e.g. smart/plain quote, dev/roman digits
 
+; -Implement 〔KeyChar〕 that provides the character that A_Hotkey would have produced. (Useful for default fallback of user-defined special-function key such as Deva-InKey backtick, and for multi-key handlers such as digits.)
+
+; TODO: Warn if any 〔UNKNOWNS〕 remain in text. (need to redo how AHK file is written)
+
+; TODO: allow uppercase hotkey labels
+; TODO: change syntax for identical keyhandler
+; TODO: implement multi-ruleset. each ruleset begins with >
+; TODO: implement preprocess that prepends rulesets/rules to specified keys
+; TODO: implement normalize that appends rulesets to specified keys.
+; Problem: A 2nd ruleset (such as preproc or normalization) will result in requiring two BKSP to undo it (if it applied). Also it happens in two steps, so in-btween form is briefly displayed than changed. We need to make the net affect of multiple rulesets happen as a single unit.
+
+; In settings, "CapsSensitive" defaults to "Yes", and 'CapsKeys" defaults to "abcdefghijklmnopqrstuvwxyz".
+; If CapsSensitive, then apply CapsKeys and do K_UseContext = 2.
+; otherwise, do K_UseContext = 1
+; TODO later: generate handlers at tinker compile time rather than inkeylib.ahki run time
+
+; TODO: enable define to be inside ##if...
+
+; TODO: Make installation of keyboards smooth again, now that we're calling the .exe to do the install.
+; (Some flakiness with name showing badly in config list, with no return value from exe, etc.)
+
+; TODO: When opening Config dialog, *RunAs ftype InKeyKeyboardFile="%A_ScriptDir%" "%1"
+
+; TODO: progress indicator during compile tinker file
+
+
+
 
 ; Main initialization
 	Outputdebug ___________________________ INKEY.AHK ___________________
-	ver = 1.956
 	K_ProtocolNum := 5 ; When changes are made to the communication protocol between InKey and InKeyLib.ahki, this number should be incremented in both files.
-	K_TinkerVersion := ver ; Version of Tinker language
-	K_MinTinkerVersion := 1.956 ; Min required version of Tinker language
+
+	K_TinkerVersion := versionNum(ver)
+	K_MinTinkerVersion := 1.956 ; Min required version of Tinker language, converted to a float (as versionNum() does)
 	SetWorkingDir %A_ScriptDir%
 	onExit DoCleanup
 	;~ SetTitleMatchMode 3
@@ -234,9 +246,10 @@ Icon_1=%In_Dir%\inkey.ico
 			if (not ii)		; skip items marked as disabled
 				continue
 			numKeyboards++  ; New keyboard to configure
+			KBD_IniStem%numKeyboards% := SubStr(CurrKbdIni, 1, StrLen(CurrKbdIni) - 8)
 			if (CurrKbdTinkerFile) {
-				KBD_File%numKeyboards% := CurrFolder "." SubStr(CurrKbdIni, 1, StrLen(CurrKbdIni) - 8) ".ahk"
-				KBD_CacheStem%numKeyboards% := InkeyCacheDir "\" CurrFolder "." SubStr(CurrKbdIni, 1, StrLen(CurrKbdIni) - 8)
+				KBD_File%numKeyboards% := CurrFolder "." KBD_IniStem%numKeyboards% ".ahk"
+				KBD_CacheStem%numKeyboards% := InkeyCacheDir "\" CurrFolder "." KBD_IniStem%numKeyboards%
 				KBD_AhkFile%numKeyboards% := KBD_CacheStem%numKeyboards% ".ahk"
 
 			} else {
@@ -516,7 +529,9 @@ Icon_1=%In_Dir%\inkey.ico
 				}
 				if (tinkWarnings) {
 					Gui hide
-					MsgBox 0, Warning, % "See warnings in " KBD_AhkFile%kk%
+					MsgBox 260, Warning, % "Warnings were encountered while processing " KBD_Folder%kk% ".tinker`nView warnings now?"
+					IfMsgBox Yes
+						Run % "notepad """ KBD_AhkFile%kk% """"
 				}
 			}
 		}
@@ -548,7 +563,7 @@ ProcessKbdErrors:
 			;or ( KBD_File%kk% and not FileExist(KBD_Folder%kk% . "\" . KBD_File%kk%))) {
 		; local xx := KBD_MenuText%kk%
 		; outputdebug ignoring %fldr% %xx%
-
+		IniWrite 0, % KBD_IniFile%kk%, Keyboard, Enabled
 		KBD_FileID%kk% =
 		KBD_File%kk% =
 		KBD_AhkFile%kk% =
@@ -661,8 +676,8 @@ LangCodeOK:
 		if (klid) {
 			; Keyboard is registered.  Ensure we haven't already used it.
 			if (InStr(ProcdKbdList, klid)) {
-				Gui Hide
-				MsgBox 0, Configuration Error, Each keyboard must have a unique layout name.
+				Gui Hide  ; TODO: Add this text to Lang
+				MsgBox 0, % "Keyboard Configuration Error", % "Each keyboard must have a unique layout name.`n`nKeyboard File: " KBD_Folder%kk% "\" KBD_IniStem%kk% "`nLayout name: " KBD_LayoutName%kk% "`n`nCheck keyboard settings."
 				Gui Show
 				KBD_Disabled%kk% := 1
 				goto ProcessKbdErrors
@@ -866,6 +881,11 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 		return ("Unable to read file: " TinkerFile)
 	}
 
+	tinkerLines := RegExReplace(tinkerLines, "((?<!\r)\n)|(\r(?!\n))", "`r`n") ; ensure canonical CR-LF
+	; tinkerLines := RegExReplace(tinkerLines, chr(0xA0), " ") ; replace any no break space with normal space. (may be code copied from tutorial.)
+	local nbsp := chr(0xA0)
+	StringReplace tinkerLines, tinkerLines, %nbsp%, %A_Space%, 1  ; replace any no break space with normal space. (may be code copied from tutorial.)
+
 	; Remove all comments and trailing whitespace from the file
 	local fpos
 	while (fpos := RegExMatch(tinkerLines, "(【[^【】]*)//([^【】]*】)")) { ; First preserve all // that are inside 【 param braces 】
@@ -875,7 +895,7 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	StringReplace tinkerLines, tinkerLines, % chr(0xfffe), //, 1
 	tinkerLines := RegExReplace(tinkerLines, "m)\s+$", "") ; nuke trailing whitespace
 
-	; tinkerLines := RegExReplace(tinkerLines, "ms)(►.*?◄)|(\s*▹.*?$)|([ \t]*$)", "")
+	tinkerLines := RegExReplace(tinkerLines, "s)(►.*?◄)", "")
 	; tinkerLines := RegExReplace(tinkerLines, "m)(\s*//.*?$)|([ \t]*$)", "")
 	; tinkerLines := RegExReplace(tinkerLines, "m)(\s*//.*?$)|([ \t]*$)", "")
 	; outputdebug % "a. tinkerlines len = " . StrLen(tinkerlines)
@@ -896,10 +916,12 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	}
 	FileAppend `; generated by InKey v. %ver%`n, %AHKFile%
 
-	local useContext := 1
+	local CapsSensitive := 1
 	local options := ""
+	local CapsKeys := "abcdefghijklmnopqrstuvwxyz"
 
-	fpos := RegExMatch(tinkerLines, "Oi)---(?:\s+//.*)?\r?\nSettings:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+)(?:Options:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+))?\.\.\.(?:\s+//.*)?\r?\n", match)
+	; fpos := RegExMatch(tinkerLines, "Oi)---(?:\s+//.*)?\r?\nSettings:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+)(?:Options:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+))?\.\.\.(?:\s+//.*)?\r?\n", match)
+	fpos := RegExMatch(tinkerLines, "Oim)^Settings:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+)(?:Options:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+))?\.\.\.(?:\s+//.*)?\r?\n", match)
 	if (fpos) {
 		tinkerLines := SubStr(tinkerLines, match.Len(0) + fpos)
 		local settings := match.Value(1)
@@ -907,25 +929,30 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 
 		; Check Tinker version for compatibility
 		if (RegExMatch(settings, "Om)^\s*TinkerVersion:\s+([0-9\.]*)$", match)) {
-			if (match.Value(1) < K_MinTinkerVersion) {
+			local tvNum := versionNum(match.Value(1))
+			if (tvNum < K_MinTinkerVersion) {
 				local err := TinkerFile " uses Tinker v. " match.Value(1) ". Please update keyboard to at least v. " K_MinTinkerVersion
 				FileAppend `; %err%`n, %AHKFile%
 				return (err)
 			}
-			if (match.Value(1) > K_TinkerVersion) {
-				local err := TinkerFile " requires a later version of InKey. Please update InKey to the latest version."
+			if (tvNum > K_TinkerVersion) {
+				local err := TinkerFile " requires a later version of InKey (" match.Value(1) "). Please update InKey version " ver " to the latest version."
 				FileAppend `; %err%`n, %AHKFile%
 				return (err)
 			}
 		} else {
+			TinkWarnings += 1
 			FileAppend `; WARNING: No TinkerVersion key found in Settings`n, %AHKFile%
 		}
 
-		; Get UseContext setting
-		if (RegExMatch(settings, "Om)^\s*UseContext:\s+(\d*)$", match)) {
-			useContext := match.Value(1)
-		} else {
-			outputdebug % "No UseContext value matched in """ settings """"
+		; Get CapsSensitive setting
+		if (RegExMatch(settings, "Om)^\s*CapsSensitive:\s+(No|false)$", match)) {
+			CapsSensitive := 0
+		}
+
+		; Get CapsKeys setting
+		if (RegExMatch(settings, "Om)^\s*CapsKeys:\s+(\S*)$", match)) {
+			CapsKeys := match.Value(1)
 		}
 
 	} else {
@@ -940,7 +967,7 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 		}
 	}
 
-	; local defines := ""
+	; parse the Options section
 	local fldName
 	local fldDef
 	local fldVal
@@ -950,11 +977,10 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	}
 	if (options) {
 		FileAppend %options%, %optionsFile%
-
 		while (StrLen(options) > 1) {
-			if (RegExMatch(options, "Oi)^( +)- (checkbox|hotkey):\s*\r?\n((?:\1\s+.*\r?\n)+)", match)) {
+			if (RegExMatch(options, "Oi)^( +)- (checkbox|keystroke):\s*\r?\n((?:\1\s+.*\r?\n)+)", match)) {
 				options := substr(options, match.Len(0)+1)
-				; local ctrltype := match.Value(2)
+				local ctrltype := match.Value(2)
 				local subFlds := match.Value(3)
 				fldName := ""
 				if (RegExMatch(subFlds, "Oi) name:\s+(.*?)\r?\n", match)) {
@@ -963,7 +989,7 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 					FileAppend /* WARNING: Option not parsed:`n%subFlds% */, %AHKFile%
 					continue
 				}
-				fldDef := ""
+				fldDef := " "
 				if (RegExMatch(subFlds, "Oi) default:\s+(.*?)\r?\n", match)) {
 					fldDef := match.Value(1)
 				}
@@ -972,6 +998,8 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 				; outputdebug % "read from ini:" KBD_IniFile%kk%
 				fldVal := 9
 				IniRead fldVal, % KBD_IniFile%kk%, Options, %fldName%, %fldDef%		; TODO: maybe fldDef may need chars escaped or like %A_Space%???
+				if ((ctrltype = "keystroke") and (fldVal = ""))
+					fldVal := "00" ; this signals that the handler should be ignored
 				tinkerLines := RegExReplace(tinkerLines, "\Q〔" fldName "〕\E", fldVal)
 				; defines .= "define " fldName " " fldVal "`n"
 				continue
@@ -980,18 +1008,55 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 			FileAppend /* WARNING: Options not parsed:`n%options% */, %AHKFile%
 			break
 		}
-		; tinkerLines := defines . tinkerLines
 	}
-	; FoundPos := RegExMatch(tinkerLines, "ims)^\s*\[Settings\]\s*\n(?P<Settings>.*?)^\s*(?P<Section>\[\w+\])\s*\n(?P<Left>.*)", lines)
-	; if (FoundPos = 0) {
-		; MsgBox 0, Configuration Error, Unable to parse Settings file section in %TinkerFile% `n %tinkerLines%
-		; FileAppend %tinkerLines%, %AHKFile%
-		; return
-	; }
 
 
 	; TODO: Build the AHK file header better
+	local useContext := CapsSensitive ? 2 : 1
 	FileAppend K_MinimumInKeyLibVersion = 1.912`nK_UseContext = %useContext%`n#include InKeyLib.ahki`n, %AHKFile%
+
+	; Process any define and function statements
+	while (RegExMatch(tinkerLines, "Oi)^(define[ \t]+(\w+)[ \t]+(.*?)\r?\n)|(function[ \t]+(\w+)\s*((?:【\w+?】\s*?)+)\r?\n\s+(\S.*(?:\r?\n\s+\S.*)*)\r?\n)", match)) {
+		tinkerLines := SubStr(tinkerlines, 1, match.Pos(0)-1) . SubStr(tinkerLines, match.Pos(0)+match.Len(0))
+		; outputdebug % "Preproc: " match.Value(0)
+		; outputdebug % "[0].Pos="  match.Pos(0) "; [0].Len=" match.Len(0)
+		; outputdebug % "tinkerLines begin: " substr(tinkerlines, 1, 40) "..."
+		; apply the define or function across tinkerLines
+		; define text => match[1]
+		; def[1] => match 2
+		; def[2] => match 3
+		; fn txt => match 4
+		; fn[1] => 5
+		; fn2 > 6
+		; fn3 > 7
+		; define XXX YYY
+		if (match.Value(1)) {
+			StringReplace tinkerLines, tinkerLines, % "〔" match.Value(2) "〕", % match.Value(3), 1
+			; tinkerLines := RegExReplace(SubStr(tinkerLines, match.Len(1) + 1), "\Q〔" match.Value(2) "〕\E", match.Value(3)) ; TODO: escape $ as $$ in the replacement text!!!
+			continue
+		}
+
+		; function XXX 【 】+
+		if (match.Value(4)) {
+			; tinkerLines := SubStr(tinkerLines, match.Len(4) + 1)
+			local fname := match.Value(5)
+			local fparams := match.Value(6)
+			local frules := match.Value(7)
+			fparams := RegExReplace(fparams, "】\s*【", chr(0xfffe))
+			local fparamsA := StrSplit(fparams, char(0xfffe), "【】")
+			local findFunc := "i)\Q" fname "\E"
+			StringReplace frules, frules, $, $$, 1
+			for index, element in fparamsA {
+				findFunc .= "\s*【(.*?)】"
+				frules := RegExReplace(frules, "i)〔\Q" . element . "\E〕", "$${" . index . "}")
+			}
+			; StringReplace tinkerLines, tinkerLines, %find
+			tinkerLines := RegExReplace(tinkerLines, findFunc, frules)
+			continue
+		}
+
+
+	}
 
 	tinkerLines := HexCodes2Chars(tinkerLines) ; Replace 〔hex〕 codes with chars
 
@@ -999,73 +1064,16 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	while RegExMatch(tinkerLines, "O)⌘if[\s\r\n]*([^⌘]*?)[\s\r\n]*⌘then[\s\r\n]*([^⌘]*?)(?:[\s\r\n]*⌘else[\s\r\n]*([^⌘]*?))?[\s\r\n]*⌘endif", defM) {
 		local toFind := defM.Value(0)
 		; outputdebug % "⌘IF{" defM.Value(1) "} ⌘THEN{" defM.Value(2) "} ⌘ELSE{" defM.Value(3) "}"
+		; outputdebug % "evalExpr(""" defM.Value(1) """) => "  evalExpr(defM.Value(1))
 		local toRepl := defM.Value(evalExpr(defM.Value(1)) ? 2 : 3)
 		; outputdebug % "toRepl{" toRepl "}"
 		StringReplace, tinkerLines, tinkerLines, %toFind%, %toRepl%
 
 	}
-	tinkerLines := RegExReplace(tinkerLines, "(?<=\n)[\r\n]+", "") ; nuke blank lines (can result from no #else clause)
-
-/*
-	; Cycle through tinkerLines doing pre-processor replacements
-	local defM
-	local defL
-	local defR
-	loop {
-		if (RegExMatch(tinkerLines, "O)^\s*(\[\w+\])\s*\n", defM))  {
-			linesSection := defM.Value(1)
-			tinkerLines := SubStr(tinkerLines, defM.Len(0) + 1)
-			continue
-		}
-		if (linesSection = "[KeystrokeRules]" || strlen(tinkerLines) < 2)
-			break
-		if (linesSection = "[Defines]") {
-			if (RegExMatch(tinkerLines, "O)^\s*(\w+)\s*=\s*(.*?)\s*\n", defM))  {  ; TODO: handle badly-formed defn
-				defL := defM.Value(1)
-				defR := defM.Value(2)
-				; outputdebug #define %defL% %defR%
-				tinkerLines := RegExReplace(SubStr(tinkerLines, defM.Len(0) + 1), "\Q〔" defM.Value(1) "〕\E", defM.Value(2)) ; TODO: escape $ as $$ in the replacement text!!!
-				continue
-			} else {
-				outputdebug bad defn: %tmp%
-				tinkerLines := SubStr(tinkerLines, InStr(tinkerLines, "`n") + 1)
-			}
-		} else if (linesSection = "[Functions]") {
-			if (RegExMatch(tinkerLines, "O)^(\w+)\s*((?:【\w+?】\s*?)+)\r?\n\s+(\S.*(?:\r?\n\s+\S.*)*)\r?\n", defM)) {
-				tinkerLines := SubStr(tinkerLines, defM.Len(0) + 1)
-				local fname := defM.Value(1)
-				local fparams := defM.Value(2)
-				local frules := defM.Value(3)
-				fparams := RegExReplace(fparams, "】\s*【", chr(0xfffe))
-				; local fparamsA := StrSplit(Substr(fparams, 2, strlen(fparams)-2), char(0xfffe))
-				local fparamsA := StrSplit(fparams, char(0xfffe), "【】")
-				local findFunc := "i)\Q" fname "\E"
-				StringReplace frules, frules, $, $$, 1
-				for index, element in fparamsA {
-					findFunc .= "\s*【(.*?)】"
-					frules := RegExReplace(frules, "i)〔\Q" . element . "\E〕", "$${" . index . "}")
-				}
-				tinkerLines := RegExReplace(tinkerLines, findFunc, frules)
-				;FileAppend `; FindFunc: %findFunc%`n`; Replace:  %frules%`n, %AHKFile%
-			} else {
-				x := substr(tinkerLines, 1, InStr(tinkerLines, "`n"))
-				outputdebug unexpected stuff in [Functions]: %x%`n ; TODO: alert user
-				tinkerLines := SubStr(tinkerLines, InStr(tinkerLines, "`n") + 1)
-			}
-		} else {
-			; TODO: handle unexpected/mispelled [section]
-			outputdebug unexpected/mispelled section: %linesSection%
-			break
-		}
-	}
-
-*/
+	tinkerLines := RegExReplace(tinkerLines, "(?:(?<=\n)|^)\s*[\r\n]+", "") ; nuke blank lines resulting from above
 
 
-	; Escape any backtick or double-quote in a parameter string
-	tinkerLines := RegExReplace(tinkerLines, "([``""])", "$1$1")  ; 1st escape ALL backticks and double-quotes
-	tinkerLines := RegExReplace(tinkerLines, "(\n\S*)([``""]){2}", "$1$2") ; remove escape from backtick/dblquot in keystroke labels
-	; TODO: also in labels with alt, shift, etc!!!
+	; tinkerLines := RegExReplace(tinkerLines, "(\n\S*)([``""]){2}", "$1$2") ; remove escape from backtick/dblquot in keystroke labels ; TODO: also in labels with alt, shift, etc!!!
 
 	; Handle colon key : as +`;
 	StringReplace tinkerLines, tinkerLines, `n:, `n+```;, 1
@@ -1076,125 +1084,59 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	}
 	FileAppend %tinkerLines%, %debugFile%
 
-
-	while (StrLen(tinkerLines) > 1) {
-
-		; define XXX YYY
-		if (RegExMatch(tinkerLines, "Oi)^define[ \t]+(\w+)[ \t]+(.*?)\r?\n", match)) {
-			; tinkerLines := SubStr(tinkerLines, match.Len(0))
-				; defL := match.Value(1)
-				; defR := match.Value(2)
-				; outputdebug #define %defL% %defR%
-				tinkerLines := RegExReplace(SubStr(tinkerLines, match.Len(0) + 1), "\Q〔" match.Value(1) "〕\E", match.Value(2)) ; TODO: escape $ as $$ in the replacement text!!!
-				continue
+	; Extract all key handlers and their translated rulesets to an array
+	local keyArray, synArray
+	keyArray := Object()
+	local unparsed := ""
+	while (RegExMatch(tinkerLines, "Om)^(?:(\S+)|(?:【([^】]+)】))\s*>\s*(\S.*(\r?\n\s+.*)*\r?\n?)", match)) {
+		if (match.Pos(0) > 1)
+			unparsed .= SubStr(tinkerLines, 1, match.Pos(0) - 1)
+		tinkerLines := SubStr(tinkerLines, match.Pos(0) + match.Len(0))
+		local keystroke := match.Value(1) . match.Value(2)
+		if (keystroke = "00")
+			continue	; User blanked out hotkey, so ignore this and all its rules.
+		keystroke := RegExReplace(keystroke, "\s+", chr(0xfffe))
+		synArray := StrSplit(keystroke, chr(0xfffe)) ; spaces in keystroke indicate synonymous keys. TODO: Would be more efficient to end up with two hotkeys on the same code than duplicating code like this.
+		local tr := translateRules(match.Value(3))
+		Loop % synArray.MaxIndex()
+		{
+			keystroke := RegExReplace(synArray[a_index], "^([!#<>^]*)([A-Z])$", "$1+$L2")  ; e.g. K -> +k
+			keyArray[keystroke] := tr
+			; outputdebug key = %keystroke%
 		}
-
-		; function XXX 【 】+
-		if (RegExMatch(tinkerLines, "Oi)^function[ \t]+(\w+)\s*((?:【\w+?】\s*?)+)\r?\n\s+(\S.*(?:\r?\n\s+\S.*)*)\r?\n", match)) {
-			tinkerLines := SubStr(tinkerLines, match.Len(0) + 1)
-			local fname := match.Value(1)
-			local fparams := match.Value(2)
-			local frules := match.Value(3)
-			fparams := RegExReplace(fparams, "】\s*【", chr(0xfffe))
-			local fparamsA := StrSplit(fparams, char(0xfffe), "【】")
-			local findFunc := "i)\Q" fname "\E"
-			StringReplace frules, frules, $, $$, 1
-			for index, element in fparamsA {
-				findFunc .= "\s*【(.*?)】"
-				frules := RegExReplace(frules, "i)〔\Q" . element . "\E〕", "$${" . index . "}")
-			}
-			tinkerLines := RegExReplace(tinkerLines, findFunc, frules)
-			;FileAppend `; FindFunc: %findFunc%`n`; Replace:  %frules%`n, %AHKFile%
-			continue
-		}
-
-		; keystroke and all its rules
-		if (RegExMatch(tinkerLines, "O)^(?:\r?\n?)*(\S+)\s*>\s*(\S.*(\r?\n\s+.*)*\r?\n?)", match)) {
-			tinkerLines := SubStr(tinkerLines, match.Len(0) + 1)
-			local keystroke := match.Value(1)
-			FileAppend $%keystroke%::, %AHKFile%
-			local ruleStr := RegExReplace(match.Value(2), "\r?\n\s+\|\s*", chr(0xfffe)) ; mark split points between alternate rules (sep by vert bar)
-			ruleStr := RegExReplace(ruleStr, "\r?\n\s+", " ")  ; unwrap lines
-			local rules := StrSplit(ruleStr, chr(0xfffe))
-			for index, element in rules {
-				if (index > 1)
-					FileAppend %A_Space% ||%A_Space%, %AHKFile%
-
-				; TODO: implement IfPhase, SetPhase, &, +, _
-
-				; map|loopMap|multiTapMap|multiTapSend 【 】+
-				if (RegExMatch(element, "Oi)^(map|loopMap|multiTapMap|multiTapSend)\s*((【.*?】\s*?)+)\s*$", m2)) {
-				; if (RegExMatch(element, "Oi)^(map|loopMap|multiTapMap)\s*((【.*?】\s*?)+)\s*$", m2)) {
-					local mapType := m2.Value(1)
-					local mapParams := RegExReplace(m2.Value(2), "】\s*【", chr(0x22) chr(0x2c) " " chr(0x22))
-					mapParams := RegExReplace(mapParams, "[【】]", chr(0x22))
-					FileAppend InCase(%mapType%(%mapParams%))`n, %AHKFile%
-
-				; multiTapSend 【 】
-				; } else if (RegExMatch(element, "Oi)^multiTapSend\s*【(.*?)】\s*$", m2)) {
-					; local rep := m2.Value(1)
-					; FileAppend InCase(MultiTapSend("%rep%"))`n, %AHKFile%
-
-				; (After 【 】)? Replace 【 】 with 【 】 (usingMap|usingLoopMap 【 】+)?
-				} else if (RegExMatch(element, "Oi)^(after\s*【(.*?)】\s*)?replace\s*【(.*?)】\s*with\s*【(.*?)】\s*( using(Loop)?Map\s*((【.*?】\s*)+))?\s*$", m2)) {
-					local aft =
-					if (m2.Value(1))
-						aft := "After(" chr(34) m2.Value(2) chr(34) ") "
-					local rep := m2.Value(3)
-					local wth := m2.Value(4)
-					local using =
-					if (m2.Value(5)) {
-						local mapParams := RegExReplace(m2.Value(7), "】\s*【", chr(0x22) chr(0x2c) " " chr(0x22))
-						mapParams := RegExReplace(mapParams, "[【】]", chr(0x22))
-						using := " using" m2.Value(6) "Map(" RegExReplace(mapParams, "[【】]", chr(0x22)) ")"
-					}
-					FileAppend InCase(%aft%Replace("%rep%") with("%wth%")%using%)`n, %AHKFile%
-
-				; after 【 】 send 【 】
-				} else if (RegExMatch(element, "Oi)^after\s*【(.*?)】\s*send\s*【(.*?)】\s*$", m2)) {
-					local rep := m2.Value(1)
-					local wth := m2.Value(2)
-					FileAppend InCase(After("%rep%") thenSend("%wth%"))`n, %AHKFile%
-
-				; 【 】
-				} else if (RegExMatch(element, "Oi)^【(.*?)】\s*$", m2)) {
-					local rep := m2.Value(1)
-					FileAppend Send("%rep%")`n, %AHKFile%
-
-				; beep
-				} else if (RegExMatch(element, "Oi)^beep\s*$", m2)) {
-					FileAppend Beep()`n, %AHKFile%
-
-				} else {
-					outputdebug Rule not parsed: %element%
-					tinkWarnings += 1
-					FileAppend %A_Space% `; Rule not parsed: %element%, %AHKFile%
-				}
-			} ; end for ... rules
-			continue
-		}
-
-		; extra keystroke handler for a subsequent ruleset
-		if(RegExMatch(tinkerLines, "O)^(?:\r?\n?)*(\S+)\s*:\s*\n", match)) {
-			local keystroke := match.Value(1)
-			FileAppend $%keystroke%::`n, %AHKFile%
-			tinkerLines := SubStr(tinkerLines, match.Len(0) + 1)
-			continue
-		}
-
-		; empty line
-		if (RegExMatch(tinkerLines, "O)^\s*\r?\n", match)) {
-			tinkerLines := SubStr(tinkerLines, match.Len(0) + 1)
-			continue
-		}
-
-		; Unparsed content
-		local fp := InStr(tinkerLines, "`n")
-		local unparsedLine := SubStr(tinkerLines, 1, fp)
-		tinkerLines := SubStr(tinkerLines, fp+1)
-		tinkWarnings += 1
-		FileAppend `; Unparsed: %unparsedLine%, %AHKFile%
 	}
+	unparsed .= tinkerLines
+	if (unparsed) {
+		unparsed := RegExReplace(unparsed, "m)^.*$", "; unparsed: $0")
+		tinkWarnings += 1
+		FileAppend %unparsed%, %AHKFile%
+	}
+
+
+	; First process any key handlers for CapsKeys
+	if (CapsSensitive) {
+		; outputdebug CapsKeys = %CapsKeys%
+		loop parse, CapsKeys
+		{
+			local loKey := A_LoopField
+			local upKey := "+" A_LoopField
+			if (keyArray[loKey] and keyArray[upKey]) {
+				FileAppend % "$" loKey "::`n$" upKey "::`nif (UseUpperCase()) {`n`t" keyArray[upKey] "} else {`n`t" keyArray[loKey] "}`nreturn`n", %AHKFile%
+				keyArray.Remove(loKey)
+				keyArray.Remove(upKey)
+			; } else if (keyArray[loKey] or keyArray[upKey]) {
+				; tinkWarnings += 1
+				; warnTxt := "CapsSensitive = Yes, and CapsKeys included '" loKey "', but this requires handlers for both " loKey " and " upKey "`n"
+				; outputdebug Warning: %warnTxt%. loKey=%loKey%  upKey=%upKey%
+				; FileAppend `; Warning: %warnTxt%, %AHKFile%
+			}
+		}
+	}
+
+	; Now process all remaining key handlers
+	for key, rules in keyArray
+		FileAppend % "$" key "::" keyArray[key], %AHKFile%
+
 }
 
 ShowKbdMenu:
@@ -2552,6 +2494,83 @@ evalExpr(e) {
 		return 0
 	}
 	return e
+}
+
+rulesRE(key) {
+	return 	"Om)^(\Q" key "\E)\s*>\s*(\S.*(\r?\n\s+.*)*\r?\n?)"
+	; return 	"O)^(?:\r?\n?)*(\Q" key "\E)\s*>\s*(\S.*(\r?\n\s+.*)*\r?\n?)"
+}
+
+translateRules(ruleStr) {
+	global
+	local trans := ""
+	ruleStr :=  RegExReplace(ruleStr, "([``""])", "$1$1")  ; 1st escape ALL backticks and double-quotes to work with AHK syntax
+	ruleStr := RegExReplace(ruleStr, "\r?\n\s+\|\s*", chr(0xfffe)) ; mark split points between alternate rules (sep by vert bar)
+	ruleStr := RegExReplace(ruleStr, "\r?\n\s+", " ")  ; unwrap lines
+	local rules := StrSplit(ruleStr, chr(0xfffe))
+	for index, element in rules {
+		if (index > 1)
+			trans .= "  || "
+
+		; TODO: implement IfPhase, SetPhase, &, +, _
+
+		; map|loopMap|multiTapMap|multiTapSend 【 】+
+		if (RegExMatch(element, "Oi)^(map|loopMap|multiTapMap|multiTapSend)\s*((【.*?】\s*?)+)\s*$", m2)) {
+		; if (RegExMatch(element, "Oi)^(map|loopMap|multiTapMap)\s*((【.*?】\s*?)+)\s*$", m2)) {
+			local mapType := m2.Value(1)
+			local mapParams := RegExReplace(m2.Value(2), "】\s*【", chr(0x22) chr(0x2c) " " chr(0x22))
+			mapParams := RegExReplace(mapParams, "[【】]", chr(0x22))
+			trans .= "InCase(" mapType "(" mapParams "))`n"
+
+		; (After 【 】)? Replace 【 】 with 【 】 (usingMap|usingLoopMap 【 】+)?
+		} else if (RegExMatch(element, "Oi)^(after\s*【(.*?)】\s*)?replace\s*【(.*?)】\s*with\s*【(.*?)】\s*( using(Loop)?Map\s*((【.*?】\s*)+))?\s*$", m2)) {
+			local aft =
+			if (m2.Value(1))
+				aft := "After(" chr(34) m2.Value(2) chr(34) ") "
+			local rep := m2.Value(3)
+			local wth := m2.Value(4)
+			local using =
+			if (m2.Value(5)) {
+				local mapParams := RegExReplace(m2.Value(7), "】\s*【", chr(0x22) chr(0x2c) " " chr(0x22))
+				mapParams := RegExReplace(mapParams, "[【】]", chr(0x22))
+				using := " using" m2.Value(6) "Map(" RegExReplace(mapParams, "[【】]", chr(0x22)) ")"
+			}
+			trans .= "InCase(" aft "Replace(""" rep """) with(""" wth """)" using ")`n"
+
+		; after 【 】 send 【 】
+		} else if (RegExMatch(element, "Oi)^after\s*【(.*?)】\s*send\s*【(.*?)】\s*$", m2)) {
+			local rep := m2.Value(1)
+			local wth := m2.Value(2)
+			trans .= "InCase(After(""" rep """) thenSend(""" wth """))`n"
+
+		; 【 】
+		} else if (RegExMatch(element, "Oi)^【(.*?)】\s*$", m2)) {
+			local rep := m2.Value(1)
+			if (InStr(rep, " ")) {
+				trans .= "InCase(MultiTapSend(""" rep """))`n"
+			} else {
+				trans .= "Send(""" rep """)`n"
+			}
+		; beep
+		} else if (RegExMatch(element, "Oi)^beep\s*$", m2)) {
+			trans .= "Beep()`n"
+
+		} else {
+			outputdebug Rule not parsed: %element%
+			tinkWarnings += 1
+			trans .= " `; Rule not parsed: " . element
+		}
+	} ; end for ... rules
+	return trans
+}
+
+versionNum(s) {  ; Given a version string like 2.0.0.12, returns a numeric value for comparison,
+				 ; treating the 4th segement as a 3-digit number.
+				 ; Thus 1.2.3.45 => 1.23045, and 1.234 => 1.23004
+				 ; 2nd and 3rd segments MUST be single-digit.
+	if (not RegExMatch(s, "O)(\d++)\.?+(\d)?+\.?+(\d)?+\.?+(\d++)?+", match))
+		return 0
+	return match.Value(1) + (match.Value(2) / 10) + (match.Value(3) / 100)+ (match.Value(4) / 100000)
 }
 
 #include Config.ahk	; Configuration GUI (GUI 3) routines

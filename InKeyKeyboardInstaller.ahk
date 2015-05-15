@@ -1,27 +1,9 @@
-/*
- * * * Compile_AHK SETTINGS BEGIN * * *
-
-[AHK2EXE]
-Exe_File=%In_Dir%\InKey\InKeyKeyboardInstaller.exe
-Alt_Bin=C:\Program Files\AutoHotkey\Compiler\AutoHotkeySC.bin
-No_UPX=1
-Execution_Level=2
-[VERSION]
-Set_Version_Info=1
-Company_Name=InKeySoftware
-File_Description=InKey Keyboard Installer
-File_Version=0.105.0.0
-Inc_File_Version=0
-Internal_Name=inkeykeyboardinstaller
-Legal_Copyright=(c) 2008-2012 InKeySoftware
-Original_Filename=InKeyKeyboardInstaller.ahk
-Product_Name=InKey Keyboard Installer
-Product_Version=1.0.96.0
-[ICONS]
-Icon_1=%In_Dir%\inkey.ico
-
-* * * Compile_AHK SETTINGS END * * *
-*/
+;@Ahk2Exe-SetVersion 2.000
+;@Ahk2Exe-SetName InKey Keyboard Installer
+;@Ahk2Exe-SetDescription InKey Keyboard Installer
+;@Ahk2Exe-SetCopyright Copyright (c) 2018-2015`, InKey Software
+;@Ahk2Exe-SetCompanyName InKey Software
+;@Ahk2Exe-SetMainIcon InKey.ico
 
 #singleinstance force
 #notrayicon
@@ -39,6 +21,18 @@ if %0% = 0
 else
 {
 	ZipPathFile = %1%
+}
+; outputdebug %A_ScriptFullPath% %ZipPathFile%
+
+FileAppend %ZipPathFile%`n, InstallLog.txt
+if (ErrorLevel) {
+	if (A_IsAdmin) {
+		MsgBox Unable to write to InKey folder: %A_ScriptDir%
+		exitApp
+	} else {
+		Run *RunAs "%A_ScriptFullPath%" "%ZipPathFile%"
+		ExitApp
+	}
 }
 
 KeyboardName := ZipPathFile

@@ -441,22 +441,20 @@ InstallMore:
 	FileSelectFile, ZipPathFile, 3,, %TitleString%, %TempString%
 	If Not ErrorLevel
 	{
-		errorcheck:=installorupdatefromzip(ZipPathFile)
-		if errorcheck<>0
-			outputdebug Error encountered during keyboard install/update: %errorcheck%
-		if errorcheck = 0
-		{
-			TempString:=GetLang(99) ; Installation complete.
-			MsgBox,, %TitleString%, %TempString%
+		RunWait InKeyKeyboardInstaller.exe "%ZipPathFile%"
 
-			; need to reload InKey
-			needsRestart := 1
-
-			; refresh ListView
-			LV_Delete()
+		; errorcheck:=installorupdatefromzip(ZipPathFile)
+		; if errorcheck<>0
+			; outputdebug Error encountered during keyboard install/update: %errorcheck%
+		; if errorcheck = 0
+		; {
+			; TempString:=GetLang(99) ; Installation complete.
+			; MsgBox,, %TitleString%, %TempString%
+			needsRestart := 1 ; need to reload InKey
+			LV_Delete() ; refresh ListView
 			FillKbdListAll()
 			goto DoConfigure
-		}
+		; }
 	}
 	return
 

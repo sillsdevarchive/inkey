@@ -1,16 +1,13 @@
 	// Mozhi Keyboard in Tinker Format
-	// Version 0.850
+	// Version 0.900
 
 	// History:
-	// 2015-04-26 Initial version in Tinker 1.956 format
+	// 2015-05-07 Initial version in Tinker 2.000 format
 
-
----  // Begin header section
 Settings:
-  TinkerVersion: 1.956
-  UseContext: 1  // 1 means include uncaptured keystrokes in the context, not CAPS-sensitive.
-
-...  // End of header
+  TinkerVersion: 2.000
+  CapsSensitive: No
+...
 
 define Chillu2Base 【ൻ ന】【ൺ ണ】【ർ ര】【ൽ ല】【ൾ ള】【ൿ ക】
 define AnyLetterExceptSA [അ-ഷഹ]
@@ -63,7 +60,7 @@ a	> map 〔Chillu2Base〕【ം മ】【ഋ റ】【ൃ ്ര】
 	| map 【അ ആ ആ‍ാ】【@ ാ】
 	| DoChilluFixAndSend 【അ】【അ】
 
-+a	> map 【് ാ】【ഋ റാ】【ൃ ്രാ】【@ ാ】
+A	> map 【് ാ】【ഋ റാ】【ൃ ്രാ】【@ ാ】
 	| replace 【$F】 with 【$Rാ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
 	| after 【ാ】 send 【〔200D〕ാ】 //  attempts to allow multiple occurrences, but may render badly
 	| DoChilluFixAndSend 【ആ】【ആ】
@@ -86,32 +83,32 @@ u	> replace 【$F】 with 【$Rു】 usingMap 〔Chillu2Base〕【ം മ】【
 	| map 【് ു ൂ ൂൂ】【ഉ ഊ】【അ ഔ】【ഒ ഔ】【@ ു】【ൃ ്രു】【ാ ൗ ൗൗ】
 	| DoChilluFixAndSend 【ഉ】【ഉ】
 
-+e	> replace 【$F】 with 【$Rേ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+E	> replace 【$F】 with 【$Rേ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
 	| map 【് േ േേ】【ൃ ്രേ】【@ േ】
 	| DoChilluFixAndSend 【ഏ】【ഏ】
 
-+i	> replace 【$F】 with 【$Rീ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+I	> replace 【$F】 with 【$Rീ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
 	| map 【് ീ ീീ】【ൃ ്രീ】【@ ീ】
 	| DoChilluFixAndSend 【ഈ】【ഈ】
 
-+o	> replace 【$F】 with 【$Rോ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+O	> replace 【$F】 with 【$Rോ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
 	| map 【് ോ ോോ】【ൃ ്രോ】【@ ോ】
 	| DoChilluFixAndSend 【ഓ】【ഓ】
 
-+u	> replace 【$F】 with 【$Rൂ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
+U	> replace 【$F】 with 【$Rൂ】 usingMap 〔Chillu2Base〕【ം മ】【ഋ റ】
 	| map 【് ൂ ൂൂ】【ൃ ്രൂ】【@ ൂ】
 	| DoChilluFixAndSend 【ഊ】【ഊ】
 
-+r	> replace 【$F】 with 【$Rൃ】 usingMap 〔Chillu2Base〕【ം മ】
+R	> replace 【$F】 with 【$Rൃ】 usingMap 〔Chillu2Base〕【ം മ】
 	| map 【് ൃ ൄ ൄൄ】【@ ൃ】【ഋ ൠ】
 	| DoChilluFixAndSend 【ഋ】【ഋ】
 
 l	> after 【〔AnyLetterExceptSA〕】 replace 【ം】 with 【മ്ല്】
 	| map 【ൽ ല്ല്】【@ ൢ】【ൿ ക്ല്】【ൾ ഌ ൡ】 //  "് ൢ ൣ",
-	| replace 【$F】 with 【$Rൢ】 usingMap 【ൻ ന】【ൺ ണ】【ർ ര】【ൽ ല】【ൾ ള】
+	// | replace 【$F】 with 【$Rൢ】 usingMap 【ൻ ന】【ൺ ണ】【ർ ര】【ൽ ല】【ൾ ള】
 	| DoChilluFixAndSend 【ല്】【ൽ】
 
-+l	> after 【〔AnyLetterExceptSA〕】 replace 【ം】 with 【മ്ല്】
+L	> after 【〔AnyLetterExceptSA〕】 replace 【ം】 with 【മ്ല്】
 	| map 【ൾ ള്ള്】【ൻ ന്ല്】【ൽ ല്ല്】【ൿ ക്ല്】
 	| DoChilluFixAndSend 【ല്】【ൾ】
 
@@ -158,11 +155,10 @@ r	> after 【〔AnyLetterExceptSA〕】 replace 【ം】 with 【മ്ര്�
 
 s	> DoChilluFixAndSend 【സ്】【സ്】
 
-t	> map 【റ്റ് ട്ട്】【ൻ ന്റ്】【ന് ന്റ്】
+t	> map 【റ്റ് ട്ട്】【ൻ ന്റ്】【ന് ന്റ്】 【ൺ ണ്ട്】
 	| DoChilluFixAndSend 【റ്റ്】【റ്റ്】
 
-v :
-w	> map 【ൺ ണ്വ്】【ൻ ന്വ്】【ൽ ല്വ്】【ൿ ക്വ്】
+【v w】	> map 【ൺ ണ്വ്】【ൻ ന്വ്】【ൽ ല്വ്】【ൿ ക്വ്】
 	| DoChilluFixAndSend 【വ്】【വ്】
 
 x	> DoChilluFixAndSend 【ക്ഷ്】【ക്ഷ്】
@@ -173,50 +169,49 @@ y	> after 【[അ-ഷഹാ-ൌൗൢൣ]】 replace 【ം】 with 【മ്യ
 
 z	> DoChilluFixAndSend 【ശ്】【ശ്】
 
-+b	> DoChilluFixAndSend 【ബ്ബ്】【ബ്ബ്】
+B	> DoChilluFixAndSend 【ബ്ബ്】【ബ്ബ്】
 
-+c	> DoChilluFixAndSend 【ച്ച്】【ച്ച്】
+C	> DoChilluFixAndSend 【ച്ച്】【ച്ച്】
 
-+d	> map 【ൺ ണ്ഡ്】
+D	> map 【ൺ ണ്ഡ്】
 	| after 【ൺ】 replace 【〔ZWNJ〕】 with 【ഡ്】
 	| DoChilluFixAndSend 【ഡ്】【ഡ്】
 
-+f	> DoChilluFixAndSend 【ഫ്】【ഫ്】
+F	> DoChilluFixAndSend 【ഫ്】【ഫ്】
 
-+g	> map 【ൺ ങ്ങ്】
+G	> map 【ൺ ങ്ങ്】
 	| DoChilluFixAndSend 【ഗ്ഗ്】【ഗ്ഗ്】
 
-+h	> map 【ട് ത്ത്】
+H	> map 【ട് ത്ത്】
 	| 【ഃ】
 
-+j	> map 【ൺ ഞ്ഞ്】
+J	> map 【ൺ ഞ്ഞ്】
 	| DoChilluFixAndSend 【ജ്ജ്】【ജ്ജ്】
 
-+k	> DoChilluFixAndSend 【ക്ക്】【ക്ക്】
+K	> DoChilluFixAndSend 【ക്ക്】【ക്ക്】
 
-+m	> DoChilluFixAndSend 【മ്മ്】【മ്മ്】
+M	> DoChilluFixAndSend 【മ്മ്】【മ്മ്】
 
-+n	> after 【ൺ】 replace 【〔ZWNJ〕】 with 【ണ്】
+N	> after 【ൺ】 replace 【〔ZWNJ〕】 with 【ണ്】
 	| replace 【ൺ】 with 【ണ്ണ്】
 	| DoChilluFixAndSend 【ൺ】【ൺ】
 
-+p	> DoChilluFixAndSend 【പ്പ്】【പ്പ്】
+P	> DoChilluFixAndSend 【പ്പ്】【പ്പ്】
 
-+q	> DoChilluFixAndSend 【ക്യു】【ക്യ്】
+Q	> DoChilluFixAndSend 【ക്യു】【ക്യ്】
 
-+s	> DoChilluFixAndSend 【ശ്】【ശ്】
+S	> DoChilluFixAndSend 【ശ്】【ശ്】
 
-+t	> map 【ൺ ണ്ട്】
+T	> map 【ൺ ണ്ട്】
 	| DoChilluFixAndSend 【ട്】【ട്】
 
-+w :
-+v	> DoChilluFixAndSend 【വ്വ്】【വ്വ്】
+【W V】	> DoChilluFixAndSend 【വ്വ്】【വ്വ്】
 
-+x	> DoChilluFixAndSend 【ക്ഷ്】【ക്ഷ്】
+X	> DoChilluFixAndSend 【ക്ഷ്】【ക്ഷ്】
 
-+y	> DoChilluFixAndSend 【യ്യ്】【യ്യ്】
+Y	> DoChilluFixAndSend 【യ്യ്】【യ്യ്】
 
-+z	> DoChilluFixAndSend 【ശ്ശ്】【ശ്ശ്】
+Z	> DoChilluFixAndSend 【ശ്ശ്】【ശ്ശ്】
 
 0	> DoDigit 【0】【൦】
 1	> DoDigit 【1】【൧】

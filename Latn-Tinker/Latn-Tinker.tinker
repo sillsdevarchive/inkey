@@ -1,29 +1,35 @@
----  // Begin header section
 Settings:
-  TinkerVersion: 1.956
-  UseContext: 2  // 2 means include uncaptured keystrokes in the context,  CAPS-sensitive.
+  TinkerVersion: 2.000
+...
 
-...  // End of header
+//_____________________________
 
+// Double-tap [square brackets] for 【parameter brackets】
+[ > 【[ \x{3010}】
+] > 【] \x{3011}】
+
+// Double-tap {curly braces} for 〔substitution braces〕
+{ > 【{ 〔】
+} > 【} 〕】
+
+// Double tap hash (#) to get ⌘
+# > 【# ⌘】
+
+// Double-tap <left/right wedges> to get ► block comment markers ◄
+< > 【< 〔25c4〕】
+> > 【> 〔25ba〕】
+
+//_____________________________
 
 //... Alt-Minus demonstrates a pig-latinizing function.
 !- > replace 【\b([bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]+)(\p{L}+)】 with 【$2$1ay】
   | after 【\b[aeiouAEIOU]\p{L}*】 send 【way】
   | beep
 
+//_____________________________
+// Other general-purpose auto-corrections
 
-//..._____________________________
-//... Other general-purpose auto-corrections
-
-//... Dash key: double-tap for n-dash, triple-tap for m-dash. If more than that, just go back to all dashes.
+// Dash key: double-tap for n-dash, triple-tap for m-dash. If more than that, just go back to all dashes.
 - > after 【----】 send 【-】
-  | multiTapSend 【- – — ----】
-
-[ > multiTapSend 【[ \x{3010}】
-{ > multiTapSend 【{ 〔】
-
-] > multiTapSend 【] \x{3011}】
-} > multiTapSend 【} 〕】
-
-# > multiTapSend 【# ⌘】
+  | 【- – — ----】
 
