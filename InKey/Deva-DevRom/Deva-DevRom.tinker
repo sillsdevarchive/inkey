@@ -46,10 +46,10 @@
 //	 Date Modified:	2015-04-20
 //	 History:			Created by SAG
 //
---- // begin header
+
 Settings:
-  TinkerVersion: 1.956
-  UseContext: 1  // 1 means include uncaptured keystrokes in the context, not CAPS-sensitive.
+  TinkerVersion: 2.000
+  CapsSensitive: No
 
 Options:
   - checkbox:
@@ -95,22 +95,17 @@ function SendVowel 【syl】【dep】
 		| 【〔dep〕】
 	⌘endif
 
-function DoDigit 【western】【dev】【reverse】
-	after 【[0-9]】 send 【〔western〕】
-	| after 【[०-९]】 send 【〔dev〕】
-	| ⌘if 〔ScriptDigit〕 ^ 〔reverse〕 ⌘then 【〔dev〕】 ⌘else 【〔western〕】 ⌘endif //... It also used to toggle additionally on the CAPS state. Can we do that in Tinker??
-
-//... Key: Shift +R   - The flying reph typed in written (not phonetic) order.
-//... You can get a flying reph in phonetic order by typing r //... before the syllable.
+//... Key: Shift+R   - The flying reph typed in written (not phonetic) order.
+//... You can get a flying reph in phonetic order by typing r before the syllable.
 //... DevRom also allows you to obtain a flying reph by typing R at any point during or
 //... following the construction of the syllable.
 //... e.g. कर्ल़ि can be typed kl>iR or kl>Ri or klR>i.
-+r	> replace 【〔reConsN〕(〔94d〕[〔200d〕〔200c〕]*〔reConsN〕)*([〔93e〕-〔94c〕])?】 with 【र्$0】
+R	> replace 【〔reConsN〕(〔94d〕[〔200d〕〔200c〕]*〔reConsN〕)*([〔93e〕-〔94c〕])?】 with 【र्$0】
 	 | 【र्】
 
 //...*** VOWELS
 
-q	> 【〔1〕】	//... Deadkey 1: For forcing independent vowels
+【q Q】	> 【〔1〕】	//... Deadkey 1: For forcing independent vowels
 
 
 i	> map 【ि⇛ी】【इ⇛ई】                       //... double tap to turn short i into long ii
@@ -118,85 +113,83 @@ i	> map 【ि⇛ी】【इ⇛ई】                       //... double tap to
 	 | after 【〔reConsN】 replace 【र्】 with 【ृ】     //...  r;i shortcut for ृ
 	 | SendVowel 【इ】【ि】
 
-+i	> SendVowel 【ई】【ी】
+I	> SendVowel 【ई】【ी】
 
 a	> replace 【अ】 with 【आ】  //... just as with DevRom, a syllabic A followed by 'a' gives syllabic AA
 	 | SendVowel 【अ】【ा】
 
-+a	> SendVowel 【आ】【ा】	//...|	devanagari_letter_aa (आ)  devanagari_vowel_sign_aa (ा)
+A	> SendVowel 【आ】【ा】	//...|	devanagari_letter_aa (आ)  devanagari_vowel_sign_aa (ा)
 
 u	> map 【ु⇛ू】【उ⇛ऊ】                          //... double tap to turn short u into long uu
 	 | SendVowel 【उ】【ु】
 
-+u	> SendVowel 【ऊ】【ू】	//...|	devanagari_letter_uu (ऊ)  devanagari_vowel_sign_uu (ू)
+U	> SendVowel 【ऊ】【ू】	//...|	devanagari_letter_uu (ऊ)  devanagari_vowel_sign_uu (ू)
 
 e	> SendVowel 【ए】【े】	//...|	devanagari_letter_e (ए)  devanagari_vowel_sign_e (े)
 
-+e	> map 【े⇛ै】【ए⇛ऐ】                          //... double tap to turn e into ai
+E	> map 【े⇛ै】【ए⇛ऐ】                          //... double tap to turn e into ai
 	 | SendVowel 【ऐ】【ै】	//...|	devanagari_letter_ai (ऐ)  devanagari_vowel_sign_ai (ै)
 
 o	> map 【ो⇛ौ】【ओ⇛औ】                          //... double tap to turn e into ai
 	 | SendVowel 【ओ】【ो】	//...|	devanagari_letter_o (ओ)  devanagari_vowel_sign_o (ो)
 
-+o	> SendVowel 【औ】【ौ】	//...|	devanagari_letter_au (औ)  devanagari_vowel_sign_au (ौ)
+O	> SendVowel 【औ】【ौ】	//...|	devanagari_letter_au (औ)  devanagari_vowel_sign_au (ौ)
 
-+h	> map 【→ॅ→ॐ】【ा→ॉ】【ए→ऍ】【ो→ॉ】【आ→ऑ】【ओ→ऑ】【े→ॅ】   //... Shift+H adds candra.  Two of them makes OM.   (ॐ)
+H	> map 【→ॅ→ॐ】【ा→ॉ】【ए→ऍ】【ो→ॉ】【आ→ऑ】【ओ→ऑ】【े→ॅ】   //... Shift+H adds candra.  Two of them makes OM.   (ॐ)
 
 ^!l	> SendVowel 【ऋ】【ृ】	//... Old DevRom keys for devanagari_letter_vocalic_r (ऋ)  devanagari_vowel_sign_vocalic_r (ृ).  You can also use r;i
 
 
 //...*** CONSONANTS
 k	> 【क】
-+k	> 【ख】
+K	> 【ख】
 g	> 【ग】
-+g	> 【घ】
-+m	> 【ङ】
+G	> 【घ】
+M	> 【ङ】
 c	> 【च】
-+c	> 【छ】
+C	> 【छ】
 j	> 【ज】
-+j	> 【झ】
+J	> 【झ】
 ^!n	> 【ञ】
 f	> 【ट】
-+f	> 【ठ】
+F	> 【ठ】
 v	> 【ड】
-+v	> 【ढ】
-+n	> 【ण】
+V	> 【ढ】
+N	> 【ण】
 t	> 【त】
-+t	> 【थ】
+T	> 【थ】
 d	> 【द】
-+d	> 【ध】
+D	> 【ध】
 n	> 【न】
 p	> 【प】
-+p	> 【फ】
+P	> 【फ】
 b	> 【ब】
-+b	> 【भ】
+B	> 【भ】
 m	> 【म】
 r	> 【र】
 l	> 【ल】
 w	> 【व】
 h	> 【ह】
-+w	> 【द्व】	//... Shortcut for dwa //...|	devanagari_letter_da (द)  devanagari_sign_virama (्)  devanagari_letter_va (व)
+W	> 【द्व】	//... Shortcut for dwa //...|	devanagari_letter_da (द)  devanagari_sign_virama (्)  devanagari_letter_va (व)
 y	> map 【न्→ञ】【न्‍→न्य】【ग्→ज्ञ】【ग्‍→ग्य】
 	 | 【य】	//... Pressing Y key:   n;y for NYA, g;y for GYA (and nxy and gxy as alternatives to nY and gY)
-
-^!2	: 		//... old DevRom keys for GYA
-^!j	> 【ज्ञ】	//...|	devanagari_letter_ja (ज)  devanagari_sign_virama (्)  devanagari_letter_nya (ञ)
-+y	> 【्य】		//... shortcut for join -ya  //...|	devanagari_sign_virama (्)  devanagari_letter_ya (य)
+【^!2	^!j】	> 【ज्ञ】	//...|	devanagari_letter_ja (ज)  devanagari_sign_virama (्)  devanagari_letter_nya (ञ)   (old DevRom keys for GYA)
+Y	> 【्य】		//... shortcut for join -ya  //...|	devanagari_sign_virama (्)  devanagari_letter_ya (य)
 
 s	> 【स】
-+z	> 【क्ष】	//... shortcut for ksHa //...|	devanagari_letter_ka (क)  devanagari_sign_virama (्)  devanagari_letter_ssa (ष)
+Z	> 【क्ष】	//... shortcut for ksHa //...|	devanagari_letter_ka (क)  devanagari_sign_virama (्)  devanagari_letter_ssa (ष)
 
 ⌘if 〔SwapSHA〕 ⌘then
-+s	> 【श】		//...|	devanagari_letter_ssa (ष)
+S	> 【श】		//...|	devanagari_letter_ssa (ष)
 z	> 【ष】
 ⌘else
-+s	> 【ष】		//...|	devanagari_letter_ssa (ष)
+S	> 【ष】		//...|	devanagari_letter_ssa (ष)
 z	> map 【क्→क्ष】  //... Alternate keying for ksHa as k;z.  You could also type it at k;S or simply Z
 	 | 【श】
 ⌘endif
 
 
-+l	> ⌘if 〔UseLLA〕 ⌘then 【ळ】 ⌘else 【्र】 ⌘endif
+L	> ⌘if 〔UseLLA〕 ⌘then 【ळ】 ⌘else 【्र】 ⌘endif
 
 //...*** MISC:
 
@@ -230,16 +223,19 @@ z	> map 【क्→क्ष】  //... Alternate keying for ksHa as k;z.  You c
 ⌘if 〔SwapHalfH〕 ⌘then
 x	> after 【ह】 send 【्〔200C〕】
 	 | 【्〔200D〕】
-+x	> after 【ह】 send 【्〔200D〕】
+X	> after 【ह】 send 【्〔200D〕】
 	 | 【्〔200C〕】
 ⌘else
 x	> 【्〔200D〕】
-+x	> 【्〔200C〕】
+X	> 【्〔200C〕】
 ⌘endif
 
 
 //...---------------------------------------------
-
+function DoDigit 【western】【dev】【reverse】
+	after 【[0-9]】 send 【〔western〕】
+	| after 【[०-९]】 send 【〔dev〕】
+	| ⌘if 〔ScriptDigit〕 ^ 〔reverse〕 ⌘then 【〔dev〕】 ⌘else 【〔western〕】 ⌘endif //... It also used to toggle additionally on the CAPS state. Can we do that in Tinker??
 
 //...*** ALL DIGIT KEYS
 0	> DoDigit 【0】【०】【0】
@@ -266,14 +262,13 @@ x	> 【्〔200D〕】
 
 //... Misc keys, not particularly Devanagari related
 
--	> map 【- ­ – —	——】 //... Minus key, produces various hyphens/dashes
-	| 【-】
+// Dash key: double-tap for n-dash, triple-tap for m-dash. If more than that, just go back to all dashes.
+- > after 【----】 send 【-】
+  | 【- – — ----】
 
-[	> map 【[	⌊】  //... type [[ for ⌊ left_floor
-	| 【[】
+[	> 【[ ⌊】  //... type [[ for ⌊ left_floor
+]	> 【] ⌋】	//... type ]] for ⌋ right_floor
 
-]	> map 【]	⌋】	//... type ]] for ⌋ right_floor
-	| 【]】
 
 ⌘if 〔SmartQuotes〕 ⌘then
 "	> loopMap 【" “ ”】
@@ -284,6 +279,5 @@ x	> 【्〔200D〕】
 	| after 【[^\[ “\t\n\(⌊]】 send 【’】
 	| 【‘】
 ⌘endif
-
 
 

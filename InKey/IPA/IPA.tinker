@@ -24,12 +24,9 @@
 // 2015-04-20 3.0 Updated to Tinker format
 
 
----  //  Begin header section
 Settings:
-  TinkerVersion: 1.956
-  UseContext: 2  //  2 means include uncaptured keystrokes in the context,  CAPS-sensitive.
-
-...  //  End of header
+  TinkerVersion: 2.000
+...
 
 
 //  The digits have the most complex usage pattern, used for level contours, stem tones, rotas, and the digits themselves.
