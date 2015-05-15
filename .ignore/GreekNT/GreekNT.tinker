@@ -1,0 +1,194 @@
+//  Tinker Script to provide a context-sensitive keyboard layout for New Testament Greek
+
+	// Keyboard:	Greek NT Unicode
+	// Version:	2.0 ALPHA
+	// Authors:	Ben Chenoweth
+	// Official Distribution:	http://inkeysoftware.com
+
+	// You are free to modify this script for your own purposes.
+	// Please retain the above authorship details as appropriate.
+
+	// History:
+	// 2015-05-12 2.0 ALPHA Updated to Tinker format
+
+	// Still to do:
+	//	- handle AutoAddSmoothBreathingIfNeeded when consonants typed
+	//	- pressing ' twice runs UndoOxia and then sends '
+
+Settings:
+  TinkerVersion: 2.000
+...
+
+define psili 【α ἀ】【ὰ ἂ】【ά ἄ】【ᾶ ἆ】【ᾲ ᾂ】【ᾴ ᾄ】【ᾷ ᾆ】【Α Ἀ】【Ὰ Ἂ】【Ά Ἄ】【ε ἐ】【ὲ ἒ】【έ ἔ】【Ε Ἐ】【Ὲ Ἒ】【Έ Ἔ】【η ἠ】【ὴ ἢ】【ή ἤ】【ῆ ἦ】【ῂ ᾒ】【ῄ ᾔ】【ῇ ᾖ】【Η Ἠ】【Ὴ Ἢ】【Ή Ἤ】【ι ἰ】【ὶ ἲ】【ί ἴ】【ῖ ἶ】【Ι Ἰ】【Ὶ Ἲ】【Ί Ἴ】【ο ὀ】【ὸ ὂ】【ό ὄ】【Ο Ὀ】【Ὸ Ὂ】【Ό Ὄ】【υ ὐ】【ὺ ὒ】【ύ ὔ】【ῦ ὖ】【ω ὠ】【ὼ ὢ】【ώ ὤ】【ῶ ὦ】【ῲ ᾢ】【ῴ ᾤ】【ῷ ᾦ】【Ω Ὠ】【Ὼ Ὢ】【Ώ Ὤ】【ρ ῤ】
+
+define perispomeni 【α ᾶ】【ᾳ ᾷ】【η ῆ】【ῃ ῇ】【ι ῖ】【ϊ ῗ】【υ ῦ】【ϋ ῧ】【ω ῶ】【ῳ ῷ】【ἀ ἆ】【ἁ ἇ】【ἠ ἦ】【ἡ ἧ】【ἰ ἶ】【ἱ ἷ】【ὐ ὖ】【ὑ ὗ】【ὠ ὦ】【ὡ ὧ】【ᾀ ᾆ】【ᾁ ᾇ】【ᾐ ᾖ】【ᾑ ᾗ】【ᾠ ᾦ】【ᾡ ᾧ】【Ἀ Ἆ】【Ἁ Ἇ】【Ἠ Ἦ】【Ἡ Ἧ】【Ἰ Ἶ】【Ἱ Ἷ】【Ὑ Ὗ】【Ὠ Ὦ】【Ὡ Ὧ】【ᾈ ᾎ】【ᾉ ᾏ】【ᾘ ᾞ】【ᾙ ᾟ】【ᾨ ᾮ】【ᾩ ᾯ】
+
+define ypogegrammeni 【α ᾳ】【ᾶ ᾷ】【ὰ ᾲ】【ά ᾴ】【Α ᾼ】【ἀ ᾀ】【ἁ ᾁ】【ἂ ᾂ】【ἃ ᾃ】【ἄ ᾄ】【ἅ ᾅ】【ἆ ᾆ】【ἇ ᾇ】【Ἀ ᾈ】【Ἁ ᾉ】【Ἂ ᾊ】【Ἃ ᾋ】【Ἄ ᾌ】【Ἅ ᾍ】【Ἆ ᾎ】【Ἇ ᾏ】【η ῃ】【ῆ ῇ】【ὴ ῂ】【ή ῄ】【Η ῌ】【ἠ ᾐ】【ἡ ᾑ】【ἢ ᾒ】【ἣ ᾓ】【ἤ ᾔ】【ἥ ᾕ】【ἦ ᾖ】【ἧ ᾗ】【Ἠ ᾘ】【Ἡ ᾙ】【Ἢ ᾚ】【Ἣ ᾛ】【Ἤ ᾜ】【Ἥ ᾝ】【Ἦ ᾞ】【Ἧ ᾟ】【ω ῳ】【ῶ ῷ】【ὼ ῲ】【ώ ῴ】【Ω ῼ】【ὠ ᾠ】【ὡ ᾡ】【ὢ ᾢ】【ὣ ᾣ】【ὤ ᾤ】【ὥ ᾥ】【ὦ ᾦ】【ὧ ᾧ】【Ὠ ᾨ】【Ὡ ᾩ】【Ὢ ᾪ】【Ὣ ᾫ】【Ὤ ᾬ】【Ὥ ᾭ】【Ὦ ᾮ】【Ὧ ᾯ】
+
+define varia 【α ὰ】【ε ὲ】【η ὴ】【ι ὶ】【ο ὸ】【υ ὺ】【ω ὼ】【Α Ὰ】【Ε Ὲ】【Η Ὴ】【Ι Ὶ】【Ο Ὸ】【Υ Ὺ】【Ω Ὼ】【ἀ ἂ】【ἁ ἃ】【ἐ ἒ】【ἑ ἓ】【ἠ ἢ】【ἡ ἣ】【ἰ ἲ】【ἱ ἳ】【ὀ ὂ】【ὁ ὃ】【ὐ ὒ】【ὑ ὓ】【ὠ ὢ】【ὡ ὣ】【Ἀ Ἂ】【Ἁ Ἃ】【Ἐ Ἒ】【Ἑ Ἓ】【Ἠ Ἢ】【Ἡ Ἣ】【Ἰ Ἲ】【Ἱ Ἳ】【Ὀ Ὂ】【Ὁ Ὃ】【Ὑ Ὓ】【Ὠ Ὢ】【Ὡ Ὣ】【ᾳ ᾲ】【ῃ ῂ】【ῳ ῲ】【ᾀ ᾂ】【ᾁ ᾃ】【ᾐ ᾒ】【ᾑ ᾓ】【ᾠ ᾢ】【ᾡ ᾣ】【ᾈ ᾊ】【ᾉ ᾋ】【ᾘ ᾚ】【ᾙ ᾛ】【ᾨ ᾪ】【ᾩ ᾫ】【ϊ ῒ】【ϋ ῢ】
+
+define oxia 【α ά】【ε έ】【η ή】【ι ί】【ο ό】【υ ύ】【ω ώ】【Α Ά】【Ε Έ】【Η Ή】【Ι Ί】【Ο Ό】【Υ Ύ】【Ω Ώ】【ἀ ἄ】【ἁ ἅ】【ἐ ἔ】【ἑ ἕ】【ἠ ἤ】【ἡ ἥ】【ἰ ἴ】【ἱ ἵ】【ὀ ὄ】【ὁ ὅ】【ὐ ὔ】【ὑ ὕ】【ὠ ὤ】【ὡ ὥ】【Ἀ Ἄ】【Ἁ Ἅ】【Ἐ Ἔ】【Ἑ Ἕ】【Ἠ Ἤ】【Ἡ Ἥ】【Ἰ Ἴ】【Ἱ Ἵ】【Ὀ Ὄ】【Ὁ Ὅ】【Ὑ Ὕ】【Ὠ Ὤ】【Ὡ Ὥ】【ᾳ ᾴ】【ῃ ῄ】【ῳ ῴ】【ᾀ ᾄ】【ᾁ ᾅ】【ᾐ ᾔ】【ᾑ ᾕ】【ᾠ ᾤ】【ᾡ ᾥ】【ᾈ ᾌ】【ᾉ ᾍ】【ᾘ ᾜ】【ᾙ ᾝ】【ᾨ ᾬ】【ᾩ ᾭ】【ϊ ΐ】【ϋ ΰ】
+
+define dasia 【α ἁ】【ὰ ἃ】【ά ἅ】【ᾶ ἇ】【ᾲ ᾃ】【ᾴ ᾅ】【ᾷ ᾇ】【Α Ἁ】【Ὰ Ἃ】【Ά Ἅ】【ε ἑ】【ὲ ἓ】【έ ἕ】【Ε Ἑ】【Ὲ Ἓ】【Έ Ἕ】【η ἡ】【ὴ ἣ】【ή ἥ】【ῆ ἧ】【ῂ ᾓ】【ῄ ᾕ】【ῇ ᾗ】【Η Ἡ】【Ὴ Ἣ】【Ή Ἥ】【ι ἱ】【ὶ ἳ】【ί ἵ】【ῖ ἷ】【Ι Ἱ】【Ὶ Ἳ】【Ί Ἵ】【ο ὁ】【ὸ ὃ】【ό ὅ】【Ο Ὁ】【Ὸ Ὃ】【Ό Ὅ】【υ ὑ】【ὺ ὓ】【ύ ὕ】【ῦ ὗ】【Υ Ὑ】【Ὺ Ὓ】【Ύ Ὕ】【ω ὡ】【ὼ ὣ】【ώ ὥ】【ῶ ὧ】【ῲ ᾣ】【ῴ ᾥ】【ῷ ᾧ】【Ω Ὡ】【Ὼ Ὣ】【Ώ Ὥ】【ρ ῥ】【Ρ Ῥ】
+
+define anyV [αὰάᾶᾲᾴᾷΑᾺΆεὲέΕῈΈηὴήῆῂῄῇΗῊΉιὶίῖΙῚΊοὸόΟῸΌυὺύῦωὼώῶῲῴῷΩῺΏὬ]
+
+define wordInit (?:^|[^\p{L}\p{M}])  // regex for word-initial matches
+
+function SendCons 【char】
+	after 【〔wordInit〕〔anyV〕?】 replace 【$F】 with 【$R〔char〕】 usingMap 〔psili〕
+	| replace 【ς】 with 【σ〔char〕】
+	| 【〔char〕】
+
+function SendVowel 【char】
+	replace 【ς】 with 【σ〔char〕】
+	| 【〔char〕】
+
+>	> loopmap 【@ >】〔psili〕
+
+~	> loopmap 〔perispomeni〕
+	| 【῀͂】
+
+^	> loopmap 〔perispomeni〕
+	| 【῀͂】
+
+!	> loopmap 【@ !】〔ypogegrammeni〕
+	| 【ͺ】
+
+|	> loopmap 〔ypogegrammeni〕
+	| 【ͺ】
+
+_	> loopmap 〔ypogegrammeni〕
+	| 【ͺ】
+
++	> loopmap 【@ +】〔ypogegrammeni〕
+	| 【ͺ】
+
+`	> loopmap 〔varia〕
+	| 【`】
+
+\	> loopmap 【@ \】〔varia〕
+	| 【`】
+
+%	> 【\】
+
+/	> loopmap 〔oxia〕
+	| 【´】
+
+'	> map 〔oxia〕
+	| replace 【$F】 with 【$R᾿】 usingLoopMap 〔oxia〕
+	| 【᾿】
+
+(	> map 【@ «】
+	| 【(】
+
+// )	> map 【σ@ ς»】【@ »】【σ ς)】
+)	> map 【@ »】
+	| 【)】
+
+@	> SendCons 【@】
+
+*	> map 【@ *】
+	| replace 【\p{L}\p{M}*】 with 【】 // is this the same as InKey 1.0's back function?
+
+-	> map 【@ –】
+	| 【-】
+
+// :	> map 【σ@ ς:】【@ :】【σ ς·】
+:	> map 【@ :】
+	| 【·】
+
+// ?	> map 【σ ς;】
+	// | 【;】
+// .	> map 【σ ς.】
+	// | 【.】
+// ,	> map 【σ ς,】
+	// | 【,】
+
+<	> loopmap 【@ <】〔dasia〕
+
+"	> loopmap 【ι ϊ】【ὶ ῒ】【ί ΐ】【ῖ ῗ】【υ ϋ】【ὺ ῢ】【ύ ΰ】【ῦ ῧ】【Ι Ϊ】【Υ Ϋ】
+
+q	> SendCons 【θ】
+
+w	> map 【h ὡ】【H ὡ】
+	| SendVowel 【ω】
+
+e	> map 【h ἑ】
+	| SendVowel 【ε】
+r	> after 【〔wordInit〕】 send 【ῥ】  // If word-initial, send rho with rough breathing.
+	| 【ρ】   // otherwise, send plain rho
+t	> SendCons 【τ】
+y	> SendCons 【ψ】
+u	> map 【h ὑ】【H ὑ】
+	| SendVowel 【υ】
+i	> map 【h ἱ】【H ἱ】
+	| SendVowel 【ι】
+o	> map 【h ὁ】【H ὁ】
+	| SendVowel 【ο】
+p	> SendCons 【π】
+a	> map 【h ἁ】【H ἁ】
+	| SendVowel 【α】
+s	> map 【π ψ】【ς σ】
+	| after 【〔wordInit〕〔anyV〕?】 replace 【$F】 with 【$Rς】 usingMap 〔psili〕
+	| 【ς】
+d	> SendCons 【δ】
+f	> SendCons 【φ】
+g	> map 【νγ γγ】
+	| SendCons 【γ】
+h	> map 【τ θ】【κ χ】
+	| SendCons 【h】
+j	> map 【h ἡ】【H ἡ】
+	| SendCons 【η】
+k	> map 【ν γκ】
+	| SendCons 【κ】
+l	> SendCons 【λ】
+z	> SendCons 【ζ】
+x	> map 【ν γξ】
+	| SendCons 【ξ】
+c	> map 【ν γχ】
+	| SendCons 【χ】
+b	> SendCons 【β】
+n	> SendCons 【ν】
+m	> SendCons 【μ】
+Q	> SendCons 【Θ】
+W	> map 【h Ὡ】【H Ὡ】
+	| SendCons 【Ω】
+E	> map 【h Ἑ】【H Ἑ】
+	| SendVowel 【Ε】
+R	> after 【〔wordInit〕】 send 【Ῥ】
+	| SendVowel 【Ρ】
+T	> SendCons 【Τ】
+Y	> SendCons 【Ψ】
+U	> map 【h Ὑ】【H Ὑ】
+	| SendCons 【Υ】
+I	> map 【h Ἱ】【H Ἱ】
+	| SendCons 【Ι】
+O	> map 【h Ὁ】【H Ὁ】
+	| SendCons 【Ο】
+P	> SendCons 【Π】
+A	> map 【h Ἁ】【H Ἁ】
+	| SendVowel 【Α】
+S	> map 【Π Ψ】
+	| SendCons 【Σ】
+D	> SendCons 【Δ】
+F	> SendCons 【Φ】
+G	> map 【ΝΓ ΓΓ】
+	| SendCons 【Γ】
+H	> map 【Τ Θ】【Κ Χ】
+	| SendCons 【H】
+J	> map 【h Ἡ】【H Ἡ】
+	| SendCons 【Η】
+K	> map 【Ν ΓΚ】
+	| SendCons 【Κ】
+L	> SendCons 【Λ】
+Z	> SendCons 【Ζ】
+X	> map 【Ν ΓΞ】
+	| SendCons 【Ξ】
+C	> map 【Ν ΓΧ】
+	| SendCons 【Χ】
+B	> SendCons 【Β】
+N	> SendCons 【Ν】
+M	> SendCons 【Μ】
+// Space	> replace 【σ】 with 【ς 】
+	// | 【\x{20}】

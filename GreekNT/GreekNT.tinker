@@ -1,0 +1,183 @@
+//  Tinker Script to provide a context-sensitive keyboard layout for New Testament Greek
+
+	// Keyboard:	Greek NT Unicode
+	// Version:	2.0 BETA
+	// Authors:	Ben Chenoweth
+	// Official Distribution:	http://inkeysoftware.com
+
+	// You are free to modify this script for your own purposes.
+	// Please retain the above authorship details as appropriate.
+
+	// History:
+	// 2015-05-14 2.0 BETA Updated to Tinker format
+
+Settings:
+  TinkerVersion: 2.000
+...
+
+define lowerPsili 【α ἀ】【ὰ ἂ】【ά ἄ】【ᾶ ἆ】【ᾲ ᾂ】【ᾴ ᾄ】【ᾷ ᾆ】【ε ἐ】【ὲ ἒ】【έ ἔ】【η ἠ】【ὴ ἢ】【ή ἤ】【ῆ ἦ】【ῂ ᾒ】【ῄ ᾔ】【ῇ ᾖ】【ο ὀ】【ὸ ὂ】【ό ὄ】【υ ὐ】【ὺ ὒ】【ύ ὔ】【ῦ ὖ】【ω ὠ】【ὼ ὢ】【ώ ὤ】【ῶ ὦ】【ῲ ᾢ】【ῴ ᾤ】【ῷ ᾦ】【Ο Ὀ】【Ὸ Ὂ】【Ό Ὄ】【Ε Ἐ】【Ὲ Ἒ】【Έ Ἔ】 // not used, but contains all the items from psili not in capitalPsili (and therefore useful for tweaking auto smooth breathing routines)
+
+define stealPsili 【ἀ α】【ἂ ὰ】【ἄ ά】【ἆ ᾶ】【ᾂ ᾲ】【ᾄ ᾴ】【ᾆ ᾷ】【ἐ ε】【ἒ ὲ】【ἔ έ】【ἠ η】【ἢ ὴ】【ἤ ή】【ἦ ῆ】【ᾒ ῂ】【ᾔ ῄ】【ᾖ ῇ】【ὀ ο】【ὂ ὸ】【ὄ ό】【ὐ υ】【ὒ ὺ】【ὔ ύ】【ὖ ῦ】【ὠ ω】【ὢ ὼ】【ὤ ώ】【ὦ ῶ】【ᾢ ῲ】【ᾤ ῴ】【ᾦ ῷ】【Ὀ Ο】【Ὂ Ὸ】【Ὄ Ό】【Ἐ Ε】【Ἒ Ὲ】【Ἔ Έ】 // reversed order of lowerPsili
+
+define capitalPsili 【ι ἰ】【ὶ ἲ】【ί ἴ】【ῖ ἶ】【Α Ἀ】【Ὰ Ἂ】【Ά Ἄ】【Η Ἠ】【Ὴ Ἢ】【Ή Ἤ】【Ι Ἰ】【Ὶ Ἲ】【Ί Ἴ】【Ω Ὠ】【Ὼ Ὢ】【Ώ Ὤ】
+
+define psili 【α ἀ】【ὰ ἂ】【ά ἄ】【ᾶ ἆ】【ᾲ ᾂ】【ᾴ ᾄ】【ᾷ ᾆ】【ε ἐ】【ὲ ἒ】【έ ἔ】【η ἠ】【ὴ ἢ】【ή ἤ】【ῆ ἦ】【ῂ ᾒ】【ῄ ᾔ】【ῇ ᾖ】【ι ἰ】【ὶ ἲ】【ί ἴ】【ῖ ἶ】【ο ὀ】【ὸ ὂ】【ό ὄ】【υ ὐ】【ὺ ὒ】【ύ ὔ】【ῦ ὖ】【ω ὠ】【ὼ ὢ】【ώ ὤ】【ῶ ὦ】【ῲ ᾢ】【ῴ ᾤ】【ῷ ᾦ】【Α Ἀ】【Ὰ Ἂ】【Ά Ἄ】【Ε Ἐ】【Ὲ Ἒ】【Έ Ἔ】【Η Ἠ】【Ὴ Ἢ】【Ή Ἤ】【Ι Ἰ】【Ὶ Ἲ】【Ί Ἴ】【Ο Ὀ】【Ὸ Ὂ】【Ό Ὄ】【Ω Ὠ】【Ὼ Ὢ】【Ώ Ὤ】
+
+define perispomeni 【α ᾶ】【ᾳ ᾷ】【η ῆ】【ῃ ῇ】【ι ῖ】【ϊ ῗ】【υ ῦ】【ϋ ῧ】【ω ῶ】【ῳ ῷ】【ἀ ἆ】【ἁ ἇ】【ἠ ἦ】【ἡ ἧ】【ἰ ἶ】【ἱ ἷ】【ὐ ὖ】【ὑ ὗ】【ὠ ὦ】【ὡ ὧ】【ᾀ ᾆ】【ᾁ ᾇ】【ᾐ ᾖ】【ᾑ ᾗ】【ᾠ ᾦ】【ᾡ ᾧ】【Ἀ Ἆ】【Ἁ Ἇ】【Η Ἦ Ἧ】【Ἠ Ἦ】【Ἡ Ἧ】【Ἰ Ἶ】【Ἱ Ἷ】【Ὑ Ὗ】【Ὠ Ὦ】【Ὡ Ὧ】【ᾈ ᾎ】【ᾉ ᾏ】【ᾘ ᾞ】【ᾙ ᾟ】【ᾨ ᾮ】【ᾩ ᾯ】
+
+define ypogegrammeni 【α ᾳ】【ᾶ ᾷ】【ὰ ᾲ】【ά ᾴ】【Α ᾼ】【ἀ ᾀ】【ἁ ᾁ】【ἂ ᾂ】【ἃ ᾃ】【ἄ ᾄ】【ἅ ᾅ】【ἆ ᾆ】【ἇ ᾇ】【Ἀ ᾈ】【Ἁ ᾉ】【Ἂ ᾊ】【Ἃ ᾋ】【Ἄ ᾌ】【Ἅ ᾍ】【Ἆ ᾎ】【Ἇ ᾏ】【η ῃ】【ῆ ῇ】【ὴ ῂ】【ή ῄ】【Η ῌ】【ἠ ᾐ】【ἡ ᾑ】【ἢ ᾒ】【ἣ ᾓ】【ἤ ᾔ】【ἥ ᾕ】【ἦ ᾖ】【ἧ ᾗ】【Ἠ ᾘ】【Ἡ ᾙ】【Ἢ ᾚ】【Ἣ ᾛ】【Ἤ ᾜ】【Ἥ ᾝ】【Ἦ ᾞ】【Ἧ ᾟ】【ω ῳ】【ῶ ῷ】【ὼ ῲ】【ώ ῴ】【Ω ῼ】【ὠ ᾠ】【ὡ ᾡ】【ὢ ᾢ】【ὣ ᾣ】【ὤ ᾤ】【ὥ ᾥ】【ὦ ᾦ】【ὧ ᾧ】【Ὠ ᾨ】【Ὡ ᾩ】【Ὢ ᾪ】【Ὣ ᾫ】【Ὤ ᾬ】【Ὥ ᾭ】【Ὦ ᾮ】【Ὧ ᾯ】
+
+define varia 【α ὰ】【ε ὲ】【η ὴ】【ι ὶ】【ο ὸ】【υ ὺ】【ω ὼ】【Α Ὰ】【Ε Ὲ】【Η Ὴ】【Ι Ὶ】【Ο Ὸ】【Υ Ὺ】【Ω Ὼ】【ἀ ἂ】【ἁ ἃ】【ἐ ἒ】【ἑ ἓ】【ἠ ἢ】【ἡ ἣ】【ἰ ἲ】【ἱ ἳ】【ὀ ὂ】【ὁ ὃ】【ὐ ὒ】【ὑ ὓ】【ὠ ὢ】【ὡ ὣ】【Ἀ Ἂ】【Ἁ Ἃ】【Ἐ Ἒ】【Ἑ Ἓ】【Ἠ Ἢ】【Ἡ Ἣ】【Ἰ Ἲ】【Ἱ Ἳ】【Ὀ Ὂ】【Ὁ Ὃ】【Ὑ Ὓ】【Ὠ Ὢ】【Ὡ Ὣ】【ᾳ ᾲ】【ῃ ῂ】【ῳ ῲ】【ᾀ ᾂ】【ᾁ ᾃ】【ᾐ ᾒ】【ᾑ ᾓ】【ᾠ ᾢ】【ᾡ ᾣ】【ᾈ ᾊ】【ᾉ ᾋ】【ᾘ ᾚ】【ᾙ ᾛ】【ᾨ ᾪ】【ᾩ ᾫ】【ϊ ῒ】【ϋ ῢ】
+
+define oxia 【α ά】【ε έ】【η ή】【ι ί】【ο ό】【υ ύ】【ω ώ】【Α Ά】【Ε Έ】【Η Ή】【Ι Ί】【Ο Ό】【Υ Ύ】【Ω Ώ】【ἀ ἄ】【ἁ ἅ】【ἐ ἔ】【ἑ ἕ】【ἠ ἤ】【ἡ ἥ】【ἰ ἴ】【ἱ ἵ】【ὀ ὄ】【ὁ ὅ】【ὐ ὔ】【ὑ ὕ】【ὠ ὤ】【ὡ ὥ】【Ἀ Ἄ】【Ἁ Ἅ】【Ἐ Ἔ】【Ἑ Ἕ】【Ἠ Ἤ】【Ἡ Ἥ】【Ἰ Ἴ】【Ἱ Ἵ】【Ὀ Ὄ】【Ὁ Ὅ】【Ὑ Ὕ】【Ὠ Ὤ】【Ὡ Ὥ】【ᾳ ᾴ】【ῃ ῄ】【ῳ ῴ】【ᾀ ᾄ】【ᾁ ᾅ】【ᾐ ᾔ】【ᾑ ᾕ】【ᾠ ᾤ】【ᾡ ᾥ】【ᾈ ᾌ】【ᾉ ᾍ】【ᾘ ᾜ】【ᾙ ᾝ】【ᾨ ᾬ】【ᾩ ᾭ】【ϊ ΐ】【ϋ ΰ】
+
+define dasia 【α ἁ】【ὰ ἃ】【ά ἅ】【ᾶ ἇ】【ᾲ ᾃ】【ᾴ ᾅ】【ᾷ ᾇ】【Α Ἁ】【Ὰ Ἃ】【Ά Ἅ】【ε ἑ】【ὲ ἓ】【έ ἕ】【Ε Ἑ】【Ὲ Ἓ】【Έ Ἕ】【η ἡ】【ὴ ἣ】【ή ἥ】【ῆ ἧ】【ῂ ᾓ】【ῄ ᾕ】【ῇ ᾗ】【Η Ἡ】【Ὴ Ἣ】【Ή Ἥ】【ι ἱ】【ὶ ἳ】【ί ἵ】【ῖ ἷ】【Ι Ἱ】【Ὶ Ἳ】【Ί Ἵ】【ο ὁ】【ὸ ὃ】【ό ὅ】【Ο Ὁ】【Ὸ Ὃ】【Ό Ὅ】【υ ὑ】【ὺ ὓ】【ύ ὕ】【ῦ ὗ】【Υ Ὑ】【Ὺ Ὓ】【Ύ Ὕ】【ω ὡ】【ὼ ὣ】【ώ ὥ】【ῶ ὧ】【ῲ ᾣ】【ῴ ᾥ】【ῷ ᾧ】【Ω Ὡ】【Ὼ Ὣ】【Ώ Ὥ】
+
+define anyV [αεηιουωϊϋὰάὲέὴήὶίὸόὺύὼώᾲᾳᾴᾶᾷῂῃῄῆῇῒΐῖῗῢΰῦῧῲῳῴῶῷΕῈΈΟῸΌ]
+define anyCapitalV [ΑΗΙΥΩᾺΆᾼῊΉῌῚΊῪΎῺΏῼ] // not used but contains all the vowels not in anyV (and therefore useful for tweaking auto smooth breathing routines)
+
+define wordInit (?:^|[^\p{L}\p{M}])  // regex for word-initial matches
+
+=	> map 【@ =】
+	| loopMap 【ε η】 【ἐ ἠ】 【ἑ ἡ】 【ὲ ὴ】 【έ ή】 【ἒ ἢ】 【ἓ ἣ】 【ἔ ἤ】 【ἕ ἥ】 【Ε Η】 【Ἐ Ἠ】 【Ἑ Ἡ】 【Ὲ Ὴ】 【Έ Ή】 【Ἒ Ἢ】 【Ἓ Ἣ】 【Ἔ Ἤ】 【Ἕ Ἥ】 【ο ω】 【ὀ ὠ】 【ὁ ὡ】 【ὸ ὼ】 【ό ώ】 【ὂ ὢ】 【ὃ ὣ】 【ὄ ὤ】 【ὅ ὥ】 【Ο Ω】 【Ὀ Ὠ】 【Ὁ Ὡ】 【Ὸ Ὼ】 【Ό Ώ】 【Ὂ Ὢ】 【Ὃ Ὣ】 【Ὄ Ὤ】 【Ὅ Ὥ】
+
+>	> loopMap 【@ >】〔psili〕
+
+~	> loopMap 【@ —】〔perispomeni〕
+	| 【῀】
+
+^	> loopMap 【@ ^】〔perispomeni〕
+	| 【῀】
+
+!	> loopMap 【@ !】〔ypogegrammeni〕
+	| 【ͺ】
+
+|	> loopMap 【@ |】〔ypogegrammeni〕
+	| 【ͺ】
+
+_	> loopMap 〔ypogegrammeni〕
+	| 【ͺ】
+
++	> loopMap 【@ +】〔ypogegrammeni〕
+	| 【ͺ】
+
+`	> loopMap 〔varia〕
+	| 【`】
+
+\	> loopMap 【@ \】〔varia〕
+	| 【`】
+
+%	> 【\】
+
+/	> loopMap 【@ /】〔oxia〕
+	| 【´】
+
+'	> map 〔oxia〕
+	| replace 【$F】 with 【$R᾿】 usingLoopMap 〔oxia〕
+	| 【᾿】
+
+(	> loopMap 【@ «】
+	| 【(】
+
+)	> loopMap 【@ »】
+	| 【)】
+
+@	> SendCons 【@】
+
+-	> loopMap 【@ –】
+	| 【-】
+
+:	> loopMap 【@ :】
+	| 【·】
+
+?	> loopMap 【@ ?】
+	| 【;】
+
+<	> loopMap 【@ <】
+	| loopMap 【@ <】〔dasia〕
+
+"	> loopMap 【ι ϊ】【ὶ ῒ】【ί ΐ】【ῖ ῗ】【υ ϋ】【ὺ ῢ】【ύ ΰ】【ῦ ῧ】【Ι Ϊ】【Υ Ϋ】
+
+// Vowels ___________________________________________
+function SendVowel 【char】【psiliChar】【dasiaChar】【dasiaCapChar】
+	map 【῾ 〔dasiaChar〕】【῾〔1〕 〔dasiaCapChar〕】
+	| after 【〔wordInit〕】 send 【〔psiliChar〕】
+	| after 【〔wordInit〕】 replace 【$F】 with 【$R〔psiliChar〕】 usingMap 〔stealPsili〕
+	| replace 【ς】 with 【σ〔char〕】
+	| 【〔char〕】
+
+a	> SendVowel 【α】【ἀ】【ἁ】【Ἁ】
+e	> SendVowel 【ε】【ἐ】【ἑ】【Ἑ】
+i	> map 【ἁ αἱ】【ἑ εἱ】【ὁ οἱ】【ὑ υἱ】
+	| SendVowel 【ι】【ἰ】【ἱ】【Ἱ】
+j	> SendVowel 【η】【ἠ】【ἡ】【Ἡ】
+o	> SendVowel 【ο】【ὀ】【ὁ】【Ὁ】
+u	> SendVowel 【υ】【ὐ】【ὑ】【Ὑ】
+w	> SendVowel 【ω】【ὠ】【ὡ】【Ὡ】
+
+A	> SendVowel 【Α】【Ἀ】【Ἁ】【Ἁ】
+E	> SendVowel 【Ε】【Ἐ】【Ἑ】【Ἑ】
+I	> SendVowel 【Ι】【Ἰ】【Ἱ】【Ἱ】
+J	> SendVowel 【Η】【Ἠ】【Ἡ】【Ἡ】
+O	> SendVowel 【Ο】【Ὀ】【Ὁ】【Ὁ】
+U	> SendVowel 【Υ】【Υ】【Ὑ】【Ὑ】
+W	> SendVowel 【Ω】【Ὠ】【Ὡ】【Ὡ】
+
+// Consonants______________________________________________
+function SendCons 【char】
+	replace 【ς】 with 【σ〔char〕】
+	| 【〔char〕】
+
+c	> map 【ν γχ】
+	| SendCons 【χ】
+b	> SendCons 【β】
+d	> SendCons 【δ】
+f	> SendCons 【φ】
+g	> map 【νγ γγ】
+	| SendCons 【γ】
+h	> map 【τ θ】【κ χ】【π φ】【χ χ】
+	| SendCons 【῾】
+k	> map 【ν γκ】
+	| SendCons 【κ】
+l	> SendCons 【λ】
+m	> SendCons 【μ】
+n	> SendCons 【ν】
+p	> SendCons 【π】
+q	> SendCons 【θ】
+r	> map 【῾ ῥ】
+	| after 【〔wordInit〕】 send 【ῥ】
+	| SendCons 【ρ】
+s	> map 【π ψ】【ς σ】
+	| SendCons 【ς】
+t	> SendCons 【τ】
+x	> map 【ν γξ】
+	| SendCons 【ξ】
+y	> SendCons 【ψ】
+z	> SendCons 【ζ】
+
+B	> 【Β】
+C	> map 【Ν ΓΧ】
+	| 【Χ】
+D	> 【Δ】
+F	> 【Φ】
+G	> map 【ΝΓ ΓΓ】
+	| 【Γ】
+H	> map 【Τ Θ】【Κ Χ】
+	| 【῾〔1〕】
+K	> map 【Ν ΓΚ】
+	| 【Κ】
+L	> 【Λ】
+M	> 【Μ】
+N	> 【Ν】
+P	> 【Π】
+Q	> 【Θ】
+R	> map 【῾ Ῥ】
+	| after 【〔wordInit〕】 send 【Ῥ】
+	| 【Ρ】
+S	> map 【Π Ψ】
+	| 【Σ】
+T	> 【Τ】
+X	> map 【Ν ΓΞ】
+	| 【Ξ】
+Y	> 【Ψ】
+Z	> 【Ζ】
