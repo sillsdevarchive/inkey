@@ -29,7 +29,7 @@ OutputBaseFilename=InKeySetup(Mozhi)
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
-UsePreviousAppDir=no
+;UsePreviousAppDir=no
 
 [Code]
 function DirFromVersion(dummy: String): String;

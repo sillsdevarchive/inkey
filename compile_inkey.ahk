@@ -22,7 +22,7 @@ FileCopy %base%InKey.ini, %base%InkeyLive, 1
 
 MsgBox 4, , Run InKey now?
 ifmsgbox yes
-	Run %base%Inkey\inkey.exe, %base%inkey
+	Run %base%InkeyLive\inkey.exe, %base%inkey
 return
 
 Compile(in, out, icon) {

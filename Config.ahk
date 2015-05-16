@@ -439,26 +439,27 @@ ConfigureHighlightedKeyboard:
 	return
 
 InstallMore:
-	TitleString:=GetLang(94)  ; Select a keyboard file...
-	TempString:=GetLang(95) . " (*.inkey; *.zip)" ; Keyboard files (*.inkey; *.zip)
-	FileSelectFile, ZipPathFile, 3,, %TitleString%, %TempString%
-	If Not ErrorLevel
-	{
-		RunWait InKeyKeyboardInstaller.exe "%ZipPathFile%"
-
+	; TitleString:=GetLang(94)  ; Select a keyboard file...
+	; TempString:=GetLang(95) . " (*.inkey; *.zip)" ; Keyboard files (*.inkey; *.zip)
+	; FileSelectFile, ZipPathFile, 3,, %TitleString%, %TempString%
+	; If Not ErrorLevel
+	; {
+		; RunWait InKeyKeyboardInstaller.exe "%ZipPathFile%"
+		RunWait InKeyKeyboardInstaller.exe /noKill
+		if (ErrorLevel = 0)
 		; errorcheck:=installorupdatefromzip(ZipPathFile)
 		; if errorcheck<>0
 			; outputdebug Error encountered during keyboard install/update: %errorcheck%
 		; if errorcheck = 0
-		; {
+		{
 			; TempString:=GetLang(99) ; Installation complete.
 			; MsgBox,, %TitleString%, %TempString%
 			needsRestart := 1 ; need to reload InKey
 			LV_Delete() ; refresh ListView
 			FillKbdListAll()
 			goto DoConfigure
-		; }
-	}
+		}
+	; }
 	return
 
 SaveTab1Changes() {
@@ -854,4 +855,4 @@ OnTabChange:	; User has changed tabs.
 	Gui, 1:Default
 	return
 
-#include InstallOrUpdateKeyboard.ahk
+; #include InstallOrUpdateKeyboard.ahk
