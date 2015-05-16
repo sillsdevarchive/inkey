@@ -2,7 +2,7 @@ SCbin = c:\progra~1\AutoHotkey\Compiler\AutoHotkeySC.bin
 a2e = "C:\Program Files\AutoHotkey\Compiler\Ahk2Exe.exe"
 base =
 
-Compile(base . "InKeyKeyboardInstaller.ahk", base . "inkey\InKeyKeyboardInstaller.exe", base . "inkey.ico")
+Compile(base . "InKeyKeyboardInstaller.ahk", base . "inkeyLive\InKeyKeyboardInstaller.exe", base . "inkey.ico")
 MsgBox done
 return
 

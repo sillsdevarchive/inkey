@@ -10,6 +10,22 @@
 
 SetWorkingDir %A_ScriptDir%
 
+; Determine whether to store settings in AppData or in the working directory (which may prevent writing)
+if (FileExist("StoreUserSettingsInAppData.txt")) {
+	StoreUserSettingsInAppData := 1
+	BaseSettingsFolder := A_AppData . "\InKeySoftware"
+	InKeyINI := BaseSettingsFolder "\InKey.ini"
+	if (not FileExist(InKeyINI)) {
+		FileCreateDir %BaseSettingsFolder%
+		FileCopy InKey.ini, %InKeyINI%
+	}
+} else {
+	StoreUserSettingsInAppData := 0
+	BaseSettingsFolder := A_ScriptDir
+	InKeyINI := "InKey.ini"
+}
+IniRead GUILang, %InKeyINI%, InKey, GUILang, en
+
 if %0% = 0
 {
 	TitleString:=GetLang(94)  ; Select a keyboard file...

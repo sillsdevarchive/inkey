@@ -15,12 +15,10 @@ WinWaitClose i)inkey.exe ahk_class AutoHotkey
 ifwinexist i)inkey.exe ahk_class AutoHotkey
 	msgbox still there
 
-Compile(base . "inkey.ahk", base . "inkey\InKey.exe", base . "inkey.ico")
-FileCopy %base%InKeyLib.ahki, %base%Inkey, 1
-FileCopy %base%InKey License.ahki, %base%Inkey, 1
-FileCopy %base%InKey.ini, %base%Inkey, 1
-FileCopy %base%Lang.ini, %base%Inkey, 1
-FileCopyDir %base%Lang, %base%Inkey\Lang
+Compile(base . "inkey.ahk", base . "inkeyLive\InKey.exe", base . "inkey.ico")
+FileCopy %base%InKeyLib.ahki, %base%InkeyLive, 1
+FileCopy %base%InKey License.ahki, %base%InkeyLive, 1
+FileCopy %base%InKey.ini, %base%InkeyLive, 1
 
 MsgBox 4, , Run InKey now?
 ifmsgbox yes

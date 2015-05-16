@@ -126,18 +126,21 @@ DoConfigure:
 	Gui, 3:Add, Text, xs, %TempString%  ; Interface Language:
 	AvailableLangs =
 	idx := 0
-	Loop, %A_WorkingDir%\Langs\*.ini
+
+	Loop, .Langs\*.ini
 	{
-		StringLeft, Filename, A_LoopFileName, StrLen(A_LoopFileName) - 4
-		outputdebug CurrentLang=%CurrentLang%, Filename=%Filename%, Counter=%A_Index%
-		if (Filename = CurrentLang)
+		LangCode%A_Index% := RegExReplace(A_LoopFilename, ".*?([^\\]+)\.ini$", "$1")
+		; outputdebug iniread from %A_LoopFileName%
+		IniRead langName, .Langs\%A_LoopFileName%, Language, Name, ---
+		; outputdebug GUILangName=%GUILangName%, langName=%langName%, Counter=%A_Index%
+		if (langName = GUILangName)
 			idx := A_Index
 		if (AvailableLangs)
-			AvailableLangs := AvailableLangs . "|" . Filename
+			AvailableLangs := AvailableLangs . "|" . langName
 		else
-			AvailableLangs := Filename
+			AvailableLangs := langName
 	}
-	Gui, 3:Add, DropDownList, xs+180 yp Choose%idx% vCurrentLangText, %AvailableLangs%
+	Gui, 3:Add, DropDownList, xs+180 yp Choose%idx% vLangCodeIdx AltSubmit, %AvailableLangs%
 
 	TempString:=GetLang(153) " " A_WorkingDir    ; InKey folder:
 	Gui, 3:Add, Text, xs yp+30, %TempString%
@@ -480,11 +483,11 @@ SaveTab1Changes() {
 
 SaveTab2Changes() {
 	global
-outputdebug SaveTab2Changes
+outputdebug % "SaveTab2Changes: GuiLang=" GuiLang " LangCodeIdx=" LangCodeIdx " =>" LangCode%LangCodeIdx%
 	Gui, 3:Submit, NoHide ; update variables with user selections
 	UnderlyingLayout := SubStr(UnderlyingLayoutPairs, InStr(UnderlyingLayoutPairs, "|" . UnderlyingLayoutText . "|") - 8, 8)  ; bars ensure we don't match a name of which UnderlyingLayoutText is actually only a substring.  e.g. "US International" with "US"
 
-	If ((OldStartWithWindows <> StartWithWindows) or (OldPortableMode <> PortableMode) or (OldFollowWindowsLocale <> FollowWindowsInputLanguage) or (OldLeaveKeyboardsLoaded <> LeaveKeyboardsLoaded) or (OldRefreshLangBarOnExit <> RefreshLangBarOnExit) or (OldRefreshLangBarOnLoad <> RefreshLangBarOnLoad) or (OldShowKeyboardNameBalloon <> ShowKeyboardNameBalloon) or (OldPreviewAtCursor <> PreviewAtCursor) or (OldUnderlyingLayout <> UnderlyingLayout) or (OldRotaPeriod <> rotaPeriod) or (OldUseAltLangWithoutPrompting <> UseAltLangWithoutPrompting) or (OldNoSplash <> NoSplash) or (CurrentLang <> CurrentLangText))
+	If ((OldStartWithWindows <> StartWithWindows) or (OldPortableMode <> PortableMode) or (OldFollowWindowsLocale <> FollowWindowsInputLanguage) or (OldLeaveKeyboardsLoaded <> LeaveKeyboardsLoaded) or (OldRefreshLangBarOnExit <> RefreshLangBarOnExit) or (OldRefreshLangBarOnLoad <> RefreshLangBarOnLoad) or (OldShowKeyboardNameBalloon <> ShowKeyboardNameBalloon) or (OldPreviewAtCursor <> PreviewAtCursor) or (OldUnderlyingLayout <> UnderlyingLayout) or (OldRotaPeriod <> rotaPeriod) or (OldUseAltLangWithoutPrompting <> UseAltLangWithoutPrompting) or (OldNoSplash <> NoSplash) or (GuiLang <> LangCode%LangCodeIdx%))
 	{	; write new values to ini file
 outputdebug options changed... iniwrite
 		if (driveIsFixed)
@@ -500,6 +503,7 @@ outputdebug options changed... iniwrite
 		IniWrite, %PreviewAtCursor%, %InKeyINI%, InKey, PreviewAtCursor
 		IniWrite, %rotaPeriod%, %InKeyINI%, InKey, SpeedRotaPeriod
 		IniWrite, %UseAltLangWithoutPrompting%, %InKeyINI%, InKey, UseAltLangWithoutPrompting
+		IniWrite, % LangCode%LangCodeIdx%, %InKeyINI%, InKey, GUILang
 
 		; actually make the changes requested
 		If (driveIsFixed and (OldStartWithWindows != StartWithWindows))
@@ -508,17 +512,17 @@ outputdebug options changed... iniwrite
 			else
 				RegDelete HKCU, Software\Microsoft\Windows\CurrentVersion\Run, InKey
 
-		outputdebug CurrentLang=%CurrentLang%, NewLang=%CurrentLangText%
-		If  (CurrentLang != CurrentLangText)
-		{
-			; copy new language file from Langs folder into InKey folder, overwriting Lang.ini
-			NewLanguage = %A_WorkingDir%\Langs\%CurrentLangText%.ini
-			outputdebug New language file=%NewLanguage%
-			FileCopy, %NewLanguage%, %A_WorkingDir%\Lang.ini, 1
-			CurrentLang := CurrentLangText
-			needsRestart = 1
-		}
-		If ((OldPortableMode != PortableMode) or (OldUnderlyingLayout != UnderlyingLayout))
+		; outputdebug GUILangName=%GUILangName%, NewLang=%CurrentLangText%
+		; If  (GUILangName != CurrentLangText)
+		; {
+		;	; copy new language file from Langs folder into InKey folder, overwriting Lang.ini
+			; NewLanguage = %A_WorkingDir%\.Langs\%CurrentLangText%.ini
+			; outputdebug New language file=%NewLanguage%
+			; FileCopy, %NewLanguage%, %A_WorkingDir%\Lang.ini, 1
+			; GUILangName := CurrentLangText
+			; needsRestart = 1
+		; }
+		If ((OldPortableMode != PortableMode) or (OldUnderlyingLayout != UnderlyingLayout) or (GuiLang <> LangCode%LangCodeIdx%))
 			needsRestart = 1
 	}
 }

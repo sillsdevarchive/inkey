@@ -15,6 +15,7 @@ AppPublisher=InKey Software
 AppPublisherURL=http://www.inkeysoftware.com/
 AppSupportURL=http://www.inkeysoftware.com/
 AppUpdatesURL=http://www.inkeysoftware.com/
+OutputDir=files
 
 ; Select destination directory depending on Windows version
 DefaultDirName={pf}\InKey
@@ -64,12 +65,12 @@ Source: "InKeyLive\InKey License.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKey.chm"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKey.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKey.ini"; DestDir: "{app}"; Flags: ignoreversion confirmoverwrite
+Source: "InKeyLive\StoreUserSettingsInAppData.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKeyKeyboardInstaller.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKeyLib.ahki"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InKeyLive\Lang.ini"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\UnregisterKbds.ahk"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InKeyLive\Langs\*"; DestDir: "{app}\Langs"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "InKeyLive\IPA\*"; DestDir: "{app}\IPA"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "InKeyLive\.Langs\*"; DestDir: "{app}\Langs"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "InKeyLive\IPA\*"; DestDir: "{app}\IPA"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

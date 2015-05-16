@@ -1,7 +1,7 @@
 			   ; 2nd and 3rd segments of version number MUST be single-digit. See versionNum()
 			   ; Update both the following lines at the same time:
-			   ver = 2.0.0.1
-;@Ahk2Exe-SetVersion 2.0.0.1
+			   ver = 2.0.0.2
+;@Ahk2Exe-SetVersion 2.0.0.2
 ;@Ahk2Exe-SetName InKey
 ;@Ahk2Exe-SetDescription InKey Keyboard Manager
 ;@Ahk2Exe-SetCopyright Copyright (c) 2018-2015`, InKey Software
@@ -101,6 +101,7 @@
 		BaseSettingsFolder := A_ScriptDir
 		InKeyINI := "InKey.ini"
 	}
+	IniRead GUILang, %InKeyINI%, InKey, GUILang, en
 
 	AllowUnsafe := 0
 	if (FileExist("AllowUnsafeKeyboards.txt")) {
@@ -146,7 +147,8 @@
 
 	IniRead ShowKeyboardNameBalloon, %InKeyINI%, InKey, ShowKeyboardNameBalloon, 0
 	IniRead UseAltLangWithoutPrompting, %InKeyINI%, InKey, UseAltLangWithoutPrompting, 0
-	IniRead CurrentLang, Lang.ini, Language, Name
+	IniRead GUILang, %InKeyINI%, InKey, GUILang, en
+	IniRead GUILangName, .Langs\%GUILang%.ini, Language, Name, English
 
 	; [Un]/Register InKey to run on Windows start-up, if running from a fixed drive.
 	DriveGet, driveIsFixed, Type, %A_ScriptFullPath%

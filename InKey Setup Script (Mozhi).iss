@@ -15,6 +15,7 @@ AppPublisher=InKey Software
 AppPublisherURL=http://www.inkeysoftware.com/
 AppSupportURL=http://www.inkeysoftware.com/
 AppUpdatesURL=http://www.inkeysoftware.com/
+OutputDir=files
 
 ; Select destination directory depending on Windows version
 ;DefaultDirName={reg:HKCU\Software\InKey,Path|{pf}\InKey}
@@ -66,10 +67,9 @@ Source: "InKeyLive\InKey.chm"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKey.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKeyKeyboardInstaller.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKeyLib.ahki"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InKeyLive\Lang.ini"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InKeyLive\RegistrationKey.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InKeyLive\StoreUserSettingsInAppData.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\UnregisterKbds.ahk"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InKeyLive\Langs\*"; DestDir: "{app}\Langs"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "InKeyLive\.Langs\*"; DestDir: "{app}\Langs"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "InKeyLive\Mlym-Mozhi\InKey.ini"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\Mlym-Mozhi\Mlym-Mozhi.tinker"; DestDir: "{app}\Mlym-Mozhi"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "InKeyLive\Mlym-Mozhi\Mozhi.ico"; DestDir: "{app}\Mlym-Mozhi"; Flags: ignoreversion recursesubdirs createallsubdirs

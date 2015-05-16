@@ -1,12 +1,7 @@
 The accompanying AutoHotKey.exe program has been redistributed
 in this package for free.  The AutoHotKey program, its source code,
 its help file, and other tools can be downloaded from
-http://www.autohotkey.com.
-
-The InKey keyboards included in this package are AutoHotKey scripts.
-If you find AutoHotKey useful for this or other purposes, please
-email a note of thanks to support@autohotkey.com, and consider
-sending a donation of any size to that address via PayPal.
+http://www.ahkscript.org
 
 This redistribution of AutoHotKey.exe is licensed under the
 GNU GENERAL PUBLIC LICENSE, as presented below.
