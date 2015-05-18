@@ -24,7 +24,7 @@ DefaultGroupName=InKey
 UninstallDisplayIcon={app}\InKey.exe
 AllowNoIcons=yes
 LicenseFile=InKeyLive\InKey License.txt
-OutputBaseFilename=InKey Setup (IPA)
+OutputBaseFilename=SetupInKey-{#InKeyVer}-(IPA)
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -69,7 +69,7 @@ Source: "InKeyLive\StoreUserSettingsInAppData.txt"; DestDir: "{app}"; Flags: ign
 Source: "InKeyLive\InKeyKeyboardInstaller.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKeyLib.ahki"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\UnregisterKbds.ahk"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InKeyLive\.Langs\*"; DestDir: "{app}\Langs"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "InKeyLive\.Langs\*"; DestDir: "{app}\.Langs"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "InKeyLive\IPA\*"; DestDir: "{app}\IPA"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

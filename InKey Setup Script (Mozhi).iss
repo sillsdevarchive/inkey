@@ -25,7 +25,7 @@ DefaultGroupName=InKey
 UninstallDisplayIcon={app}\InKey.exe
 AllowNoIcons=yes
 LicenseFile=InKeyLive\InKey License.txt
-OutputBaseFilename=InKeySetup(Mozhi)
+OutputBaseFilename=SetupInKey-{#InKeyVer}-(Mozhi)
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -69,7 +69,7 @@ Source: "InKeyLive\InKeyKeyboardInstaller.exe"; DestDir: "{app}"; Flags: ignorev
 Source: "InKeyLive\InKeyLib.ahki"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\StoreUserSettingsInAppData.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\UnregisterKbds.ahk"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InKeyLive\.Langs\*"; DestDir: "{app}\Langs"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "InKeyLive\.Langs\*"; DestDir: "{app}\.Langs"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "InKeyLive\Mlym-Mozhi\InKey.ini"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\Mlym-Mozhi\Mlym-Mozhi.tinker"; DestDir: "{app}\Mlym-Mozhi"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "InKeyLive\Mlym-Mozhi\Mozhi.ico"; DestDir: "{app}\Mlym-Mozhi"; Flags: ignoreversion recursesubdirs createallsubdirs

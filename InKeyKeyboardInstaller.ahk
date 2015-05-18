@@ -147,7 +147,7 @@ installorupdatefromzip(ZipPathFile) {
 			MsgBox %TempString% ; There was a problem with copying files to the InKey folder!
 			; delete temp folder
 			SetWorkingDir, %A_Temp%
-			; FileRemoveDir, ExtractDir, 1
+			FileRemoveDir, ExtractDir, 1
 			SetWorkingDir, %A_ScriptDir%
 			errorcheck = 5
 			return errorcheck
@@ -156,7 +156,7 @@ installorupdatefromzip(ZipPathFile) {
 
 	; delete temp folder
 	SetWorkingDir, %A_Temp%
-	; FileRemoveDir, ExtractDir, 1
+	FileRemoveDir, ExtractDir, 1
 	SetWorkingDir, %A_ScriptDir%
 
 

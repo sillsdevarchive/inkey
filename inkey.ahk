@@ -1,7 +1,7 @@
 			   ; 2nd and 3rd segments of version number MUST be single-digit. See versionNum()
 			   ; Update both the following lines at the same time:
-			   ver = 2.0.0.2
-;@Ahk2Exe-SetVersion 2.0.0.2
+			   ver = 2.0.0.3
+;@Ahk2Exe-SetVersion 2.0.0.3
 ;@Ahk2Exe-SetName InKey
 ;@Ahk2Exe-SetDescription InKey Keyboard Manager
 ;@Ahk2Exe-SetCopyright Copyright (c) 2018-2015`, InKey Software
@@ -884,9 +884,9 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	}
 
 	tinkerLines := RegExReplace(tinkerLines, "((?<!\r)\n)|(\r(?!\n))", "`r`n") ; ensure canonical CR-LF
-	; tinkerLines := RegExReplace(tinkerLines, chr(0xA0), " ") ; replace any no break space with normal space. (may be code copied from tutorial.)
-	local nbsp := chr(0xA0)
-	StringReplace tinkerLines, tinkerLines, %nbsp%, %A_Space%, 1  ; replace any no break space with normal space. (may be code copied from tutorial.)
+	tinkerLines := RegExReplace(tinkerLines, "[\x{a0}\t]+", " ") ; replace any tab or no break space with normal space. (may be code copied from tutorial.)
+	; local nbsp := chr(0xA0)
+	; StringReplace tinkerLines, tinkerLines, %nbsp%, %A_Space%, 1  ; replace any no break space with normal space. (may be code copied from tutorial.)
 
 	; Remove all comments and trailing whitespace from the file
 	local fpos
