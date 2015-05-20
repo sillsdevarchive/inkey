@@ -1,7 +1,7 @@
 			   ; 2nd and 3rd segments of version number MUST be single-digit. See versionNum()
 			   ; Update both the following lines at the same time:
-			   ver = 2.0.0.3
-;@Ahk2Exe-SetVersion 2.0.0.3
+			   ver = 2.0.0.4
+;@Ahk2Exe-SetVersion 2.0.0.4
 ;@Ahk2Exe-SetName InKey
 ;@Ahk2Exe-SetDescription InKey Keyboard Manager
 ;@Ahk2Exe-SetCopyright Copyright (c) 2018-2015`, InKey Software
@@ -884,7 +884,7 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	}
 
 	tinkerLines := RegExReplace(tinkerLines, "((?<!\r)\n)|(\r(?!\n))", "`r`n") ; ensure canonical CR-LF
-	tinkerLines := RegExReplace(tinkerLines, "[\x{a0}\t]+", " ") ; replace any tab or no break space with normal space. (may be code copied from tutorial.)
+	tinkerLines := RegExReplace(tinkerLines, "[\x{a0}]+", " ") ; replace any no break space with normal space. (may be code copied from tutorial.)
 	; local nbsp := chr(0xA0)
 	; StringReplace tinkerLines, tinkerLines, %nbsp%, %A_Space%, 1  ; replace any no break space with normal space. (may be code copied from tutorial.)
 
@@ -923,14 +923,14 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	local CapsKeys := "abcdefghijklmnopqrstuvwxyz"
 
 	; fpos := RegExMatch(tinkerLines, "Oi)---(?:\s+//.*)?\r?\nSettings:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+)(?:Options:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+))?\.\.\.(?:\s+//.*)?\r?\n", match)
-	fpos := RegExMatch(tinkerLines, "Oim)^Settings:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+)(?:Options:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+))?\.\.\.(?:\s+//.*)?\r?\n", match)
+	fpos := RegExMatch(tinkerLines, "Oim)^Settings:\s*(?:\s+//.*)?\r?\n((?:\s+.*\r?\n)+)(?:Options:\s*(?:\s+//.*)?\r?\n((?:\s+.*\r?\n)+))?\.\.\.(?:\s+//.*)?\r?\n", match)
 	if (fpos) {
 		tinkerLines := SubStr(tinkerLines, match.Len(0) + fpos)
 		local settings := match.Value(1)
 		options := match.Value(2)
 
 		; Check Tinker version for compatibility
-		if (RegExMatch(settings, "Om)^\s*TinkerVersion:\s+([0-9\.]*)$", match)) {
+		if (RegExMatch(settings, "Om)^\s+TinkerVersion:\s+([0-9\.]*)$", match)) {
 			local tvNum := versionNum(match.Value(1))
 			if (tvNum < K_MinTinkerVersion) {
 				local err := TinkerFile " uses Tinker v. " match.Value(1) ". Please update keyboard to at least v. " K_MinTinkerVersion
@@ -948,12 +948,12 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 		}
 
 		; Get CapsSensitive setting
-		if (RegExMatch(settings, "Om)^\s*CapsSensitive:\s+(No|false)$", match)) {
+		if (RegExMatch(settings, "Om)^\s+CapsSensitive:\s+(No|false)$", match)) {
 			CapsSensitive := 0
 		}
 
 		; Get CapsKeys setting
-		if (RegExMatch(settings, "Om)^\s*CapsKeys:\s+(\S*)$", match)) {
+		if (RegExMatch(settings, "Om)^\s+CapsKeys:\s+(\S*)$", match)) {
 			CapsKeys := match.Value(1)
 		}
 
