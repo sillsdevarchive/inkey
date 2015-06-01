@@ -31,7 +31,7 @@ OutputBaseFilename=SetupInKey-{#InKeyVer}-({#KbdName})
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
-UsePreviousAppDir=no
+UsePreviousAppDir=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -46,12 +46,12 @@ Source: "InKeyLive\7-zip License.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\AutoHotKey License.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\AutoHotkey.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKey License.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InKeyLive\InKey.chm"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "InKeyLive\InKey.chm"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKey.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKeyKeyboardInstaller.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\InKeyLib.ahki"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\StoreUserSettingsInAppData.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "InKeyLive\UnregisterKbds.ahk"; DestDir: "{app}"; Flags: ignoreversion
+Source: "InKeyLive\UninstallKbds.ahk"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\.Langs\*.ini"; DestDir: "{app}\.Langs"; Flags: ignoreversion
 Source: "{#InKeyIniPath}\InKey.ini"; DestDir: "{app}"; Flags: ignoreversion
 Source: "InKeyLive\{#KbdName}\*"; Excludes: "inkey.ini,.git,.git*,*.md"; DestDir: "{app}\{#KbdName}"; Flags: ignoreversion
@@ -72,3 +72,9 @@ Root: HKCR; Subkey: "InKeyKeyboardFile\shell\open\command"; ValueType: string; V
 
 [Run]
 Filename: "{app}\InKey.exe"; Description: "{cm:LaunchProgram,InKey}"; Flags: nowait postinstall skipifsilent
+
+[UninstallRun]
+Filename: "{app}\AutoHotKey.exe"; Parameters: "UninstallKbds.ahk"; WorkingDir: "{app}"
+
+[UninstallDelete]
+Type: filesandordirs; Name: "{app}\InstallLog.txt"

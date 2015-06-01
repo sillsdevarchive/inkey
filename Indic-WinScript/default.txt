@@ -54,5 +54,3 @@ SHA=z
 SSA=+z
 SA=s
 HA=h
-JOIN=x
-NONJOIN=+x

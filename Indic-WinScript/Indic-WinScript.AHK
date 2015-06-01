@@ -12,6 +12,8 @@
 		ver 0.65	2011-02-10	Add offsets 112-113 to the range of characters recognized as consonants in Bengali script.
 		ver 0.66	2011-07-1	Adjustments for Gurmukhi
 		ver 0.67	2011-08-13	Swap MAL chillu from NONJOIN to JOIN.
+		ver 0.68	2012-11-30  More adjustments for Gurmukhi
+		ver 0.69	2014-08-05	Add UseNukta and ViramaAnywhere
 */
 
 ;________________________________________________________________________________________________________________
@@ -108,6 +110,9 @@ OnLoadScript:	; InKeyLib will call this subroutine just once, when the script is
 	RegisterRota(103, "( [ { ⌊	((", 0x28)
 	RegisterRota(104, ") ] } ⌋	))", 0x29)
 
+	; bindi/tippi for gurmukhi.  Optional: If certain characters always take tippi, never bindi, add those to the rota.
+	RegisterRota(105, "ਂ ੰ", 0x0A02)
+
 return
 
 ;--------------------------------
@@ -131,6 +136,8 @@ OnLoadKeyboard:	; InKeyLib will call this subroutine the first time InKey calls 
 	UseShortO%K_ID% := GetParam("UseShortO", 0) ; Determine whether to use the short O
 	UseShortE%K_ID% := GetParam("UseShortE", 0) ; Determine whether to use the short E
 	AtomicChillu%K_ID% := (script%K_ID% = 9) ? GetParam("AtomicChillu", 0) : 0 ; Determine whether to use Atomic Chillu characters (in Malayalam)
+	UseNukta%K_ID% := GetParam("UseNukta", InStr("679", script%K_ID%) ? 0 : 1) ; Determine whether to use the Nukta in a script that does not ordinarily support it (i.e. TAM/TEL/MAL).
+	ViramaAnywhere%K_ID% := GetParam("ViramaAnywhere", 0) ; Determine whether to permit virama to be typed anywhere. e.g. after vowels
 
 	AKey%K_ID% := GetParam("AKey", 1) ; Type 'a' twice to get long AA vowel.  e.g. typing 'kaa' produces का (1) or कअ (0)
 	SmartQuotes%K_ID% := GetParam("SmartQuotes", 0)
@@ -180,6 +187,8 @@ OnKeyboardInit:		; This subroutine will be called immediately after OnLoadKeyboa
 	ScriptDigit := ScriptDigit%K_ID%
 	UseShortE := UseShortE%K_ID%
 	UseShortO := UseShortO%K_ID%
+	UseNukta := UseNukta%K_ID%
+	ViramaAnywhere := ViramaAnywhere%K_ID%
 	Danda := Danda%K_ID%
 	AtomicChillu := AtomicChillu%K_ID%
 	SmartQuotes := SmartQuotes%K_ID%
@@ -199,15 +208,11 @@ CANDRABINDU:					; 	Key: Shift+S
 SendChar(sbase + 1)			;	CANDRABINDU
 return
 
-TIPPI:						; 	Key: }
-if (script = 3)
-	SendChar(sbase + 112)
-else
-	SendChar(0x7D)		;	RIGHT CURLY BRACKET
-return
-
 ANUSVARA:					; 	Key: Shift+M
-SendChar(sbase + 2)		;	ANUSVARA
+if (script = 3)
+	DoRota(105)
+else
+	SendChar(sbase + 2)		;	ANUSVARA
 return
 
 VISARGA:					;	Key: Shift+H
@@ -215,14 +220,14 @@ SendChar(sbase + 3)		;	VISARGA
 return
 
 NUKTA: 					;	Key: F
-if InStr("679", script)		; If TAM/TEL/MAL
+if (UseNukta = 0)
 	SoundPlay *-1
 else if (ctx() = 0x93C)
 	ReplaceChar(0x970, 1, 1, 0x66)	; replace DEV NUKTA with DEV ABBREVIATION SYMBOL
 else
 	SendChar(sbase + 60)	;	NUKTA
 return
-;*
+;*க஼
 
 ; ==============================================================================
 ;*** Vowels
@@ -580,9 +585,9 @@ JOIN:        ; Key: X
 		; maybe some additional cue would be helpful, like a click or something in the tooltip
 	} else if (cc = 32) {
 		ReplaceChar(0x200D)  ; To get an isolated ZWJ, type:  {space} {x}
-	} ;else {
-		; we could perhaps do some kind of vowel alternation here
-	;}
+	} else if (ViramaAnywhere) {
+		SendChar(sbase + 77)   ; may be used as a form of vowel modifier
+	}
 	return
 
 NONJOIN:		; Key: Shift+X

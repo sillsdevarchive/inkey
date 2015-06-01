@@ -1,7 +1,7 @@
 			   ; 2nd and 3rd segments of version number MUST be single-digit. See versionNum()
 			   ; Update both the following lines at the same time:
-			   ver = 2.0.0.4
-;@Ahk2Exe-SetVersion 2.0.0.4
+			   ver = 2.0.0.9
+;@Ahk2Exe-SetVersion 2.0.0.9
 ;@Ahk2Exe-SetName InKey
 ;@Ahk2Exe-SetDescription InKey Keyboard Manager
 ;@Ahk2Exe-SetCopyright Copyright (c) 2018-2015`, InKey Software
@@ -11,26 +11,24 @@
 #NoEnv
 #SingleInstance force
 #Warn All, OutputDebug
+#MaxHotkeysPerInterval 300
+#HotkeyInterval 1000
+
 
 ; To implement for TINKER
 ; - SetPhase, IsPhase
 ; SetMode(), IsMode for more persistent settings. e.g. smart/plain quote, dev/roman digits
 
-; -Implement 〔KeyChar〕 that provides the character that A_Hotkey would have produced. (Useful for default fallback of user-defined special-function key such as Deva-InKey backtick, and for multi-key handlers such as digits.)
+; -Implement 〔KeyChar〕 that provides the character that A_Hotkey would have produced. (Useful for default fallback of user-defined special-function key such as Deva-Winscript 〔TOGGLE〕 (which might be something like Alt+Backslash), and for multi-key handlers such as digits.)
 
 ; TODO: Warn if any 〔UNKNOWNS〕 remain in text. (need to redo how AHK file is written)
 
-; TODO: allow uppercase hotkey labels
-; TODO: change syntax for identical keyhandler
 ; TODO: implement multi-ruleset. each ruleset begins with >
 ; TODO: implement preprocess that prepends rulesets/rules to specified keys
 ; TODO: implement normalize that appends rulesets to specified keys.
 ; Problem: A 2nd ruleset (such as preproc or normalization) will result in requiring two BKSP to undo it (if it applied). Also it happens in two steps, so in-btween form is briefly displayed than changed. We need to make the net affect of multiple rulesets happen as a single unit.
 
-; In settings, "CapsSensitive" defaults to "Yes", and 'CapsKeys" defaults to "abcdefghijklmnopqrstuvwxyz".
-; If CapsSensitive, then apply CapsKeys and do K_UseContext = 2.
-; otherwise, do K_UseContext = 1
-; TODO later: generate handlers at tinker compile time rather than inkeylib.ahki run time
+; TODO: generate handlers at tinker compile time rather than inkeylib.ahki run time
 
 ; TODO: enable define to be inside ##if...
 
@@ -39,8 +37,7 @@
 
 ; TODO: When opening Config dialog, *RunAs ftype InKeyKeyboardFile="%A_ScriptDir%" "%1"
 
-; TODO: progress indicator during compile tinker file
-
+; TODO: figure out what when RegisterForPreloading() was supposed to be called  (~ line 786)
 
 
 
@@ -116,7 +113,7 @@
 	ActivateKbd(0, KBD_HKL0)
 	;~ HKLDisplayName%KBD_HKL0% := GetLang(1)  ; "Default Keyboard"
 	oHKLDisplayName[KBD_HKL0] := GetLang(1)  ; "Default Keyboard"
-	validate()
+	ShowSplash()		; validate()
 	hwndLastActive := WinExist("A")
 	WinGet hwndTray, ID, ahk_class Shell_TrayWnd
 	;outputdebug hwndtray = %hwndtray%
@@ -274,16 +271,24 @@
 			IniRead, KBD_Icon%numKeyboards%, %CurrIni%, Keyboard, Icon, %A_Space%
 			IniRead, KBD_Params%numKeyboards%, %CurrIni%, Keyboard, Params, %A_Space%
 			IniRead, KBD_DisplayCmd%numKeyboards%, %CurrIni%, Keyboard, LayoutHelp, %A_Space%
-			; outputdebug % "z. layouthelp = " KBD_DisplayCmd%numKeyboards%
+			; outputdebug % CurrIni ">> z. layouthelp = " KBD_DisplayCmd%numKeyboards%
 			if (KBD_DisplayCmd%numKeyboards% = "")
 				IniRead, KBD_DisplayCmd%numKeyboards%, %CurrIni%, Keyboard, DisplayCmd, %A_Space%  ; Old name for LayoutHelp
 			; outputdebug % "a. layouthelp = " KBD_DisplayCmd%numKeyboards%
 			if ((RegExMatch(KBD_DisplayCmd%numKeyboards%, "i)\.(pdf|png|doc|docx|txt|htm|html|jpg)$")
 					or (RegExMatch(KBD_DisplayCmd%numKeyboards%, "i)\.ahk$") and AllowUnsafe))
 				  and FileExist(KBD_Folder%numKeyboards% . "\" . KBD_DisplayCmd%numKeyboards% )) {
-				KBD_DisplayCmd%numKeyboards%  := KBD_Folder%numKeyboards% . "\" . KBD_DisplayCmd%numKeyboards% ; If the keyboard help file exists in the keyboard's folder, prepend path.
+				if (RegExMatch(KBD_DisplayCmd%numKeyboards%, "i)\.tinker\.html$"))
+				{	; LayoutHelp file is one we generate
+					KBD_DisplayCmdSrc%numKeyboards%  := KBD_Folder%numKeyboards% . "\" . KBD_DisplayCmd%numKeyboards% ; If the keyboard help file exists in the keyboard's folder, prepend path.
+					KBD_DisplayCmd%numKeyboards%  := KBD_CacheStem%numKeyboards% ".html"
+				} else {
+					KBD_DisplayCmdSrc%numKeyboards%  =
+					KBD_DisplayCmd%numKeyboards%  := KBD_Folder%numKeyboards% . "\" . KBD_DisplayCmd%numKeyboards% ; If the keyboard help file exists in the keyboard's folder, prepend path.
+				}
 			} else {
 				KBD_DisplayCmd%numKeyboards% =
+				KBD_DisplayCmdSrc%numKeyboards% =
 			}
 			; outputdebug % "b. layouthelp = " KBD_DisplayCmd%numKeyboards%
 			if (AllowUnsafe) {
@@ -523,8 +528,10 @@
 	Loop % numKeyboards  {
 		kk := A_Index
 		if (KBD_TinkerFile%kk%) {
-			if ((not FileExist(KBD_AhkFile%kk%)) or FileIsOlderThan(KBD_AhkFile%kk%, KBD_TinkerFile%kk%) or FileIsOlderThan(KBD_AhkFile%kk%, A_ScriptFullPath) or FileIsOlderThan(KBD_AhkFile%kk%, KBD_IniFile%kk%)) {
+			if ((not FileExist(KBD_AhkFile%kk%)) or FileIsOlderThan(KBD_AhkFile%kk%, KBD_TinkerFile%kk%) or FileIsOlderThan(KBD_AhkFile%kk%, A_ScriptFullPath) or FileIsOlderThan(KBD_AhkFile%kk%, KBD_IniFile%kk%) or (KBD_DisplayCmdSrc%kk% and FileIsOlderThan(KBD_DisplayCmd%kk%, KBD_DisplayCmdSrc%kk%))) {
+				GUIControl,, splashTxt, % "Recompiling keyboard:" chr(10) KBD_LayoutName%kk%
 				err := ProcessTinkerFile(kk)
+				GUIControl,, splashTxt, %A_Space%
 				if (err) {
 					Gui Hide
 					MsgBox %err%
@@ -777,8 +784,8 @@ RegisterAndLoadKeyboard(kk) {
 		Outputdebug RegWrite failed
 		return 0
 	}
-	if (Preload)
-		RegisterForPreloading(KLID, Lang)
+	if (0)    ; if (Preload) 			; TODO: I don't remember what Preload was supposed to mean
+		RegisterForPreloading(KLID, Lang)   ; so this NEVER gets called!!
 
 	jj := LoadKeyboardLayout(KLID, 16, layoutName)
 	if (jj <> hkl) {
@@ -883,6 +890,14 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 		return ("Unable to read file: " TinkerFile)
 	}
 
+	layoutLines := ""
+	if (KBD_DisplayCmdSrc%kk%) {
+		FileRead layoutLines, % KBD_DisplayCmdSrc%kk%
+		layoutLines := RegExReplace(layoutLines, "i)((?:&#12308;)|〔)LayoutName(〕|(?:&#12309;))", KBD_LayoutName%kk%)
+		layoutLines := RegExReplace(layoutLines, "i)((?:&#12308;)|〔)IniFileName(〕|(?:&#12309;))", KBD_IniFile%kk%)
+		; layoutLines := RegExReplace(layoutLines, "i)KA", "k")
+	}
+
 	tinkerLines := RegExReplace(tinkerLines, "((?<!\r)\n)|(\r(?!\n))", "`r`n") ; ensure canonical CR-LF
 	tinkerLines := RegExReplace(tinkerLines, "[\x{a0}]+", " ") ; replace any no break space with normal space. (may be code copied from tutorial.)
 	; local nbsp := chr(0xA0)
@@ -898,20 +913,7 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	tinkerLines := RegExReplace(tinkerLines, "m)\s+$", "") ; nuke trailing whitespace
 
 	tinkerLines := RegExReplace(tinkerLines, "s)(►.*?◄)", "")
-	; tinkerLines := RegExReplace(tinkerLines, "m)(\s*//.*?$)|([ \t]*$)", "")
-	; tinkerLines := RegExReplace(tinkerLines, "m)(\s*//.*?$)|([ \t]*$)", "")
-	; outputdebug % "a. tinkerlines len = " . StrLen(tinkerlines)
-	; tinkerLines := RegExReplace(tinkerLines, "m)(^\s*//.*?)|((?<=(】|⌘\w+))\s*//.*?)", "")
-	; tinkerLines := RegExReplace(tinkerLines, "m)(^\s*//.*)", "")
-	; outputdebug % "b. tinkerlines len = " . StrLen(tinkerlines)
-	; tinkerLines := RegExReplace(tinkerLines, "(?<=(】|⌘\w+))\s*//.*", "")
-	;tinkerLines := RegExReplace(tinkerLines, "(⌘(then|else|endif))\s*//.*", "$1")
-	; outputdebug % "b2. tinkerlines len = " . StrLen(tinkerlines)
-	; tinkerLines := RegExReplace(tinkerLines, "(?<=】)\s*//.*", "")
-	; tinkerLines := RegExReplace(tinkerLines, "(?<=】)\s*//.*", "")
-	; outputdebug % "c. tinkerlines len = " . StrLen(tinkerlines)
 	tinkerLines := RegExReplace(tinkerLines, "(?<=\n)[\r\n]+", "") ; nuke blank lines
-	; outputdebug % "d. tinkerlines len = " . StrLen(tinkerlines)
 
 	if (FileExist(AHKFile)) {
 		FileDelete %AHKFile%
@@ -922,7 +924,6 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	local options := ""
 	local CapsKeys := "abcdefghijklmnopqrstuvwxyz"
 
-	; fpos := RegExMatch(tinkerLines, "Oi)---(?:\s+//.*)?\r?\nSettings:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+)(?:Options:\s*(?:\s+//.*)?\r?\n((?:[ ]+.*\r?\n)+))?\.\.\.(?:\s+//.*)?\r?\n", match)
 	fpos := RegExMatch(tinkerLines, "Oim)^Settings:\s*(?:\s+//.*)?\r?\n((?:\s+.*\r?\n)+)(?:Options:\s*(?:\s+//.*)?\r?\n((?:\s+.*\r?\n)+))?\.\.\.(?:\s+//.*)?\r?\n", match)
 	if (fpos) {
 		tinkerLines := SubStr(tinkerLines, match.Len(0) + fpos)
@@ -1000,10 +1001,51 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 				; outputdebug % "read from ini:" KBD_IniFile%kk%
 				fldVal := 9
 				IniRead fldVal, % KBD_IniFile%kk%, Options, %fldName%, %fldDef%		; TODO: maybe fldDef may need chars escaped or like %A_Space%???
-				if ((ctrltype = "keystroke") and (fldVal = ""))
-					fldVal := "00" ; this signals that the handler should be ignored
-				tinkerLines := RegExReplace(tinkerLines, "\Q〔" fldName "〕\E", fldVal)
-				; defines .= "define " fldName " " fldVal "`n"
+				if (ctrltype = "keystroke") {
+					if (fldVal = "") {
+						layoutLines := RegExReplace(layoutLines, "((\Q&#12308;\E)|〔)\Q" fldName "\E((\Q&#12309;\E)|〕)", "<nokeystroke title=""" . fldName . """>‡</nokeystroke>")
+						fldVal := "00" ; this signals that the handler should be ignored
+					} else {
+						local keybtns, lblmatch, modkey, spPos, priChar, priKey
+						spPos := InStr(fldVal, " ")
+						if (spPos) {
+							priKey := substr(fldVal, 1, spPos - 1)
+							priChar := substr(fldVal, spPos - 2, spPos - 1)
+						} else {
+							priKey := fldVal
+							priChar := substr(fldVal, -1, 1)
+						}
+						if (RegExMatch(priKey, "O)^([>!<#+^]+)(\S)$", lblmatch)) {
+							if (lblmatch.Value(1) = ">!")
+								modkey := "RAlt"   ; Make >! into a RAlt button
+							else if (lblmatch.Value(1) = "!")
+								modkey := "Alt"
+							else if (lblmatch.Value(1) = "<!")
+								modkey := "LAlt"
+							else if (lblmatch.Value(1) = "+")
+								modkey := "Shift"
+							else
+								modkey := "[" lblmatch.Value(1) "]"
+							keybtns := "<span title=""" fldName """><keystroke>" modkey "</keystroke><keystroke>" lblmatch.Value(2) "</keystroke>"
+						} else {
+							keybtns := "<keystroke title=""" . fldName . """>" priKey "</keystroke>"
+						}
+						layoutLines := RegExReplace(layoutLines, "((\Q&#12308;\E)|〔)\Q" fldName "\E((\Q&#12309;\E)|〕)", keybtns)
+					}
+
+					if (spPos) {
+						; If more than one key specified, enclose all keys in 【 】 brackets at start of line, but just use the first key in other contexts.
+						tinkerLines := RegExReplace(tinkerLines, "m)^\Q〔" fldName "〕\E", "【" fldVal "】")
+						tinkerLines := RegExReplace(tinkerLines, "\Q〔" fldName "〕\E", priChar)
+					} else {
+						tinkerLines := RegExReplace(tinkerLines, "m)^\Q〔" fldName "〕\E", fldVal)
+						tinkerLines := RegExReplace(tinkerLines, "\Q〔" fldName "〕\E", priChar)
+					}
+				} else {
+					; ctrltype is checkbox
+					tinkerLines := RegExReplace(tinkerLines, "\Q〔" fldName "〕\E", fldVal)
+					layoutLines := RegExReplace(layoutLines, "((\Q&#12308;\E)|〔)\Q" fldName "\E((\Q&#12309;\E)|〕)", fldVal ? "YES" : "NO")
+				}
 				continue
 			}
 			tinkWarnings += 1
@@ -1078,7 +1120,8 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 	; tinkerLines := RegExReplace(tinkerLines, "(\n\S*)([``""]){2}", "$1$2") ; remove escape from backtick/dblquot in keystroke labels ; TODO: also in labels with alt, shift, etc!!!
 
 	; Handle colon key : as +`;
-	StringReplace tinkerLines, tinkerLines, `n:, `n+```;, 1
+	; StringReplace tinkerLines, tinkerLines, `n:, `n+```;, 1
+	tinkerLines := RegExReplace(tinkerLines, "m)^([!><#^]*):", "$1+`;")
 
 	local debugfile := KBD_CacheStem%kk% ".tinker"
 	if (FileExist(debugfile)) {
@@ -1114,6 +1157,12 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 		FileAppend %unparsed%, %AHKFile%
 	}
 
+	; Write layoutLines to html file
+	if (KBD_DisplayCmdSrc%kk%) {
+		if (FileExist(KBD_DisplayCmd%kk%))
+			FileDelete % KBD_DisplayCmd%kk%
+		FileAppend %layoutLines%, % KBD_DisplayCmd%kk%
+	}
 
 	; First process any key handlers for CapsKeys
 	if (CapsSensitive) {
@@ -1506,7 +1555,7 @@ DoCleanup:  ; Called onExit
 	ExitApp
 
 DoHelp:
-	Run InKey.chm
+	Run http://inkeysoftware.com/userguide.html
 	return
 
 $#V::ShowOnScreen()  ; TODO: map to user-config hotkey / menu
@@ -1790,7 +1839,7 @@ KbdByHKL(hkl) {
 		;~ SetFormat, IntegerFast, H
 		;~ HexString:=TempString
 		;~ SetFormat, IntegerFast, D
-		outputdebug Count=%A_Index%, Trying %HexString%
+		; outputdebug Count=%A_Index%, Trying %HexString%
 		;~ if (HexString = hkl)
 		;~ {
 			;~ OutputDebug % "KbdByHkl(" . hkl . ") returns " . A_Index  . ".  oKbdByHKL[] is " . oKbdByHKL[hkl]
@@ -2570,9 +2619,9 @@ versionNum(s) {  ; Given a version string like 2.0.0.12, returns a numeric value
 				 ; treating the 4th segement as a 3-digit number.
 				 ; Thus 1.2.3.45 => 1.23045, and 1.234 => 1.23004
 				 ; 2nd and 3rd segments MUST be single-digit.
-	if (not RegExMatch(s, "O)(\d++)\.?+(\d)?+\.?+(\d)?+\.?+(\d++)?+", match))
+	if (not RegExMatch(s, "O)(\d++)\.?+(\d)?+\.?+(\d)?+\.?+(\d++)?+", vmatch))
 		return 0
-	return match.Value(1) + (match.Value(2) / 10) + (match.Value(3) / 100)+ (match.Value(4) / 100000)
+	return vmatch.Value(1) + (vmatch.Value(2) / 10) + (vmatch.Value(3) / 100)+ (vmatch.Value(4) / 100000)
 }
 
 #include Config.ahk	; Configuration GUI (GUI 3) routines

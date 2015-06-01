@@ -69,10 +69,11 @@ generateInKeyPkg(kbdFolder) {
 
 	if (latestKbdTime > latestZipTime) {
 		; We need to build a package
-		FileCreateDir %files%
+		; FileCreateDir %files%
 
 		FormatTime, pkgName, %latestKbdTime%, yyyy-MM-dd
 		pkgName := files "\" kbdFolder "_" pkgName ".inkey"
+		; pkgName = %files%\%kbdFolder%_%pkgName%.inkey
 		outputdebug creating %pkgName%
 		tempKbdDir := A_Temp "\inkeybuild\" kbdFolder
 		ifExist %tempKbdDir%
@@ -84,7 +85,7 @@ generateInKeyPkg(kbdFolder) {
 		}
 
 		RunWait 7za.exe a -tzip %pkgName% %tempKbdDir% -mx9,,hide
-		; FileRemoveDir %tempKbdDir%, 1
+		FileRemoveDir %tempKbdDir%, 1
 		updates += 1
 		updatedPkgs .= chr(9) kbdFolder chr(13) chr(10)
 

@@ -19,6 +19,7 @@ Compile(base . "inkey.ahk", base . "inkeyLive\InKey.exe", base . "inkey.ico")
 FileCopy %base%InKeyLib.ahki, %base%InkeyLive, 1
 FileCopy %base%InKey License.ahki, %base%InkeyLive, 1
 FileCopy %base%InKey.ini, %base%InkeyLive, 1
+FileCopy %base%UninstallKbds.ahk, %base%InkeyLive, 1
 
 MsgBox 4, , Run InKey now?
 ifmsgbox yes

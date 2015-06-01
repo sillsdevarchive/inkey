@@ -5,18 +5,21 @@ gui hide
 run http://www.InKeySoftware.com, , UseErrorLevel
 return
 
-validate() {
-	md5 = %A_Temp%\ik83nc6g.exe
-	FileInstall md5.exe, %md5%, 1
 
-	errs := DoValidationChecks(md5)
-	FileDelete %md5%
-	if errs
-		ExitApp
-}
+; validate() {
+	; md5 = %A_Temp%\ik83nc6g.exe
+	; FileInstall md5.exe, %md5%, 1
 
-DoValidationChecks(byref md5) {
+	; errs := DoValidationChecks(md5)
+	; FileDelete %md5%
+	; if errs
+		; ExitApp
+; }
+
+; DoValidationChecks(byref md5) {
+ShowSplash() {
 	global ver
+	global splashTxt
 	;~ privData = mDZKlngA-6groZzg64lqKKeSTXWOKKaCMghVI3CSDei88UJmK60tm86ZRG2tRkghFOjyLLkmu2W9KRdldiBNGQGLTDuNZlqP54B4JNSwXbKjRd4gLQ9EiQ6Zc1WyU-EJ
 
 	;~ ; First, do some basic checks on the MD5.exe file
@@ -83,7 +86,7 @@ DoValidationChecks(byref md5) {
 	Gui, +AlwaysOnTop  +Owner -Caption ; +Owner avoids a taskbar button.
 	Gui, Add, picture, x0 yo w302 h268 gCancel, %jpg%
 	Gui, Add, Text, x0 y120 w302 h30 gCancel cWhite backgroundtrans +Center, Version %ver%
-	Gui, Add, Text, x50 y150 w200 h80 cWhite gCancel backgroundtrans +Center, %splashTxt%
+	Gui, Add, Text, x50 y150 w200 h80 cWhite gCancel vsplashTxt backgroundtrans +Center, %splashTxt%
 	;~ Gui, Add, Text, x50 y150 w200 h80 hwndLicHwnd cWhite gCancel backgroundtrans +Center
 	;~ copyright := chr(169)  ; necessary because this script is saved in utf8 format
 	;~ spacer := chr(32)+chr(32)
@@ -124,20 +127,20 @@ mangle(srcStr, ByRef privData) {
 	return ostr
 }
 
-getMD5Hash(ByRef md5, srcStr) {
-	; outputdebug getmd5hash(%md5%, %srcStr%)
-	InFilename = %A_Temp%\~bdsms10gle8ayyi1.tmp
-	OutFilename = %A_Temp%\~bdsms10gle8ayyi2.tmp
-	FileDelete %InFilename%
-	FileAppend %srcStr%, %InFilename%
-	RunWait, %comspec% /c ""%md5%" "%InFilename%" >"%OutFilename%"", , min
-	FileDelete, %InFilename%
-	FileReadLine, hash, %OutFilename%, 1
-	FileDelete, %OutFilename%
-	; outputdebug files: %infilename%, %outfilename%
-	; outputdebug md5 returned: %hash%
-	return substr(hash,1,32)
-}
+; getMD5Hash(ByRef md5, srcStr) {
+	outputdebug getmd5hash(%md5%, %srcStr%)
+	; InFilename = %A_Temp%\~bdsms10gle8ayyi1.tmp
+	; OutFilename = %A_Temp%\~bdsms10gle8ayyi2.tmp
+	; FileDelete %InFilename%
+	; FileAppend %srcStr%, %InFilename%
+	; RunWait, %comspec% /c ""%md5%" "%InFilename%" >"%OutFilename%"", , min
+	; FileDelete, %InFilename%
+	; FileReadLine, hash, %OutFilename%, 1
+	; FileDelete, %OutFilename%
+	outputdebug files: %infilename%, %outfilename%
+	outputdebug md5 returned: %hash%
+	; return substr(hash,1,32)
+; }
 
 
 

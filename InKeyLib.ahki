@@ -409,7 +409,7 @@ SendBackspace() {
 }
 
 DoSpace() {
-	chk()
+	; chk()
 ; Call this when the spacebar is pressed.
 	SendToInKey(0x8018)
 	return 1
@@ -428,7 +428,7 @@ DoEnter() {
 }
 
 Back(ct=1) {
-	chk()
+	; chk()
 ; Back up a specified number of characters
 	SendToInKey(0x8013, ct)
 	return 1
@@ -701,7 +701,7 @@ RegisterRota(id, rotaSets, defChr=0, uFlags=0, back=0, style=0) {
 ;~ DoRota(id, rotaSets="", defTxt="", style=0, uFlags=0) {
 DoRota(id) {
 	global
-	chk()
+	; chk()
 ; Perform a rotation sequence, optionally registering a rota if it has not already been registered.
 ; Parameters:
 ;   id		- Identifies a sequence already registered by RegisterRota()
@@ -806,23 +806,23 @@ SendText(ByRef CharString, uFlags=0) {
 ;=======================================
 ; Functions after this point are internal, and should not be directly called by keyboard scripts.
 
-chk() {
-;~ OutputDebug A_ThisHotkey=%A_ThisHotkey%, A_PriorHotkey=%A_PriorHotkey%, A_PriorKey=%A_PriorKey%
-}
+; chk() {
+;  OutputDebug A_ThisHotkey=%A_ThisHotkey%, A_PriorHotkey=%A_PriorHotkey%, A_PriorKey=%A_PriorKey%
+; }
 
-array :=	ComObjCreate("Scripting.Dictionary")
-array.item("A") :=	"À"
- , array.item("a") :=	"à"
- , array.item("e") :=	"è"
- , array.item("E") :=	"È"
-For key in array
-	MsgBox %	key " => " array.item(key)
+; array :=	ComObjCreate("Scripting.Dictionary")
+; array.item("A") :=	"À"
+ ; , array.item("a") :=	"à"
+ ; , array.item("e") :=	"è"
+ ; , array.item("E") :=	"È"
+; For key in array
+	; MsgBox %	key " => " array.item(key)
 
 InRota(MapCmd) {
 	static ct := 1
 	static K_InRotas := ComObjCreate("Scripting.Dictionary")
 	global
-	chk()
+	; chk()
 	local str, index, param, rotaStr, rotaID
 
 	rotaID := K_InRotas.item(MapCmd)
