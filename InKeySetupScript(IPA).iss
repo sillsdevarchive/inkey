@@ -19,7 +19,6 @@ AppPublisher=InKey Software
 AppPublisherURL=http://www.inkeysoftware.com/
 AppSupportURL=http://www.inkeysoftware.com/
 AppUpdatesURL=http://www.inkeysoftware.com/
-;OutputDir=site\keyboard\{#KbdName}\files
 OutputDir=files
 DefaultDirName={commonappdata}\InKey
 DefaultGroupName=InKey
