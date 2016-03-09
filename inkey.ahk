@@ -998,7 +998,7 @@ ProcessTinkerFile(kk) {  ; Generate an AHK file from the TINKER file
 				}
 				; numOpts += 1
 				; OPT_Name%numOpts% := fldName
-				; outputdebug % "read from ini:" KBD_IniFile%kk%
+				 outputdebug % "read from ini:" KBD_IniFile%kk%
 				fldVal := 9
 				IniRead fldVal, % KBD_IniFile%kk%, Options, %fldName%, %fldDef%		; TODO: maybe fldDef may need chars escaped or like %A_Space%???
 				if (ctrltype = "keystroke") {
@@ -1998,8 +1998,10 @@ TryLangChgAgain:
 GetActiveHKL() {
 	WinGet, WinID,, A
 	ThreadID:=DllCall("GetWindowThreadProcessId", "UInt", WinID, "UInt", 0)
-	InputLocaleID:=DllCall("GetKeyboardLayout", "UInt", ThreadID) & 0xffffffff
+	setformat, integerfast, H
+	InputLocaleID:= ( DllCall("GetKeyboardLayout", "UInt", ThreadID) & 0xffffffff )
 	; outputdebug GetActiveHKL() =>  %InputLocaleID%
+	setformat, integerfast, D
 	return InputLocaleID
 }
 
